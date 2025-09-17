@@ -1,11 +1,314 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>register</title>
+  <meta charset="utf-8" />
+  <title>Create Account — CleanTrack+</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --brand-50:#f2fbf5; --brand-100:#e7f7ee; --brand-200:#d7f2e4; --brand-300:#bde9d3;
+      --brand-400:#85d3ac; --brand-500:#2fa873; --brand-600:#19895c; --brand-700:#0f5f42;
+      --ink:#0f2b1f;
+      --card-bg: rgba(255,255,255,.80);
+      --card-stroke: rgba(25,137,92,.14);
+      --shadow-lg: 0 22px 50px rgba(16, 94, 64, .22);
+      --shadow-md: 0 12px 28px rgba(16,94,64,.18);
+      --error:#b42318; --error-bg:#ffe9e9;
+      --info:#0b3d91; --info-bg:#eef7ff;
+    }
+
+    /* ====== Animated background ====== */
+    body{
+      margin:0; min-height:100dvh; display:grid; place-items:center; padding:28px;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+      color:var(--ink);
+      background:
+        radial-gradient(1200px 600px at 85% -10%, rgba(47,168,115,.18), transparent 60%),
+        radial-gradient(1000px 520px at -10% 5%, rgba(25,137,92,.20), transparent 60%),
+        linear-gradient(180deg, #ffffff 0%, var(--brand-50) 100%);
+      overflow-x:hidden;
+    }
+    .bg-blur{
+      position:fixed; inset:-20% -20% -20% -20%; pointer-events:none; z-index:-1;
+      background:
+        radial-gradient(400px 400px at 20% 30%, rgba(133,211,172,.45), transparent 60%),
+        radial-gradient(520px 520px at 80% 20%, rgba(47,168,115,.35), transparent 60%),
+        radial-gradient(460px 460px at 60% 80%, rgba(25,137,92,.28), transparent 60%);
+      filter: blur(40px) saturate(120%);
+      animation: floatBlobs 16s ease-in-out infinite alternate;
+    }
+    @keyframes floatBlobs{
+      0%{ transform: translate3d(0,0,0) scale(1); }
+      50%{ transform: translate3d(0,-1.2%,0) scale(1.02); }
+      100%{ transform: translate3d(0,1.2%,0) scale(0.98); }
+    }
+
+    /* Top badges */
+    .brand-chip{
+      /* moved to LEFT */
+      position:fixed; top:14px; left:14px;
+      background:linear-gradient(135deg, var(--brand-600), var(--brand-500));
+      color:#fff; padding:10px 16px; border-radius:999px; font-weight:700; letter-spacing:.2px;
+      box-shadow:0 10px 30px rgba(7,72,49,.25); overflow:hidden; z-index:20;
+    }
+    .brand-chip::after{
+      content:""; position:absolute; inset:0;
+      background:linear-gradient(100deg, transparent 0%, rgba(255,255,255,.35) 35%, transparent 70%);
+      transform: translateX(-120%); filter: blur(2px);
+      animation: shimmer 3.2s ease-in-out infinite;
+    }
+    @keyframes shimmer{ 0%{transform:translateX(-120%)} 60%{transform:translateX(120%)} 100%{transform:translateX(120%)} }
+
+    .top-right{
+      position:fixed; top:14px; right:14px; z-index:20; display:flex; gap:10px;
+    }
+    .home-btn{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:10px 14px; border-radius:999px; text-decoration:none;
+      color:var(--brand-700); font-weight:800; letter-spacing:.2px;
+      background:linear-gradient(135deg, rgba(255,255,255,.9), rgba(244,251,247,.9));
+      border:1px solid var(--card-stroke);
+      box-shadow:0 10px 30px rgba(7,72,49,.18);
+      backdrop-filter: blur(10px) saturate(115%);
+      -webkit-backdrop-filter: blur(10px) saturate(115%);
+      transition: transform .06s, box-shadow .25s, opacity .2s;
+    }
+    .home-btn:hover{ transform:translateY(-1px); }
+    .home-btn svg{ width:18px; height:18px; }
+
+    /* ====== Glass card with glow ring & parallax tilt ====== */
+    .card-wrap{ perspective:1200px; width:min(92vw, 760px); }
+    .card{
+      position:relative; background:var(--card-bg);
+      border:1px solid var(--card-stroke); border-radius:22px;
+      box-shadow:var(--shadow-lg); backdrop-filter: blur(12px) saturate(115%);
+      -webkit-backdrop-filter: blur(12px) saturate(115%); overflow:hidden;
+      transform-style:preserve-3d; animation: riseIn .5s cubic-bezier(.22,.9,.28,1) both;
+    }
+    .glow{
+      content:""; position:absolute; inset:-2px; border-radius:24px; z-index:-1;
+      background:conic-gradient(from 120deg, rgba(47,168,115,.45), rgba(133,211,172,.25), rgba(47,168,115,.45));
+      filter: blur(22px); opacity:.35; animation: spin 10s linear infinite;
+    }
+    @keyframes spin{ to{ transform:rotate(1turn) } }
+    @keyframes riseIn{ from{ opacity:0; transform: translateY(14px) scale(.98) } to{ opacity:1; transform: translateY(0) scale(1)} }
+
+    .card-head{
+      padding:30px 30px 18px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.60), rgba(255,255,255,.80)),
+        radial-gradient(600px 240px at 20% -10%, rgba(133,211,172,.35), transparent 70%);
+    }
+    h1{ margin:0 0 8px; font-size: clamp(22px, 2.6vw, 30px); line-height:1.15; color:var(--brand-700); letter-spacing:.2px; }
+    .subtitle{ margin:0; color:#375547; font-size:14px; }
+    .pill{ display:inline-block; margin-top:12px; font-size:12px; color:#0a2e22; background:linear-gradient(135deg, #ffffff, #f4fbf7); border:1px solid var(--card-stroke); padding:6px 10px; border-radius:999px; }
+
+    .body{ padding:20px 28px 28px; }
+
+    .messages, .errors, ul.errorlist{
+      margin:14px 0; padding:12px 14px; border-radius:12px; border:1px solid; will-change:transform,opacity;
+      animation: slideIn .35s cubic-bezier(.21,.95,.31,.99);
+    }
+    .messages{ background:var(--info-bg); color:var(--info); border-color:#c5ddff; }
+    .errors, ul.errorlist{ background:var(--error-bg); color:var(--error); border-color:#ffd0cb; }
+    ul.errorlist{ list-style:none; padding-left:14px; }
+    @keyframes slideIn{ from{opacity:0; transform:translateY(-6px)} to{opacity:1; transform:translateY(0)} }
+
+    .grid{ display:grid; gap:16px 18px; }
+    .two-col{ grid-template-columns:1fr 1fr; }
+    @media (max-width: 640px){ .two-col{ grid-template-columns:1fr; } }
+
+    .field{
+      position:relative; padding:12px; border-radius:14px;
+      background: linear-gradient(180deg, #ffffff 0%, #f7fcf9 100%);
+      border:1px solid #cfe8db; transition: box-shadow .25s, border-color .25s, transform .2s;
+    }
+    .field:hover{ transform: translateY(-1px); }
+    .field:focus-within{
+      border-color: var(--brand-400);
+      box-shadow: 0 0 0 5px rgba(47,168,115,.15), 0 8px 24px rgba(16,94,64,.12);
+      background:#fff;
+    }
+    label{
+      display:block; font-size:13px; font-weight:700; color:#1d3a2e; margin:0 0 6px; letter-spacing:.2px;
+      transition: color .2s ease;
+    }
+    .field:focus-within label{ color:var(--brand-600); }
+
+    input, select{
+      width:100%; box-sizing:border-box; border:0; outline:none; background:transparent;
+      padding:10px 2px 8px; color:#0a2e22; font-size:14px;
+    }
+    input::placeholder{ color:#8aa89c; }
+
+    .actions{ display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-top:4px; }
+
+    .btn{
+      position:relative; border:0; border-radius:14px; padding:12px 18px;
+      font-weight:800; letter-spacing:.2px; cursor:pointer; overflow:hidden;
+      transition: transform .06s ease, box-shadow .25s ease, opacity .2s ease;
+      box-shadow: var(--shadow-md);
+      will-change: transform;
+    }
+    .btn-primary{
+      color:#fff;
+      background: linear-gradient(135deg, var(--brand-600), var(--brand-500), var(--brand-600));
+      background-size: 200% 200%;
+      animation: hueShift 6s ease-in-out infinite;
+    }
+    @keyframes hueShift{ 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+    .btn:hover{ transform: translateY(-1px); }
+    .btn:active{ transform: translateY(0); }
+    .btn-ghost{ background:transparent; color:var(--brand-600); border:1px solid var(--brand-300); }
+
+    .ripple{
+      position:absolute; border-radius:50%; transform:translate(-50%,-50%) scale(0);
+      background:rgba(255,255,255,.6); animation:ripple .6s ease-out forwards; pointer-events:none;
+    }
+    @keyframes ripple{ to{ transform:translate(-50%,-50%) scale(10); opacity:0 } }
+
+    .links{ margin-top:10px; font-size:14px; color:#204b3a; }
+    .links a{ color:var(--brand-600); text-decoration:none; background:linear-gradient(currentColor,currentColor) no-repeat 0 100%/0 1px; transition:background-size .25s; }
+    .links a:hover{ background-size:100% 1px; }
+
+    .fineprint{ color:#486c5d; font-size:12px; margin-top:2px; }
+
+    @media (prefers-reduced-motion: reduce){
+      * { animation-duration:.001ms !important; animation-iteration-count:1 !important; transition:none !important; }
+    }
+  </style>
 </head>
 <body>
-<h1>Register</h1> <br>
-<a href="{% url 'home' %}">  Home</a>
+  <div class="bg-blur" aria-hidden="true"></div>
+
+  <!-- Top badges -->
+  <div class="brand-chip">⚡ CleanTrack+</div>
+  <div class="top-right">
+    <!-- If you have a named URL for home, replace href="/" with: {% url 'home' %} -->
+    <a href="/" class="home-btn" data-ripple aria-label="Go to homepage">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M3 11.5 12 4l9 7.5" stroke="#0f5f42" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M5 10.5V20h5v-5h4v5h5v-9.5" stroke="#2fa873" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Home
+    </a>
+  </div>
+
+  <div class="card-wrap" id="tilt-wrap">
+    <div class="glow" aria-hidden="true"></div>
+    <main class="card" role="main" aria-labelledby="signup-title">
+      <header class="card-head">
+        <h1 id="signup-title">Create your account</h1>
+        <p class="subtitle">Welcome! Let’s get you started with CleanTrack+ </p>
+        <span class="pill">Choose role: <b>Regular</b> or <b>Driver</b> </span>
+      </header>
+
+      <section class="body">
+        {% if messages %}
+          <div class="messages">
+            {% for message in messages %}<div>{{ message }}</div>{% endfor %}
+          </div>
+        {% endif %}
+
+        {% if form.non_field_errors %}
+          <div class="errors">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <form method="post" action="{% url 'users:signup' %}" class="grid two-col">
+          {% csrf_token %}
+
+          <div class="field" style="grid-column:1 / -1">
+            <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+            {{ form.username }}
+            {% if form.username.errors %}<ul class="errorlist">{{ form.username.errors }}</ul>{% endif %}
+          </div>
+
+          <div class="field" style="grid-column:1 / -1">
+            <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+            {{ form.email }}
+            {% if form.email.errors %}<ul class="errorlist">{{ form.email.errors }}</ul>{% endif %}
+          </div>
+
+          <div class="field">
+            <label for="{{ form.role.id_for_label }}">{{ form.role.label }}</label>
+            {{ form.role }}
+            {% if form.role.errors %}<ul class="errorlist">{{ form.role.errors }}</ul>{% endif %}
+          </div>
+
+          <div class="field">
+            <label for="{{ form.phone_number.id_for_label }}">{{ form.phone_number.label }}</label>
+            {{ form.phone_number }}
+            {% if form.phone_number.errors %}<ul class="errorlist">{{ form.phone_number.errors }}</ul>{% endif %}
+          </div>
+
+          <div class="field">
+            <label for="{{ form.password1.id_for_label }}">{{ form.password1.label }}</label>
+            {{ form.password1 }}
+            {% if form.password1.errors %}<ul class="errorlist">{{ form.password1.errors }}</ul>{% endif %}
+          </div>
+
+          <div class="field">
+            <label for="{{ form.password2.id_for_label }}">{{ form.password2.label }}</label>
+            {{ form.password2 }}
+            {% if form.password2.errors %}<ul class="errorlist">{{ form.password2.errors }}</ul>{% endif %}
+          </div>
+
+          <div class="actions" style="grid-column:1 / -1">
+            <button type="submit" class="btn btn-primary" data-ripple>Create account</button>
+            <a class="btn btn-ghost" href="{% url 'users:login' %}" data-ripple>Already have an account</a>
+          </div>
+
+          <div class="fineprint" style="grid-column:1 / -1">
+            By creating an account, you agree to our Terms & Privacy Policy.
+          </div>
+        </form>
+
+        <div class="links">
+          <a href="{% url 'users:password_reset' %}">Forgot your password?</a>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // Ripple effect
+    document.addEventListener('click', function(e){
+      const btn = e.target.closest('[data-ripple]');
+      if(!btn) return;
+      const rect = btn.getBoundingClientRect();
+      const ripple = document.createElement('span');
+      const size = Math.max(rect.width, rect.height);
+      ripple.className = 'ripple';
+      ripple.style.width = ripple.style.height = size + 'px';
+      ripple.style.left = (e.clientX - rect.left) + 'px';
+      ripple.style.top  = (e.clientY - rect.top)  + 'px';
+      btn.appendChild(ripple);
+      ripple.addEventListener('animationend', () => ripple.remove());
+    });
+
+    // Parallax tilt
+    const wrap = document.getElementById('tilt-wrap');
+    const card = wrap.querySelector('.card');
+    let rafId = null;
+    function handleMove(e){
+      const r = wrap.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width;
+      const y = (e.clientY - r.top) / r.height;
+      const rotY = (x - .5) * 10;
+      const rotX = (0.5 - y) * 8;
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        card.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg) translateZ(0)`;
+      });
+    }
+    function resetTilt(){ card.style.transform = 'rotateX(0deg) rotateY(0deg)'; }
+    wrap.addEventListener('mousemove', handleMove);
+    wrap.addEventListener('mouseleave', resetTilt);
+
+    if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      wrap.removeEventListener('mousemove', handleMove);
+      wrap.removeEventListener('mouseleave', resetTilt);
+    }
+  </script>
 </body>
 </html>

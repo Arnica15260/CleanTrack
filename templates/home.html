@@ -5,10 +5,11 @@
     <title>home</title>
 </head>
 <body>
-<h1>Welcome to CleanTrack</h1> <br>
-<a href="{% url 'about' %}">  About</a><br><br>
-<a href="{% url 'contact' %}">  Contact</a><br><br>
-<a href="{% url 'register' %}">  SignUp</a><br><br>
-<a href="{% url 'login' %}">  Login</a><br><br>
+  <h1>Welcome to CleanTrack</h1>
+  <br>
+  <a href="{% url 'about' %}">About</a><br><br>
+  <a href="{% url 'contact' %}">Contact</a><br><br>
+  <a href="{% url 'users:register' %}">SignUp</a><br><br>
+  <a href="{% url 'users:login' %}">Login</a><br><br>
 </body>
 </html>
