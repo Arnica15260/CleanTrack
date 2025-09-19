@@ -3,14 +3,677 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>home</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CleanTrack+</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'templatemo-neural-style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-  <h1>Welcome to CleanTrack</h1>
-  <br>
-  <a href="{% url 'about' %}">About</a><br><br>
-  <a href="{% url 'contact' %}">Contact</a><br><br>
-  <a href="{% url 'users:register' %}">SignUp</a><br><br>
-  <a href="{% url 'users:login' %}">Login</a><br><br>
+    <!-- Background -->
+   <div class="neural-background"></div>
+
+
+
+
+    <!-- Header/Navbar -->
+    <header class="glass">
+        <nav>
+<style>
+/* ===== Logo Styling (Dark Green Pill + White Text + Shimmer) ===== */
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* space between icon and text */
+    font-size: 28px;
+    font-weight: bold;
+    font-family: 'Inter', sans-serif; /* clean font */
+    color: #ffffff; /* white text */
+    text-decoration: none;
+    position: relative;
+    padding: 10px 30px; /* pill shape padding */
+    border-radius: 9999px; /* full pill shape */
+    background-color: #2fa873; /* dark green box */
+    overflow: hidden;
+    transition: color 0.3s ease;
+    z-index: 1; /* ensure text stays on top */
+}
+
+/* Ensure the text itself is always white */
+.logo span {
+    color: #ffffff;
+}
+
+/* Make text appear above shimmer */
+.logo::before {
+    position: relative;
+    z-index: 2;
+}
+
+/* Shimmer effect on the box */
+.logo::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, transparent 0%, rgba(255,255,255,0.35) 35%, transparent 70%);
+    transform: translateX(-120%);
+    filter: blur(2px);
+    animation: shimmer 3.2s ease-in-out infinite;
+    border-radius: 9999px; /* shimmer follows pill shape */
+    z-index: 0; /* behind the text */
+}
+
+/* Shimmer animation */
+@keyframes shimmer {
+    0% { transform: translateX(-120%); }
+    60% { transform: translateX(120%); }
+    100% { transform: translateX(120%); }
+}
+
+/* Hover effect: darken the green slightly */
+.logo:hover {
+    background-color: #014d2b;
+}
+</style>
+</head>
+<body>
+
+<!-- Logo with icon -->
+<a href="/" class="logo" aria-label="Home">
+    ⚡ <span>CleanTrack+</span>
+</a>
+
+</body>
+
+
+
+            <ul class="nav-links">
+                <li><a href="{% url 'about' %}">About</a></li>
+                <li><a href="{% url 'contact' %}">Contact</a></li>
+                <li><a href="{% url 'users:register' %}">Signup</a></li>
+                <li><a href="{% url 'users:login' %}">Login</a></li>
+            </ul>
+
+            <div class="mobile-menu-toggle">
+                <div class="hamburger-line"></div>
+                <div class="hamburger-line"></div>
+                <div class="hamburger-line"></div>
+            </div>
+        </nav>
+
+        <div class="mobile-nav">
+            <a href="{% url 'about' %}">About</a>
+            <a href="{% url 'contact' %}">Contact</a>
+            <a href="{% url 'users:register' %}">Signup</a>
+            <a href="{% url 'users:login' %}">Login</a>
+        </div>
+    </header>
+
+       <!-- Section 1: Hero -->
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <div class="hero-subtitle">Welcome to the CleanTrack+</div>
+            <h1>Smart Waste, Clean Future.</h1>
+
+            <div class="hero-description">
+                <p>
+    Experience how small actions can create big changes with CleanTrack+.
+    Through smart waste tracking and meaningful donations, together we can
+    build cleaner cities and a greener tomorrow.
+</p>
+
+            </div>
+
+            <div class="hero-stats">
+    <div class="hero-stat">
+        <i class="fas fa-calendar-check"></i>
+        <span class="hero-stat-number">Schedule</span>
+        <span class="hero-stat-label">Waste Pickups</span>
+    </div>
+    <div class="hero-stat">
+        <i class="fas fa-hand-holding-heart"></i>
+        <span class="hero-stat-number">Donate</span>
+        <span class="hero-stat-label">Usable Items</span>
+    </div>
+    <div class="hero-stat">
+        <i class="fas fa-coins"></i>
+        <span class="hero-stat-number">Earn</span>
+        <span class="hero-stat-label">Rewards Points</span>
+    </div>
+    <div class="hero-stat">
+        <i class="fas fa-map-marker-alt"></i>
+        <span class="hero-stat-number">Track</span>
+        <span class="hero-stat-label">Pickup Status</span>
+    </div>
+</div>
+
+            <div class="cta-buttons">
+                <a href="#features" class="cta-button">Join Us</a>
+                <a href="#showcase" class="cta-button secondary">Explore</a>
+            </div>
+        </div>
+    </section>
+<!-- ===== Section: Mission & Vision ===== -->
+<section class="mission-vision" id="mission-vision"
+         style="background: url('{% static 'mission.png' %}') center/cover no-repeat; padding:90px 20px; text-align:center; color:#fff;">
+
+    <div class="section-header">
+       <h2 class="section-title">Mission & Vision</h2>
+        <p>Dedicated to creating a cleaner and greener future through smart waste management.</p>
+    </div>
+
+    <div class="mission-vision-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:35px;max-width:1050px;margin:0 auto;">
+
+        <!-- Mission Card -->
+        <div class="mv-card" style="background:rgba(255,255,255,0.9);border-radius:20px;padding:40px 28px;text-align:center;box-shadow:0 8px 25px rgba(0,0,0,0.2);">
+            <i class="fas fa-bullseye" style="font-size:2.6rem;color:#2fa873;background:#fff;padding:20px;border-radius:50%;margin-bottom:20px;display:inline-block;box-shadow:0 6px 18px rgba(47,168,115,0.4);"></i>
+            <h3 style="font-size:1.5rem;color:#014d2b;margin-bottom:15px;font-weight:700;">Mission</h3>
+            <p style="font-size:1rem;color:#014d2b;line-height:1.7;">
+                To provide smart and innovative waste tracking solutions that encourage responsible disposal,
+                promote donations, and reward sustainable actions for a cleaner environment.
+            </p>
+        </div>
+
+        <!-- Vision Card -->
+        <div class="mv-card" style="background:rgba(255,255,255,0.9);border-radius:20px;padding:40px 28px;text-align:center;box-shadow:0 8px 25px rgba(0,0,0,0.2);">
+            <i class="fas fa-eye" style="font-size:2.6rem;color:#2fa873;background:#fff;padding:20px;border-radius:50%;margin-bottom:20px;display:inline-block;box-shadow:0 6px 18px rgba(47,168,115,0.4);"></i>
+            <h3 style="font-size:1.5rem;color:#014d2b;margin-bottom:15px;font-weight:700;">Vision</h3>
+            <p style="font-size:1rem;color:#014d2b;line-height:1.7;">
+                To build a future where every city is clean, communities are empowered, and waste is managed
+                efficiently to protect our planet for generations to come.
+            </p>
+        </div>
+    </div>
+</section>
+
+
+<!-- ===== Section: Hexagonal Showcase ===== -->
+<section class="showcase" id="showcase">
+    <h2 class="section-title">OUR TECHNOLOGIES</h2>
+    <div class="hexagon-container">
+        <div class="hexagon">
+            <div class="hexagon-inner glass">
+                <div class="hexagon-icon">📍</div> <!-- Smart Tracking -->
+                <h4>Smart Tracking</h4>
+                <p>Real-time waste collection monitoring</p>
+            </div>
+        </div>
+        <div class="hexagon">
+            <div class="hexagon-inner glass">
+                <div class="hexagon-icon">🔒</div> <!-- Data Security -->
+                <h4>Data Security</h4>
+                <p>Safe and encrypted user information</p>
+            </div>
+        </div>
+        <div class="hexagon">
+            <div class="hexagon-inner glass">
+                <div class="hexagon-icon">⏱️</div> <!-- Fast Pickup -->
+                <h4>Fast Pickup</h4>
+                <p>Efficient scheduling and collection</p>
+            </div>
+        </div>
+        <div class="hexagon">
+            <div class="hexagon-inner glass">
+                <div class="hexagon-icon">🎁</div> <!-- Reward System -->
+                <h4>Reward System</h4>
+                <p>Earn points for every donation</p>
+            </div>
+        </div>
+        <div class="hexagon">
+            <div class="hexagon-inner glass">
+                <div class="hexagon-icon">📊</div> <!-- Tracking Status -->
+                <h4>Tracking Status</h4>
+                <p>Monitor your pickup status live</p>
+            </div>
+        </div>
+        <div class="hexagon">
+            <div class="hexagon-inner glass">
+                <div class="hexagon-icon">🌱</div> <!-- Community Impact -->
+                <h4>Community Impact</h4>
+                <p>See how your actions help the city</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Section 2: Diagonal Features -->
+<section class="features" id="features">
+    <div class="features-container">
+<h2 class="section-title" style="color: #000000;">HOW IT WORKS</h2>
+
+
+        <div class="diagonal-grid">
+
+            <!-- Feature 1 -->
+            <div class="feature-row">
+                <div class="feature-content glass">
+                    <div class="feature-icon"><i class="fas fa-calendar-check"></i></div>
+                    <h3>Book a Pickup Schedule</h3>
+                    <p>Choose your preferred date and time for waste collection.</p>
+                </div>
+                <div class="feature-visual glass">
+                    {% load static %}
+                    <img src="{% static 'pick.png' %}" alt="Book Schedule">
+                </div>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="feature-row">
+                <div class="feature-content glass">
+                    <div class="feature-icon"><i class="fas fa-truck"></i></div>
+                    <h3>Track in Real-Time</h3>
+                    <p>Monitor your pickup in real-time and stay updated.</p>
+                </div>
+                <div class="feature-visual glass">
+                    <img src="{% static 'real.png' %}" alt="Track in Real-Time">
+                </div>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="feature-row">
+                <div class="feature-content glass">
+                    <div class="feature-icon"><i class="fas fa-gift"></i></div>
+                    <h3>Collect Rewards</h3>
+                    <p>Earn points for recycling and redeem exciting rewards.</p>
+                </div>
+                <div class="feature-visual glass">
+                    <img src="{% static 'gift.png' %}" alt="Collect Rewards">
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+
+    <!-- Developed By Team Section -->
+<section class="team">
+    <div class="container">
+      <h2 class="section-title">OUR TEAM</h2>
+        <div class="team-cards">
+            <!-- Team Member 1 -->
+            <div class="team-card">
+                <div class="team-avatar">
+                    <img src="team1.jpg" alt="Arnica Sarker">
+                </div>
+                <h4 class="team-member-name">Arnica sarker</h4>
+                <p class="team-member-role">Backend Developer</p>
+            </div>
+
+            <!-- Team Member 2 -->
+            <div class="team-card">
+                <div class="team-avatar">
+                    <img src=".jpg" alt="Mehrin Akter">
+                </div>
+                <h4 class="team-member-name">Mehrin Akter</h4>
+                <p class="team-member-role">Frontend Developer</p>
+            </div>
+
+            <!-- Team Member 3 -->
+            <div class="team-card">
+                <div class="team-avatar">
+
+                    <img src="{% static 'prity.jpg' %}" alt="Fahima Khan Prity">
+                </div>
+                <h4 class="team-member-name">Fahima Khan Prity</h4>
+                <p class="team-member-role">UI/UX Designer</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+/* ===== Team Section ===== */
+.team {
+    padding: 100px 20px;
+    background: linear-gradient(135deg, #d0f0e5 0%, #a6e0c8 50%, #85d3ac 100%); /* smoother gradient */
+    text-align: center;
+    font-family: 'Inter', sans-serif;
+    position: relative;
+    overflow: hidden;
+}
+
+/* subtle floating glow background */
+.team::before {
+    content: '';
+    position: absolute;
+    top: -20%;
+    left: -20%;
+    width: 150%;
+    height: 150%;
+    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+    animation: floatGlow 8s infinite linear;
+}
+@keyframes floatGlow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.team h2 {
+    font-size: 3.8rem;
+    color: #0f2b1f;
+    margin-bottom: 60px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    position: relative;
+    display: inline-block;
+}
+.team h2::after {
+    content: '';
+    position: absolute;
+    bottom: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 160px;
+    height: 4px;
+    background: linear-gradient(90deg, #4caf88, #2f7d5a, #4caf88);
+    border-radius: 2px;
+}
+
+/* cards wrapper */
+.team-cards {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 35px;
+}
+
+/* individual card */
+.team-card {
+    background: #ffffff;
+    border-radius: 22px;
+    padding: 30px 25px;
+    width: 250px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+/* gradient border effect */
+.team-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 22px;
+    padding: 2px;
+    background: linear-gradient(135deg, #4caf88, #2f7d5a);
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+}
+.team-card:hover {
+    transform: translateY(-10px) scale(1.03);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.25);
+}
+
+/* avatar */
+.team-avatar {
+    width: 140px;
+    height: 140px;
+    margin: 0 auto 20px auto;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 5px solid #4caf88;
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+.team-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.team-card:hover .team-avatar {
+    transform: scale(1.12);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+}
+
+/* text */
+.team-member-name {
+    font-size: 20px;
+    color: #0f2b1f;
+    font-weight: 700;
+    margin-bottom: 6px;
+    transition: color 0.3s;
+}
+.team-member-role {
+    font-size: 15px;
+    color: #2f5f44;
+    font-weight: 500;
+}
+.team-card:hover .team-member-name {
+    color: #2f7d5a;
+}
+</style>
+<!-- ===== Customer Testimonials Section ===== -->
+<section class="testimonials">
+  <div class="container">
+    <h2>CUSTOMER TESTIMONIALS</h2>
+    <div class="testimonial-cards">
+      <!-- Testimonial 1 -->
+      <div class="testimonial-card">
+        <div class="testimonial-avatar">
+          <img src="images/customer1.jpg" alt="Customer 1">
+        </div>
+        <p class="testimonial-text">
+          <span class="quote">“</span>CleanTrack+ has completely transformed our waste management process. Highly recommended!
+        </p>
+        <h4 class="testimonial-name">Rahim Hossain</h4>
+        <span class="testimonial-role">Regular user</span>
+      </div>
+      <!-- Testimonial 2 -->
+      <div class="testimonial-card">
+        <div class="testimonial-avatar">
+          <img src="images/customer2.jpg" alt="Customer 2">
+        </div>
+        <p class="testimonial-text">
+          <span class="quote">“</span>The donation tracking system is seamless and very user-friendly. Great job!
+        </p>
+        <h4 class="testimonial-name">Fatima Khan</h4>
+        <span class="testimonial-role">Regular User</span>
+      </div>
+      <!-- Testimonial 3 -->
+      <div class="testimonial-card">
+        <div class="testimonial-avatar">
+          <img src="images/customer3.jpg" alt="Customer 3">
+        </div>
+        <p class="testimonial-text">
+          <span class="quote">“</span>Amazing platform! It makes monitoring and donating so much easier and efficient.
+        </p>
+        <h4 class="testimonial-name">Shahriar Alam</h4>
+        <span class="testimonial-role">Regular User</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+/* ===== Customer Testimonials Section (Professional with subtle background) ===== */
+.testimonials {
+  padding: 100px 20px;
+  background: linear-gradient(135deg, #eaf6f1, #d0f0e5);
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+  position: relative;
+  overflow: hidden;
+}
+
+/* optional subtle pattern overlay */
+.testimonials::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('images/testimonial-bg-pattern.png'); /* optional pattern */
+  background-repeat: repeat;
+  opacity: 0.05;
+  z-index: 1;
+}
+
+.testimonials h2 {
+  font-size: 3.5rem;
+  color: #000000;
+  margin-bottom: 60px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  position: relative;
+  z-index: 2;
+}
+.testimonials h2::after {
+  content: '';
+  display: block;
+  width: 100px;
+  height: 4px;
+  background: linear-gradient(90deg, #2fa873, #2fa873);
+  margin: 12px auto 0 auto;
+  border-radius: 2px;
+  z-index: 2;
+}
+
+/* testimonial cards wrapper */
+.testimonial-cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 35px;
+  position: relative;
+  z-index: 2;
+}
+
+/* individual testimonial card */
+.testimonial-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 35px 25px;
+  width: 280px;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+}
+
+.testimonial-card:hover {
+  transform: translateY(-6px) scale(1.03);
+  box-shadow: 0 16px 32px rgba(0,0,0,0.12);
+}
+
+/* avatar */
+.testimonial-avatar {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 15px auto;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid #16a085;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.testimonial-card:hover .testimonial-avatar {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.testimonial-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* testimonial text */
+.testimonial-text {
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 18px;
+  color: #000000;
+  font-style: italic;
+  position: relative;
+}
+.testimonial-text .quote {
+  font-size: 2rem;
+  color: #014d2b;
+  vertical-align: top;
+}
+
+/* name and role */
+.testimonial-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 4px;
+  transition: color 0.3s;
+}
+.testimonial-card:hover .testimonial-name {
+  color: #2fa873;
+}
+
+.testimonial-role {
+  font-size: 13px;
+  color: #014d2b;
+  font-weight: 500;
+}
+</style>
+
+
+<!-- Section 5: Contact -->
+<section class="contact" id="contact">
+  <div class="contact-container">
+
+    <!-- Contact Info -->
+    <div class="contact-info glass">
+      <h3>Contact Us</h3>
+      <p><i class="fa-solid fa-location-dot"></i> 74/4, Green Road, Dhaka-1205</p>
+      <p><i class="fa-solid fa-flag"></i> Bangladesh</p>
+      <p><i class="fa-solid fa-envelope"></i> info@cleantrackplus.com</p>
+      <p><i class="fa-solid fa-phone"></i> (123) 456-78890</p>
+
+      <div class="social-links">
+        <a href="#" class="glass"><i class="fab fa-facebook-f"></i></a>
+        <a href="#" class="glass"><i class="fab fa-instagram"></i></a>
+        <a href="#" class="glass"><i class="fab fa-twitter"></i></a>
+      </div>
+    </div>
+
+    <!-- Contact Form -->
+    <div class="contact-form glass">
+      <div class="form-group">
+        <input type="text" placeholder=" (Name)" required>
+      </div>
+      <div class="form-group">
+        <input type="email" placeholder=" (Email)" required>
+      </div>
+
+      <div class="form-group">
+        <textarea rows="5" placeholder=" (Message)" required></textarea>
+      </div>
+      <button type="submit" class="submit-btn">Send</button>
+    </div>
+
+  </div>
+</section>
+
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="#features">FAQ</a>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <!-- Add external links -->
+    			<a href="https://github.com/yourproject" target="_blank" rel="noopener">GitHub</a>
+            </div>
+            <div class="footer-copyright">
+                <p>&copy; 2025 CleanTrack+. All rights reserved.</p>
+            </div>
+
+        </div>
+    </footer>
+<script src="{% static '/templatemo-neural-scripts.js' %}"></script>
+
 </body>
 </html>
