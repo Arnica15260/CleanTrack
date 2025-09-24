@@ -10,118 +10,872 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'templatemo-neural-style.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body>
-    <!-- Background -->
-   <div class="neural-background"></div>
 
+    <style>
+        /* ===== Body Background ===== */
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+        }
+        .neural-background {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+/* ===== Header wrapper ===== */
+.header {
+    width: 100%;
+    max-width: 1200px;
+    min-width: 500px;
+    padding: 10px 28px; /* padding কমানো */
+    margin: 0 auto; /* margin উপরের gap কমানো */
+   background: linear-gradient(to right, #bde9d3, #f2fbf5, #bde9d3);
 
+    border-radius: 16px;
+    box-shadow: 0 6px 18px rgba(133, 211, 172, 0.35);
+    position: sticky;
+    top: 10px; /* top কমানো */
+    z-index: 999;
+    display: block;
+    text-align: center;
+    transition: all 0.3s ease;
+}
 
+/* Scroll হলে ছোট shape */
+.header.scrolled {
+    margin: 0 auto;
+    border-radius: 10px;
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+/* ===== Nav container ===== */
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
 
-    <!-- Header/Navbar -->
-    <header class="glass">
-        <nav>
-<style>
-/* ===== Logo Styling (Dark Green Pill + White Text + Shimmer) ===== */
+/* ===== Logo Styling ===== */
 .logo {
     display: flex;
     align-items: center;
-    gap: 8px; /* space between icon and text */
-    font-size: 28px;
+    gap: 8px;
+    font-size: 26px;
     font-weight: bold;
-    font-family: 'Inter', sans-serif; /* clean font */
-    color: #ffffff; /* white text */
-    text-decoration: none;
-    position: relative;
-    padding: 10px 30px; /* pill shape padding */
-    border-radius: 9999px; /* full pill shape */
-    background-color: #2fa873; /* dark green box */
-    overflow: hidden;
-    transition: color 0.3s ease;
-    z-index: 1; /* ensure text stays on top */
-}
-
-/* Ensure the text itself is always white */
-.logo span {
     color: #ffffff;
-}
-
-/* Make text appear above shimmer */
-.logo::before {
+    text-decoration: none;
+    padding: 10px 24px;
+    border-radius: 9999px;
+    background-color: #2fa873;
     position: relative;
-    z-index: 2;
+    overflow: hidden;
+    transition: none; /* hover effect বন্ধ */
 }
 
-/* Shimmer effect on the box */
+.logo span {
+    color: #ffffff !important;
+    z-index: 2;
+    position: relative;
+}
+
+/* hover effect completely removed */
+.logo:hover {
+    /* empty: no background/color/scale change */
+}
+
+/* Shimmer effect */
 .logo::after {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(100deg, transparent 0%, rgba(255,255,255,0.35) 35%, transparent 70%);
+    background: linear-gradient(
+        100deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.6) 35%,
+        transparent 70%
+    );
     transform: translateX(-120%);
     filter: blur(2px);
     animation: shimmer 3.2s ease-in-out infinite;
-    border-radius: 9999px; /* shimmer follows pill shape */
-    z-index: 0; /* behind the text */
+    border-radius: inherit;
+    z-index: 1;
 }
 
-/* Shimmer animation */
 @keyframes shimmer {
     0% { transform: translateX(-120%); }
     60% { transform: translateX(120%); }
     100% { transform: translateX(120%); }
 }
 
-/* Hover effect: darken the green slightly */
-.logo:hover {
-    background-color: #014d2b;
+/* ===== Nav links ===== */
+.nav-links {
+    display: flex;
+    gap: 20px;
+    list-style: none;
 }
-</style>
+
+.nav-links li a {
+    text-decoration: none;
+    color: #1e293b;
+    font-weight: 500;
+    padding: 8px 14px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.nav-links li a:hover,
+.nav-links li a.active {
+    color: #ffffff;
+    background-color: #2fa873;
+    box-shadow: 0 4px 10px rgba(47, 168, 115, 0.3);
+}
+
+/* ===== Responsive Menu ===== */
+.mobile-menu-toggle {
+    display: none;
+    cursor: pointer;
+    font-size: 28px;
+    color: #2fa873;
+    background: transparent;
+    border: none;
+}
+
+@media (max-width: 992px) {
+    .nav-links {
+        display: none;
+    }
+
+    .mobile-menu-toggle {
+        display: block;
+    }
+
+    .mobile-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background: #ffffff;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        transform: translateY(-20px);
+        opacity: 0;
+        pointer-events: none;
+        transition: all 0.3s ease;
+    }
+
+    .mobile-nav.active {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .mobile-nav a {
+        text-decoration: none;
+        color: #1e293b;
+        padding: 10px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .mobile-nav a:hover,
+    .mobile-nav a.active {
+        color: #ffffff;
+        background: #2fa873;
+    }
+}
+
+
+
+
+        /* ===== Responsive ===== */
+        @media (max-width: 992px) {
+            .nav-links {
+                display: none; /* Mobile menu can be added later */
+            }
+        }
+   /* ===== Section 1: Modern Redesigned Hero ===== */
+.hero {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    padding: 100px 20px; /* breathing space */
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 60%;
+    height: 60%;
+    background: radial-gradient(circle, rgba(133, 211, 172, 0.35) 0%, transparent 70%);
+    transform: translate(-50%, -50%);
+    animation: heroGlow 10s ease-in-out infinite;
+    z-index: -1;
+    border-radius: 50%;
+}
+
+@keyframes heroGlow {
+    0%, 100% {
+        transform: translate(-50%, -50%) scale(1) rotate(0deg);
+        opacity: 0.6;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.3) rotate(180deg);
+        opacity: 1;
+    }
+}
+
+.hero-content {
+    max-width: 900px;
+    padding: 60px 30px;
+    margin-top: 80px;
+    animation: heroAppear 2.5s ease-out;
+    position: relative;
+}
+
+@keyframes heroAppear {
+    from { opacity: 0; transform: translateY(40px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Hero Subtitle */
+.hero-subtitle {
+    font-size: 0.95rem;
+    color: #000000;
+    margin-bottom: 20px;
+    opacity: 0;
+    animation: slideInFromLeft 1.2s ease 0.3s forwards;
+    text-transform: uppercase;
+    letter-spacing: 0.35em;
+    display: inline-block;
+    font-weight: 300;
+    position: relative;
+}
+
+.hero-subtitle::before,
+.hero-subtitle::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 35px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #000000, transparent);
+    animation: linePulse 3s ease infinite;
+}
+
+.hero-subtitle::before { left: -50px; }
+.hero-subtitle::after { right: -50px; }
+
+@keyframes linePulse {
+    0%, 100% { opacity: 0.4; transform: scaleX(0.85); }
+    50% { opacity: 1; transform: scaleX(1.2); }
+}
+
+@keyframes slideInFromLeft {
+    from { opacity: 0; transform: translateX(-30px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* Hero Heading */
+.hero h1 {
+    font-size: clamp(2.2rem, 4vw, 2.8rem);
+    font-weight: 800;
+    background: linear-gradient(90deg, #000000, #000000);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    line-height: 1.15;
+    margin-bottom: 20px;
+    opacity: 0;
+    animation: slideInFromRight 1.2s ease 0.6s forwards;
+    word-break: break-word;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.1); /* subtle depth */
+}
+
+@keyframes slideInFromRight {
+    from { opacity: 0; transform: translateX(30px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* Hero Description */
+.hero-description p {
+    font-size: 1rem;
+    font-weight: 300;
+    color: #000000;
+    line-height: 1.8;
+    margin: 25px auto 0;
+    max-width: 700px;
+    text-align: center;
+    letter-spacing: 0.03em;
+    word-break: break-word;
+    opacity: 0;
+    animation: fadeInUp 1.2s ease 1s forwards;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
+/* ===== Hero Stats Modern Fonts ===== */
+.hero-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 30px;
+    margin: 60px auto 50px;
+    max-width: 720px;
+    font-family: 'Inter', sans-serif;
+}
+
+/* ===== Hero Stat Cards ===== */
+.hero-stat {
+    text-align: center;
+    padding: 25px 15px;
+    background: linear-gradient(135deg, #bde9d3, #f2fbf5);
+    border: 1px solid #85d3ac;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-weight: 400;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+    cursor: pointer; /* hover করলে pointer দেখাবে */
+    backdrop-filter: blur(10px);
+}
+
+/* Icons & Text */
+.hero-stat i,
+.hero-stat-number,
+.hero-stat-label {
+    transition: color 0.3s ease;
+}
+
+.hero-stat i {
+    font-size: 1.8rem;
+    color: #000000;
+    margin-bottom: 10px;
+}
+
+.hero-stat-number {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #000000;
+    margin-bottom: 4px;
+}
+
+.hero-stat-label {
+    font-size: 0.5rem;
+    font-weight: 500;
+    color: #000000;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Hover effect */
+.hero-stat:hover {
+    transform: translateY(-6px); /* subtle lift */
+    box-shadow: 0 12px 25px rgba(1, 77, 43, 0.3); /* shadow */
+}
+
+.hero-stat:hover i,
+.hero-stat:hover .hero-stat-number,
+.hero-stat:hover .hero-stat-label {
+    color: #000000; /* dark green on hover */
+}
+
+/* ===== CTA Buttons ===== */
+.cta-button {
+    display: inline-block;
+    padding: 16px 40px;
+    background: linear-gradient(135deg, #bde9d3, #bde9d3, #f2fbf5);
+    color: #000000;
+    text-decoration: none;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: transform 0.25s ease, box-shadow 0.25s ease; /* only transform + shadow */
+    position: relative;
+    overflow: visible; /* fix: allow subtle lift */
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    box-shadow: 0 4px 15px rgba(47, 168, 115, 0.5);
+}
+
+/* Secondary button */
+.cta-button.secondary {
+    background: transparent;
+    border: 2px solid #85d3ac;
+    color: #000000;
+    box-shadow: 0 4px 15px rgba(133, 211, 172, 0.4);
+}
+
+/* Hover effect: subtle lift + glow */
+.cta-button:hover {
+    transform: translateY(-3px); /* subtle lift */
+    box-shadow: 0 8px 20px rgba(133, 211, 172, 0.6);
+}
+
+
+.cta-button.secondary:hover {
+    transform: translateY(-3px); /* subtle lift */
+    background: rgba(224, 163, 255, 0.06);
+    box-shadow: 0 8px 20px rgba(224, 163, 255, 0.15);
+}
+
+.mission-vision {
+    position: relative;
+    padding: 100px 20px;
+    text-align: center;
+    color: #000000; /* deep slate for fallback text */
+    border-radius: 40px;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif; /* modern clean font */
+}
+
+/* Background gradient only */
+.mission-vision::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        135deg,
+        #85d3ac 0%,   /* soft white-green */ #f2fbf5 100%  /* pastel green */
+    );
+    border-radius: 40px;
+    z-index: 1;
+}
+
+/* Section content */
+.mission-vision .section-header {
+    position: relative;
+    z-index: 2;
+    max-width: 850px;
+    margin: 0 auto 50px;
+}
+
+/* Heading */
+.mission-vision .section-header h2 {
+    font-size: 2.8rem;
+    font-weight: 800;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #000000; /* slate-900 */
+
+}
+
+/* Paragraph */
+.mission-vision .section-header p {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: #000000; /* slate-700 */
+    margin: 0 auto;
+    max-width: 750px;
+}
+
+/* Cards container */
+.mission-vision-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    max-width: 1050px;
+    margin: 50px auto 0 auto;
+    position: relative;
+    z-index: 2;
+}
+
+/* Card */
+.mv-card {
+    background: #f2fbf5;
+    border-radius: 20px;
+    padding: 40px 28px;
+    text-align: center;
+    box-shadow: 0 6px 20px rgb(242, 251, 245);
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+    border: 1px solid rgb(242, 251, 245);
+}
+
+/* Hover effect */
+.mv-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 16px 40px rgba(133, 211, 172, 0.35);
+}
+
+/* Card icon */
+.mv-card i {
+    font-size: 2.6rem;
+    color: #2fa873; /* fresh green */
+    margin-bottom: 18px;
+}
+
+/* Card heading & text */
+.mv-card h3 {
+    font-size: 1.4rem;
+    color: #2563eb; /* deep blue */
+    margin-bottom: 12px;
+    font-weight: 700;
+}
+
+.mv-card p {
+    font-size: 1rem;
+    color: #475569; /* slate-600 */
+    line-height: 1.7;
+}
+.hero-content {
+    max-width: 1000px;
+    padding: 60px 30px; /* hero padding সামঞ্জস্য */
+    margin-top: 0;      /* hero top margin কমানো */
+    animation: heroAppear 2.5s ease-out;
+    position: relative;
+    background: none;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+}
+
+.hero-subtitle {
+    font-size: 0.9rem;
+    color: #000000;
+    margin-bottom: 20px; /* subtitle gap কমানো */
+}
+
+.hero h1 {
+    margin-bottom: 20px; /* heading gap কমানো */
+}
+
+.hero-description p {
+    margin-bottom: 40px; /* description bottom gap */
+    max-width: 700px;    /* text block width */
+}
+
+.hero-stats {
+    margin: 40px auto 50px; /* hero-stats উপরের gap কমানো */
+}
+/* ===== Section 3: Enhanced Hexagonal Showcase ===== */
+.showcase {
+    padding: 120px 20px;
+    position: relative;
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #f2fbf5, #85D3AC); /* subtle section background */
+    overflow: hidden;
+}
+
+/* Hexagon Container */
+.hexagon-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Hexagon */
+.hexagon {
+    width: 220px;
+    height: 290px;
+    position: relative;
+    margin: 20px;
+    cursor: pointer;
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+.hexagon:hover {
+    transform: translateY(-4px) scale(1.03);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+}
+
+/* Hexagon Inner */
+.hexagon-inner {
+    width: 100%;
+    height: 100%;
+    transform: rotate(30deg);
+    border-radius: 20px;
+    padding: 45px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow: hidden;
+    transition: transform 0.4s ease, box-shadow 0.4s ease, border-radius 0.4s ease;
+    background: linear-gradient(135deg, #ffffff, #e0f5e8);
+    border: 1px solid rgba(133, 211, 172, 0.3);
+    box-shadow: 0 6px 15px rgba(133, 211, 172, 0.12);
+}
+.hexagon:hover .hexagon-inner {
+    transform: rotate(0deg);
+    border-radius: 15px;
+    box-shadow: 0 12px 30px rgba(133, 211, 172, 0.25);
+}
+
+/* Hexagon Icon */
+.hexagon-icon {
+    font-size: 1.8rem;
+    margin-bottom: 18px;
+    transform: rotate(-30deg);
+    color: #2fa873;
+    transition: transform 0.4s ease, color 0.4s ease;
+}
+.hexagon:hover .hexagon-icon {
+    transform: rotate(0deg) scale(1.05);
+    color: #014d2b;
+}
+
+/* Hexagon Heading */
+.hexagon h4 {
+    font-size: 1rem;
+    color: #000000;
+    transform: rotate(-30deg);
+    margin-bottom: 12px;
+    font-weight: 700;
+    transition: transform 0.4s ease, color 0.4s ease;
+}
+.hexagon:hover h4 {
+    transform: rotate(0deg);
+    color: #2fa873;
+}
+
+/* Hexagon Paragraph */
+.hexagon p {
+    font-size: 0.7rem;
+    color: #000000;
+    transform: rotate(-30deg);
+    line-height: 1.6;
+    max-width: 160px;
+    transition: transform 0.4s ease, color 0.4s ease;
+}
+.hexagon:hover p {
+    transform: rotate(0deg);
+    color: #000000;
+}
+
+/* Section Heading */
+.showcase h2 {
+    font-size: 3rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    text-align: center;
+    margin-bottom: 80px;
+    color: #000000;
+    position: relative;
+    opacity: 0;
+    animation: fadeInUp 1.2s ease forwards;
+    animation-delay: 0.2s;
+}
+
+
+/* Section Heading Animations */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInWidth {
+    from { opacity: 0; width: 0; }
+    to { opacity: 1; width: 60px; }
+}
+/* ===== Section 2: Diagonal Features ===== */
+.features {
+    padding: 150px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Background Animation */
+.features::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(from 0deg, transparent, rgba(189, 233, 211, 0.2), transparent);
+    animation: rotate 25s linear infinite;
+    z-index: -1;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.section-title {
+    text-align: center;
+    font-size: clamp(2rem, 5vw, 3rem);
+    margin-bottom: 80px;
+    color: #000000 !important;
+    position: relative;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 140px;
+    height: 4px;
+    background: linear-gradient(90deg, rgba(189,233,211,0.8), rgba(133,211,172,0.8), rgb(242, 251, 245));
+    border-radius: 2px;
+}
+
+/* Container */
+.features-container {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.diagonal-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 70px;
+}
+
+/* Feature Row */
+.feature-row {
+    display: flex;
+    align-items: center;
+    gap: 80px;
+    position: relative;
+    perspective: 1000px;
+}
+.feature-row:nth-child(even) {
+    flex-direction: row-reverse;
+}
+
+/* Feature Content */
+.feature-content {
+    flex: 1;
+    padding: 50px;
+    transform: skew(-4deg);
+    transition: all 0.4s ease; /* কমানো hover reaction */
+    background: rgba(255,255,255,0.85);
+    border-radius: 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+.feature-content:hover {
+    transform: skew(-4deg) translateY(-8px) rotateX(1deg); /* subtle hover */
+    box-shadow: 0 18px 40px rgba(0,0,0,0.10);
+}
+
+/* Feature Icon */
+.feature-icon {
+    font-size: 4rem;
+    margin-bottom: 25px;
+    color: #bde9d3;
+}
+
+/* Feature Heading & Paragraph */
+.feature-content h3 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: #000000;
+    font-weight: 700;
+}
+.feature-content p {
+    font-size: 1.1rem;
+    color: #000000;
+    line-height: 1.8;
+}
+
+/* Feature Visual */
+.feature-visual {
+    flex: 1;
+    height: 280px; /* আগের 360px → নতুন 280px */
+    position: relative;
+    border-radius: 20px; /* হালকা কমানো-rounded corners */
+    overflow: hidden;
+    background-color: #f5f5f5;
+}
+
+/* Image inside visual */
+.feature-visual img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    transition: transform 0.4s ease;
+}
+.feature-visual:hover img {
+    transform: scale(1.03);
+}
+
+/* Overlay */
+.feature-visual::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(45deg, rgba(189, 233, 211, 0.1), rgba(166, 228, 153, 0.1));
+    z-index: 1;
+    backdrop-filter: blur(1px);
+    pointer-events: none;
+    transition: all 0.4s ease;
+}
+.feature-visual:hover::before {
+    background: linear-gradient(45deg, rgba(133, 211, 172, 0.12), rgba(166, 228, 153, 0.12));
+}
+
+
+    </style>
 </head>
 <body>
+    <!-- Background -->
+    <div class="neural-background"></div>
 
-<!-- Logo with icon -->
-<a href="/" class="logo" aria-label="Home">
-    ⚡ <span>CleanTrack+</span>
-</a>
+    <!-- Header/Navbar -->
+    <header class="header">
+        <nav class="nav-container">
+            <!-- Logo -->
+            <a href="/" class="logo" aria-label="Home">⚡ <span>CleanTrack+</span></a>
 
-</body>
-
-
-
+            <!-- Desktop nav links -->
             <ul class="nav-links">
                 <li><a href="{% url 'about' %}">About</a></li>
                 <li><a href="{% url 'contact' %}">Contact</a></li>
                 <li><a href="{% url 'users:register' %}">Signup</a></li>
                 <li><a href="{% url 'users:login' %}">Login</a></li>
             </ul>
-
-            <div class="mobile-menu-toggle">
-                <div class="hamburger-line"></div>
-                <div class="hamburger-line"></div>
-                <div class="hamburger-line"></div>
-            </div>
         </nav>
-
-        <div class="mobile-nav">
-            <a href="{% url 'about' %}">About</a>
-            <a href="{% url 'contact' %}">Contact</a>
-            <a href="{% url 'users:register' %}">Signup</a>
-            <a href="{% url 'users:login' %}">Login</a>
-        </div>
     </header>
+</body>
+</html>
 
        <!-- Section 1: Hero -->
     <section class="hero" id="home">
         <div class="hero-content">
             <div class="hero-subtitle">Welcome to the CleanTrack+</div>
-            <h1>Smart Waste, Clean Future.</h1>
+            <h1>SMART WASTE, ClEAN FUTURE.</h1>
 
             <div class="hero-description">
-                <p>
+  <p>
     Experience how small actions can create big changes with CleanTrack+.
     Through smart waste tracking and meaningful donations, together we can
-    build cleaner cities and a greener tomorrow.
+    build cleaner cities and a greener tomorrow. Join our community to make
+    a real impact every day. Track your contributions, earn rewards, and
+    inspire others to take part in creating sustainable and eco-friendly
+    neighborhoods.With CleanTrack+, you can schedule waste pickups, donate usable items,
+    and monitor your positive impact on the environment. Every action counts,
+    whether big or small. Together, let's transform our cities, reduce waste,
+    and pave the way for a cleaner, healthier, and more responsible future.
 </p>
 
             </div>
@@ -157,11 +911,19 @@
     </section>
 <!-- ===== Section: Mission & Vision ===== -->
 <section class="mission-vision" id="mission-vision"
-         style="background: url('{% static 'mission.png' %}') center/cover no-repeat; padding:90px 20px; text-align:center; color:#fff;">
+         style="background: url('{% static 'truck.png' %}') center/cover no-repeat; padding:90px 20px; text-align:center; color:#fff;">
 
     <div class="section-header">
        <h2 class="section-title">Mission & Vision</h2>
-        <p>Dedicated to creating a cleaner and greener future through smart waste management.</p>
+    <p>
+Dedicated to creating a cleaner and greener future through smart waste management.
+Join us in reducing waste, promoting recycling, and empowering communities to make eco-friendly choices.
+Together, we can transform cities into sustainable, thriving environments for generations to come.
+Our innovative solutions streamline waste collection, enhance resource efficiency, and reward positive environmental actions.
+Be part of a movement that cares for the planet, nurtures communities, and inspires a healthier tomorrow.
+</p>
+
+
     </div>
 
     <div class="mission-vision-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:35px;max-width:1050px;margin:0 auto;">
@@ -170,20 +932,30 @@
         <div class="mv-card" style="background:rgba(255,255,255,0.9);border-radius:20px;padding:40px 28px;text-align:center;box-shadow:0 8px 25px rgba(0,0,0,0.2);">
             <i class="fas fa-bullseye" style="font-size:2.6rem;color:#2fa873;background:#fff;padding:20px;border-radius:50%;margin-bottom:20px;display:inline-block;box-shadow:0 6px 18px rgba(47,168,115,0.4);"></i>
             <h3 style="font-size:1.5rem;color:#014d2b;margin-bottom:15px;font-weight:700;">Mission</h3>
-            <p style="font-size:1rem;color:#014d2b;line-height:1.7;">
-                To provide smart and innovative waste tracking solutions that encourage responsible disposal,
-                promote donations, and reward sustainable actions for a cleaner environment.
-            </p>
+           <p style="font-size:1rem;color:#000000;line-height:1.7;">
+    To provide smart and innovative waste tracking solutions that encourage responsible disposal,
+    promote donations, and reward sustainable actions for a cleaner environment.
+    Our platform empowers communities to participate actively in recycling efforts,
+    reduces landfill waste, and fosters a culture of environmental responsibility.
+    Together, we aim to create greener neighborhoods, conserve resources,
+    and build a sustainable future for generations to come.
+</p>
+
         </div>
 
         <!-- Vision Card -->
         <div class="mv-card" style="background:rgba(255,255,255,0.9);border-radius:20px;padding:40px 28px;text-align:center;box-shadow:0 8px 25px rgba(0,0,0,0.2);">
             <i class="fas fa-eye" style="font-size:2.6rem;color:#2fa873;background:#fff;padding:20px;border-radius:50%;margin-bottom:20px;display:inline-block;box-shadow:0 6px 18px rgba(47,168,115,0.4);"></i>
             <h3 style="font-size:1.5rem;color:#014d2b;margin-bottom:15px;font-weight:700;">Vision</h3>
-            <p style="font-size:1rem;color:#014d2b;line-height:1.7;">
-                To build a future where every city is clean, communities are empowered, and waste is managed
-                efficiently to protect our planet for generations to come.
-            </p>
+            <p style="font-size:1rem;color:#000000;line-height:1.7;">
+    To build a future where every city is clean, communities are empowered, and waste is managed
+    efficiently to protect our planet for generations to come.
+    We envision a world where innovative technology drives sustainable practices,
+    citizens take active roles in recycling and reducing waste, and
+    environmental responsibility becomes a shared value across communities.
+    By fostering awareness, collaboration, and smart solutions, we aim to create lasting positive impact
+    for both people and the planet.
+</p>
         </div>
     </div>
 </section>
@@ -197,42 +969,66 @@
             <div class="hexagon-inner glass">
                 <div class="hexagon-icon">📍</div> <!-- Smart Tracking -->
                 <h4>Smart Tracking</h4>
-                <p>Real-time waste collection monitoring</p>
+                <p>
+    Real-time waste collection monitoring. Stay updated with live tracking of all waste pickups,
+    receive notifications for scheduled collections, and ensure your contributions are efficiently managed.
+</p>
+
             </div>
         </div>
         <div class="hexagon">
             <div class="hexagon-inner glass">
                 <div class="hexagon-icon">🔒</div> <!-- Data Security -->
                 <h4>Data Security</h4>
-                <p>Safe and encrypted user information</p>
+               <p>
+    Safe and encrypted user information. We use advanced encryption standards to protect your data,
+    ensuring privacy, security, and peace of mind for every user.
+</p>
+
             </div>
         </div>
         <div class="hexagon">
             <div class="hexagon-inner glass">
                 <div class="hexagon-icon">⏱️</div> <!-- Fast Pickup -->
                 <h4>Fast Pickup</h4>
-                <p>Efficient scheduling and collection</p>
+               <p>
+    Efficient scheduling and collection. Our system ensures timely pickups, optimizes routes,
+    and reduces waiting times for a seamless waste management experience.
+</p>
+
             </div>
         </div>
         <div class="hexagon">
             <div class="hexagon-inner glass">
                 <div class="hexagon-icon">🎁</div> <!-- Reward System -->
                 <h4>Reward System</h4>
-                <p>Earn points for every donation</p>
+              <p>
+    Earn points for every donation and redeem them for exciting rewards, encouraging
+    sustainable actions and active participation in waste management.
+</p>
+
             </div>
         </div>
         <div class="hexagon">
             <div class="hexagon-inner glass">
                 <div class="hexagon-icon">📊</div> <!-- Tracking Status -->
                 <h4>Tracking Status</h4>
-                <p>Monitor your pickup status live</p>
+               <p>
+    Monitor your pickup status live and receive real-time updates on the progress of
+    your waste collection, ensuring transparency and convenience.
+</p>
+
             </div>
         </div>
         <div class="hexagon">
             <div class="hexagon-inner glass">
                 <div class="hexagon-icon">🌱</div> <!-- Community Impact -->
                 <h4>Community Impact</h4>
-                <p>See how your actions help the city</p>
+             <p>
+    See how your actions help the city by tracking the positive impact of your donations
+    and contributions on community cleanliness and sustainability.
+</p>
+
             </div>
         </div>
     </div>
@@ -251,7 +1047,8 @@
                 <div class="feature-content glass">
                     <div class="feature-icon"><i class="fas fa-calendar-check"></i></div>
                     <h3>Book a Pickup Schedule</h3>
-                    <p>Choose your preferred date and time for waste collection.</p>
+                   <p>Schedule your waste collection easily by choosing your preferred date and time, ensuring timely pickup without any hassle.</p>
+
                 </div>
                 <div class="feature-visual glass">
                     {% load static %}
@@ -264,7 +1061,13 @@
                 <div class="feature-content glass">
                     <div class="feature-icon"><i class="fas fa-truck"></i></div>
                     <h3>Track in Real-Time</h3>
-                    <p>Monitor your pickup in real-time and stay updated.</p>
+                   <p>
+Track your scheduled waste pickups live and get instant updates on status changes.
+Receive reminders before each collection to stay prepared and organized.
+Easily reschedule or cancel pickups directly from your account.
+
+</p>
+
                 </div>
                 <div class="feature-visual glass">
                     <img src="{% static 'real.png' %}" alt="Track in Real-Time">
@@ -276,7 +1079,8 @@
                 <div class="feature-content glass">
                     <div class="feature-icon"><i class="fas fa-gift"></i></div>
                     <h3>Collect Rewards</h3>
-                    <p>Earn points for recycling and redeem exciting rewards.</p>
+                 <p>"Recycle with us and earn points that you can redeem for exciting rewards! Get bonus points and surprise gifts when you recycle directly through our website."</p>
+
                 </div>
                 <div class="feature-visual glass">
                     <img src="{% static 'gift.png' %}" alt="Collect Rewards">
@@ -292,7 +1096,7 @@
     <!-- Developed By Team Section -->
 <section class="team">
     <div class="container">
-      <h2 class="section-title">OUR TEAM</h2>
+      <h2 class="section-title">OUR TEAM MEMBER</h2>
         <div class="team-cards">
             <!-- Team Member 1 -->
             <div class="team-card">
@@ -306,9 +1110,9 @@
             <!-- Team Member 2 -->
             <div class="team-card">
                 <div class="team-avatar">
-                    <img src=".jpg" alt="Mehrin Akter">
+                    <img src=".jpg" alt="Mehrin Rahman">
                 </div>
-                <h4 class="team-member-name">Mehrin Akter</h4>
+                <h4 class="team-member-name">Mehrin Rahman</h4>
                 <p class="team-member-role">Frontend Developer</p>
             </div>
 
@@ -319,7 +1123,7 @@
                     <img src="{% static 'prity.jpg' %}" alt="Fahima Khan Prity">
                 </div>
                 <h4 class="team-member-name">Fahima Khan Prity</h4>
-                <p class="team-member-role">UI/UX Designer</p>
+                <p class="team-member-role">Frontend Developer</p>
             </div>
         </div>
     </div>
@@ -329,7 +1133,7 @@
 /* ===== Team Section ===== */
 .team {
     padding: 100px 20px;
-    background: linear-gradient(135deg, #d0f0e5 0%, #a6e0c8 50%, #85d3ac 100%); /* smoother gradient */
+    background: linear-gradient(135deg, #2fa873 0%, #bde9d3 50%, #f2fbf5 100%); /* smoother gradient */
     text-align: center;
     font-family: 'Inter', sans-serif;
     position: relative;
@@ -353,7 +1157,7 @@
 }
 
 .team h2 {
-    font-size: 3.8rem;
+    font-size: 3rem;
     color: #0f2b1f;
     margin-bottom: 60px;
     font-weight: 800;
@@ -361,17 +1165,7 @@
     position: relative;
     display: inline-block;
 }
-.team h2::after {
-    content: '';
-    position: absolute;
-    bottom: -12px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 160px;
-    height: 4px;
-    background: linear-gradient(90deg, #4caf88, #2f7d5a, #4caf88);
-    border-radius: 2px;
-}
+
 
 /* cards wrapper */
 .team-cards {
@@ -495,7 +1289,8 @@
 /* ===== Customer Testimonials Section (Professional with subtle background) ===== */
 .testimonials {
   padding: 100px 20px;
-  background: linear-gradient(135deg, #eaf6f1, #d0f0e5);
+ background: linear-gradient(135deg, #f2fbf5, #bde9d3, #2fa873);
+
   text-align: center;
   font-family: 'Inter', sans-serif;
   position: relative;
@@ -530,7 +1325,11 @@
   display: block;
   width: 100px;
   height: 4px;
-  background: linear-gradient(90deg, #2fa873, #2fa873);
+  background: linear-gradient(
+    45deg,
+    #f5f5f5,    /* light green */ #2fa873,    /* mint green */ #2fa873,    /* soft green */ #f5f5f5 /* deep green */
+);
+
   margin: 12px auto 0 auto;
   border-radius: 2px;
   z-index: 2;
