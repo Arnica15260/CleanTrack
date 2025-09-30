@@ -1,6 +1,7 @@
 from django.urls import path, reverse_lazy
 from django.contrib.auth import views as auth_views
-from .views import RoleLoginView, logout_view, signup_view, signup_admin, dashboard, activate
+from .views import RoleLoginView, logout_view, signup_view, signup_admin, dashboard, activate, contact_view
+from . import views
 
 app_name = "users"
 
@@ -12,6 +13,14 @@ urlpatterns = [
 
     path("activate/<uidb64>/<token>/", activate, name="activate"),
     path("dashboard/", dashboard, name="dashboard"),
+
+    path("schedule/", views.page_schedule, name="schedule"),
+    path("recycling/", views.page_recycling, name="recycling"),
+    path("reuse/", views.page_reuse, name="reuse"),
+    path("track/", views.page_track, name="track"),
+    path("complaint/", views.page_complaint, name="complaint"),
+    path("contact/", contact_view, name="contact"),
+    path("go/<str:target>/", views.auth_gate, name="auth_gate"),
 
     path(
         "password-reset/",

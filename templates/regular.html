@@ -1,2 +1,132 @@
-<h1>Regular Dashboard</h1>
-<p>Welcome, {{ request.user.username }} (role: {{ request.user.role }})</p>
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Regular Dashboard — CleanTrack+</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    :root{
+      --brand:#0f7a4d; --brand-2:#0ea5a0;
+      --glass:#ffffffc8; --glass-border:#ffffffa2;
+      --muted:#5b6876; --radius:20px;
+      --shadow:0 12px 30px rgba(0,0,0,.08);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;color:#0f172a}
+
+    /* ===== Animated background (no images) ===== */
+    .bg{position:fixed;inset:0;z-index:-2;
+        background:linear-gradient(180deg,#f4fff9 0%,#ecfff6 50%,#f9fffe 100%)}
+    .bg span{position:absolute;width:45vmax;height:45vmax;border-radius:50%;
+      background:radial-gradient(35% 35% at 30% 30%,#dcfff4,transparent 70%),
+                 radial-gradient(35% 35% at 70% 70%,#bff3e3,transparent 70%);
+      filter:blur(28px);mix-blend-mode:multiply;
+      animation:float 18s var(--delay,0s) ease-in-out infinite alternate}
+    .bg span:nth-child(1){top:-10vmax;left:-10vmax;--delay:-0s}
+    .bg span:nth-child(2){top:10vmax;right:-12vmax;--delay:-3s}
+    .bg span:nth-child(3){bottom:-12vmax;left:25vmax;--delay:-6s}
+    .bg span:nth-child(4){bottom:-6vmax;right:-8vmax;--delay:-9s}
+    @keyframes float{
+      0%{transform:translate(0,0)}
+      50%{transform:translate(3vmax,-2vmax)}
+      100%{transform:translate(-2vmax,2vmax)}
+    }
+
+    /* ===== Glass look / layout ===== */
+    .glass{background:var(--glass);backdrop-filter:blur(12px) saturate(1.2);
+           -webkit-backdrop-filter:blur(12px) saturate(1.2);
+           border:1px solid var(--glass-border);box-shadow:var(--shadow)}
+    .topbar{position:sticky;top:0;margin:18px;border-radius:999px;padding:10px 16px;
+            display:flex;align-items:center;justify-content:space-between}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:900}
+    .brand .logo{width:34px;height:34px;display:grid;place-items:center;background:#eafff5;border-radius:12px}
+    .home-btn{display:inline-flex;gap:8px;align-items:center;text-decoration:none;background:#eafff5;
+              border:1px solid #c6f6e5;color:#084c3c;padding:10px 14px;border-radius:999px;font-weight:700}
+
+    .layout{display:grid;grid-template-columns:240px 1fr;gap:18px;padding:12px 18px 24px}
+    @media (max-width:1050px){.layout{grid-template-columns:1fr}.sidebar{display:none}}
+
+    .sidebar{align-self:start;position:sticky;top:96px;padding:12px;border-radius:22px}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;
+              text-decoration:none;color:#073b2e;font-weight:600}
+    .nav-item:hover{background:#eafff5}
+    .nav-item.active{background:var(--brand);color:#fff}
+    .ico{width:20px;height:20px;display:inline-grid;place-items:center}
+    .ico::before{content:attr(data-emoji)}         /* we’ll use emoji as inline “icons” */
+
+    .content{padding:6px}
+    .card{border-radius:18px;padding:20px}
+    .muted{color:var(--muted)}
+  </style>
+</head>
+<body>
+  <!-- animated background -->
+  <div class="bg">
+    <span></span><span></span><span></span><span></span>
+  </div>
+
+  <!-- top bar -->
+  <header class="topbar glass">
+    <div class="brand"><div class="logo">⚡</div><span>CleanTrack+</span></div>
+    <a class="home-btn" href="{% url 'users:dashboard' %}">🏠 Home</a>
+  </header>
+
+  <!-- layout -->
+  <div class="layout">
+    <!-- sidebar -->
+    <aside class="sidebar glass">
+      {% with p=request.path %}
+        <a class="nav-item {% if '/users/dashboard/' in p %}active{% endif %}" href="{% url 'users:dashboard' %}">
+          <span class="ico" data-emoji="📊"></span> Dashboard
+        </a>
+        <a class="nav-item {% if '/users/schedule/' in p %}active{% endif %}" href="{% url 'users:schedule' %}">
+          <span class="ico" data-emoji="🗓️"></span> Schedule Pickup
+        </a>
+        <a class="nav-item {% if '/users/recycling/' in p %}active{% endif %}" href="{% url 'users:recycling' %}">
+          <span class="ico" data-emoji="♻️"></span> Recycling
+        </a>
+        <a class="nav-item {% if '/users/reuse/' in p %}active{% endif %}" href="{% url 'users:reuse' %}">
+          <span class="ico" data-emoji="🎁"></span> Reuse
+        </a>
+        <a class="nav-item {% if '/users/track/' in p %}active{% endif %}" href="{% url 'users:track' %}">
+          <span class="ico" data-emoji="📍"></span> Track
+        </a>
+        <a class="nav-item {% if '/users/complaint/' in p %}active{% endif %}" href="{% url 'users:complaint' %}">
+          <span class="ico" data-emoji="📝"></span> Complaint
+        </a>
+      {% endwith %}
+    </aside>
+
+    <!-- main content (you can replace this with any page content) -->
+    <main class="content">
+      <div class="card glass">
+        <h1 style="margin:0 0 6px">Regular Dashboard</h1>
+        <p class="muted" style="margin:0 0 14px">
+          Welcome, <strong>{{ request.user.username }}</strong>
+          (role: {{ request.user.role|default:"regular" }})
+        </p>
+
+        <!-- Put your page-specific content here -->
+        <p>Select a section from the left sidebar. The middle cards/info are intentionally omitted as you asked.</p>
+      </div>
+    </main>
+  </div>
+
+  <!-- tiny parallax for background (inline, no external JS) -->
+  <script>
+    (function(){
+      const spans=document.querySelectorAll('.bg span');
+      if(!spans.length) return;
+      let w=innerWidth,h=innerHeight;
+      addEventListener('mousemove',e=>{
+        const x=(e.clientX/w-.5)*6, y=(e.clientY/h-.5)*6;
+        spans.forEach((s,i)=> s.style.transform=`translate(${x*(i+1)}vmin, ${y*(i+1)}vmin)`);
+      });
+      addEventListener('resize',()=>{w=innerWidth;h=innerHeight});
+    })();
+  </script>
+</body>
+</html>

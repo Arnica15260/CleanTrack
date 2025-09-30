@@ -2,6 +2,8 @@
 from django import forms
 from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from .models import PickupRequest
+from .models import ContactMessage
 
 User = get_user_model()
 
@@ -53,3 +55,53 @@ class LoginEmailOrUsernameForm(AuthenticationForm):
         self.user_cache = user
         self.cleaned_data = {"username": login_id, "password": password}
         return self.cleaned_data
+
+
+class PickupRequestForm(forms.ModelForm):
+    class Meta:
+        model = PickupRequest
+        fields = ["waste_type", "date", "time", "address", "notes", "photo"]
+        widgets = {
+            "date":  forms.DateInput(attrs={"type": "date"}),
+            "time":  forms.TimeInput(attrs={"type": "time"}),
+            "notes": forms.Textarea(attrs={"rows": 3, "placeholder": "Additional instruction (optional)"}),
+            "address": forms.TextInput(attrs={"placeholder": "Street, House/Flat"}),
+        }
+
+
+
+
+class ContactForm(forms.ModelForm):
+    # Honeypot: real users won't fill this (hidden in template)
+    hp = forms.CharField(required=False, widget=forms.TextInput(attrs={"autocomplete": "off"}))
+
+    class Meta:
+        model = ContactMessage
+        fields = ["name", "email", "subject", "message"]
+        widgets = {
+            "name":    forms.TextInput(attrs={
+                "placeholder": "Your full name",
+                "autocomplete": "name",
+                "aria-label": "Your name"
+            }),
+            "email":   forms.EmailInput(attrs={
+                "placeholder": "you@example.com",
+                "autocomplete": "email",
+                "aria-label": "Email address"
+            }),
+            "subject": forms.TextInput(attrs={
+                "placeholder": "What is this about? (optional)",
+                "aria-label": "Subject"
+            }),
+            "message": forms.Textarea(attrs={
+                "rows": 6,
+                "placeholder": "Write your message…",
+                "aria-label": "Message"
+            }),
+        }
+
+    def clean_hp(self):
+        # if bots fill it, reject silently
+        if self.cleaned_data.get("hp"):
+            raise forms.ValidationError("Spam detected.")
+        return ""

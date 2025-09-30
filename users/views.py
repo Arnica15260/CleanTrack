@@ -1,3 +1,4 @@
+# users/views.py
 
 from django.conf import settings
 from django.contrib import messages
@@ -5,16 +6,25 @@ from django.contrib.auth import get_user_model, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.views import LoginView
 from django.core.mail import EmailMultiAlternatives
+from django.core.validators import validate_email  # (kept if you ever need manual validation)
+from django.core.exceptions import ValidationError  # (kept if you ever need manual validation)
 from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 
-from .forms import RegisterForm, LoginEmailOrUsernameForm
+from .forms import (
+    RegisterForm,
+    LoginEmailOrUsernameForm,
+    PickupRequestForm,
+    ContactForm,
+)
 from .tokens import account_activation_token
+from .models import ContactMessage  # admin reads this; form.save() writes it
 
 User = get_user_model()
+
 
 class RoleLoginView(LoginView):
     template_name = "login.html"
@@ -27,6 +37,7 @@ class RoleLoginView(LoginView):
             return "/admin/"
         return reverse("users:dashboard")
 
+
 def _build_activation_url(request, user):
     uid = urlsafe_base64_encode(force_bytes(user.pk))
     token = account_activation_token.make_token(user)
@@ -35,15 +46,19 @@ def _build_activation_url(request, user):
         return f"{settings.SITE_DOMAIN}{path}"
     return request.build_absolute_uri(path)
 
+
 def _send_activation_email(request, user):
     activate_url = _build_activation_url(request, user)
     ctx = {"user": user, "activate_url": activate_url}
     subject = "Activate your CleanTrack account"
     text_body = render_to_string("users/activation_email.txt", ctx)
     html_body = render_to_string("users/activation_email.html", ctx)
-    msg = EmailMultiAlternatives(subject, text_body, settings.DEFAULT_FROM_EMAIL, [user.email])
+    msg = EmailMultiAlternatives(
+        subject, text_body, settings.DEFAULT_FROM_EMAIL, [user.email]
+    )
     msg.attach_alternative(html_body, "text/html")
     msg.send()
+
 
 def signup_view(request):
     if request.method == "POST":
@@ -53,11 +68,14 @@ def signup_view(request):
             user.is_active = False
             user.save()
             _send_activation_email(request, user)
-            messages.success(request, "We emailed you an activation link. Please verify to log in.")
+            messages.success(
+                request, "We emailed you an activation link. Please verify to log in."
+            )
             return redirect("users:login")
     else:
         form = RegisterForm()
     return render(request, "register.html", {"form": form})
+
 
 def activate(request, uidb64, token):
     try:
@@ -74,11 +92,14 @@ def activate(request, uidb64, token):
         return redirect("users:login")
     return render(request, "activation_invalid.html", status=400)
 
+
 @login_required
 def logout_view(request):
     logout(request)
     messages.info(request, "You have been logged out.")
     return redirect("users:login")
+
+
 @login_required
 @user_passes_test(lambda u: u.is_staff or u.is_superuser)
 def signup_admin(request):
@@ -96,9 +117,12 @@ def signup_admin(request):
         form = RegisterForm()
     return render(request, "register.html", {"form": form, "creating_admin": True})
 
+
 @login_required
 def dashboard(request):
-    if request.user.is_superuser or (getattr(request.user, "role", "") == "admin" and request.user.is_staff):
+    if request.user.is_superuser or (
+        getattr(request.user, "role", "") == "admin" and request.user.is_staff
+    ):
         return redirect("/admin/")
     if request.user.role == "driver":
         return render(request, "driver.html")
@@ -106,3 +130,106 @@ def dashboard(request):
         return render(request, "regular.html")
     messages.error(request, "Your account doesn't have a valid role.")
     return redirect("users:login")
+
+
+def _require_regular(user):
+    return getattr(user, "role", "") == "regular"
+
+
+@login_required
+def page_recycling(request):
+    return render(request, "recycling.html")
+
+
+@login_required
+def page_reuse(request):
+    return render(request, "reuse.html")
+
+
+@login_required
+def page_track(request):
+    return render(request, "track.html")
+
+
+@login_required
+def page_complaint(request):
+    return render(request, "complaint.html")
+
+
+def require_regular(user):
+    return getattr(user, "role", "") == "regular"
+
+
+@login_required
+def page_schedule(request):
+    if not _require_regular(request.user):
+        messages.error(request, "Only regular users can schedule pickups.")
+        return redirect("users:dashboard")
+
+    if request.method == "POST":
+        form = PickupRequestForm(request.POST, request.FILES)
+        if form.is_valid():
+            obj = form.save(commit=False)
+            obj.user = request.user
+            obj.save()
+            messages.success(request, "Pickup scheduled successfully!")
+            return redirect("users:schedule")
+    else:
+        form = PickupRequestForm()
+
+    return render(request, "schedule.html", {"form": form})
+
+
+# -------- Auth Gate (fixes AttributeError from urls.py) --------
+def auth_gate(request, target):
+    """
+    Gatekeeper for feature tiles/links.
+    - Guests -> signup with a message.
+    - Logged-in users -> redirect to requested feature page.
+    """
+    target_map = {
+        "schedule": "users:schedule",
+        "recycling": "users:recycling",
+        "track": "users:track",
+        "complaint": "users:complaint",
+    }
+
+    if not request.user.is_authenticated:
+        messages.info(request, "Please create a free account to access this feature.")
+        return redirect("users:signup")
+
+    dest = target_map.get(target)
+    if dest:
+        return redirect(dest)
+
+    messages.error(request, "Unknown destination.")
+    return redirect("users:dashboard")
+
+
+# ----------------- Contact View (single, final) -----------------
+def contact_view(request):
+    """
+    Accepts POST from the custom contact.html (plain inputs).
+    On success: saves, flashes a message, and redirects back to the same page.
+    On error: re-renders with errors + previously entered values.
+    """
+    if request.method == "POST":
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(
+                request, "Thanks! We received your message and will reply soon."
+            )
+            return redirect("users:contact")
+
+        # invalid -> return errors + previous data for the custom template bindings
+        ctx = {
+            "form": form,
+            "errors": form.errors,
+            "data": request.POST,
+        }
+        return render(request, "contact.html", ctx)
+
+    # GET
+    form = ContactForm()
+    return render(request, "contact.html", {"form": form, "errors": {}, "data": {}})

@@ -1,11 +1,466 @@
-<!DOCTYPE html>
+{% load static %}
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>contact</title>
+  <meta charset="utf-8" />
+  <title>Contact — CleanTrack+</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Manrope everywhere -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --brand:#0f7a4d; --brand2:#0ea5a0;
+      --glass:#ffffffcc; --glass-b:#ffffffa6; --ghost:#eafff5;
+      --ink:#0f172a; --muted:#4c5a67; --field:#cfe9db;
+      --radius:20px; --shadow:0 14px 36px rgba(0,0,0,.08);
+
+      /* action tile accents */
+      --accent-schedule:#14b8a6;  /* teal */
+      --accent-recycle:#22c55e;   /* green */
+      --accent-track:#60a5fa;     /* blue */
+      --accent-complaint:#f97316; /* orange */
+
+      /* other contact chip accents */
+      --accent-email:#22d3ee;     /* cyan */
+      --accent-call:#fb7185;      /* pinky red */
+      --accent-wa:#22c55e;        /* green */
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:Manrope,system-ui,Segoe UI,Roboto,Arial;
+      color:var(--ink);
+      line-height:1.6;
+      font-size:18px;
+    }
+
+    /* animated mint background */
+    .bg{position:fixed; inset:0; z-index:-2; background:linear-gradient(180deg,#f4fff9 0%,#ecfff6 50%,#f9fffe 100%)}
+    .bg span{position:absolute;width:46vmax;height:46vmax;border-radius:50%;
+      background:radial-gradient(35% 35% at 30% 30%,#dcfff4,transparent 70%),radial-gradient(35% 35% at 70% 70%,#bff3e3,transparent 70%);
+      filter:blur(28px); mix-blend-mode:multiply; animation:float 18s var(--d,0s) ease-in-out infinite alternate}
+    .bg span:nth-child(1){top:-10vmax; left:-10vmax; --d:-0s}
+    .bg span:nth-child(2){top:12vmax; right:-12vmax; --d:-3s}
+    .bg span:nth-child(3){bottom:-12vmax; left:25vmax; --d:-6s}
+    .bg span:nth-child(4){bottom:-8vmax; right:-8vmax; --d:-9s}
+    @keyframes float{0%{transform:translate(0,0)}50%{transform:translate(3vmax,-2vmax)}100%{transform:translate(-2vmax,2vmax)}}
+
+    /* shared glass */
+    .glass{background:var(--glass); backdrop-filter:blur(14px) saturate(1.2); -webkit-backdrop-filter:blur(14px) saturate(1.2);
+           border:1px solid var(--glass-b); box-shadow:var(--shadow)}
+
+    /* header with animated logo (no logout) */
+    .topbar{position:sticky; top:0; margin:20px; border-radius:999px; padding:12px 18px; display:flex; align-items:center; justify-content:space-between}
+    .logo-pill{
+      display:inline-flex; gap:10px; align-items:center; color:#fff; border-radius:999px; padding:12px 20px; font-weight:800;
+      background:linear-gradient(120deg,#0f7a4d, #0ea5a0, #0f7a4d);
+      background-size:200% 100%; animation:logoFlow 6s linear infinite;
+      box-shadow:0 14px 30px rgba(15,122,77,.25), 0 0 0 1px #0f7a4d22 inset;
+      font-size:20px;
+    }
+    @keyframes logoFlow{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+    .bolt{background:#ffffff22; width:28px; height:28px; border-radius:10px; display:grid; place-items:center; font-size:18px}
+    .nav-actions{display:flex; gap:12px}
+    .nav-btn{display:inline-flex; gap:8px; align-items:center; text-decoration:none; background:var(--ghost); border:1px solid #c6f6e5; color:#084c3c; padding:10px 16px; border-radius:999px; font-weight:800; font-size:16px}
+    .nav-btn:hover{filter:brightness(.96)}
+
+    .wrap{max-width:1040px; margin:0 auto; padding:8px 16px 60px}
+
+    /* hero */
+    .hero{padding:28px; border-radius:24px; margin-bottom:18px; position:relative; overflow:hidden}
+    .hero::after{
+      content:""; position:absolute; inset:-1px; border-radius:26px;
+      background:conic-gradient(from 180deg, #d7f7ec, #b7f0e7, #dffbea, #d7f7ec);
+      filter:blur(8px); opacity:.5; z-index:-1; animation:borderSpin 12s linear infinite;
+    }
+    @keyframes borderSpin{to{transform:rotate(1turn)}}
+    .title{font-size:46px; margin:6px 0 6px; font-weight:800; letter-spacing:.01em}
+    .sub{color:var(--muted); margin:0; font-size:1.12rem}
+
+    /* messages */
+    .messages{margin:0 0 12px 0}
+    .messages .msg{padding:14px 16px; border:1px solid #b6f2da; background:#ecfdf5; color:#064e3b; border-radius:12px; font-size:1.02rem}
+
+    /* ---------- FORM ---------- */
+    .card{padding:22px; border-radius:22px; overflow:hidden; position:relative}
+    .ct-form{display:grid; grid-template-columns:1fr 1fr; gap:28px}
+    .field{display:flex; flex-direction:column; gap:12px}
+    .label{font-weight:900; font-size:1.1rem}
+
+    .pill-field{
+      display:flex; align-items:center; gap:12px;
+      padding:18px; border-radius:18px;
+      border:1.6px solid var(--field); background:#fff;
+      box-shadow:0 1px 0 rgba(0,0,0,.02), 0 10px 30px rgba(15,122,77,.06);
+      transition:border-color .15s, box-shadow .15s;
+    }
+    .pill-field:focus-within{border-color:#86e0c8; box-shadow:0 0 0 6px #a7f3d066, 0 10px 30px rgba(15,122,77,.10)}
+    .pill-badge{
+      width:46px;height:46px;border-radius:14px;display:grid;place-items:center;
+      background:linear-gradient(135deg,#ecfdf5,#d1fae5); border:1px solid #b8f3db; color:#0f7a4d;
+      box-shadow:0 6px 18px rgba(16,122,77,.10); font-size:20px
+    }
+    .pill-input{flex:1;border:0;background:transparent;outline:0;font:inherit;color:var(--ink); font-size:1.06rem}
+    .pill-textarea{
+      width:100%;border:0;background:transparent;outline:0;font:inherit;color:var(--ink);
+      min-height:220px; resize:vertical; font-size:1.06rem
+    }
+
+    /* centered rows */
+    .centerline{grid-column:1/-1; display:grid; place-items:center}
+    .centerwrap{width:100%; max-width:800px}
+
+    .actions{grid-column:1/-1; display:flex; justify-content:center; align-items:center; gap:14px; margin-top:6px}
+    .btn{border:0; background:linear-gradient(90deg,var(--brand2),var(--brand)); color:#fff; padding:16px 28px; border-radius:16px; font-weight:900; cursor:pointer; box-shadow:0 10px 24px rgba(15,122,77,.22); transform:translateY(0); transition:transform .06s cubic-bezier(.2,.8,.2,1); font-size:1.02rem}
+    .btn:active{transform:translateY(2px)}
+    .hint{color:var(--muted); font-size:1rem}
+
+    /* ---------- ACTION TILES (dynamic flow like chips) ---------- */
+    .tiles{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-top:22px}
+    @media (max-width:980px){ .ct-form{grid-template-columns:1fr} .centerwrap{max-width:100%} .tiles{grid-template-columns:1fr 1fr} }
+    .tile{
+      position:relative; overflow:hidden;
+      display:flex; flex-direction:column; align-items:center; gap:8px;
+      padding:22px 16px; border-radius:18px; text-decoration:none; color:#063f34;
+      background:#ffffffeb; border:1px solid #d8efe6; box-shadow:0 10px 26px rgba(15,122,77,.06);
+      transition:transform .15s ease, box-shadow .15s ease, border-color .15s;
+      isolation:isolate;
+    }
+    .tile .emoji{font-size:30px}
+    .tile strong{font-size:1.08rem}
+    .tile small{color:#4a6b5f; letter-spacing:.10em; font-size:.9rem}
+    .tile:hover{transform:translateY(-3px); box-shadow:0 14px 34px rgba(15,122,77,.10)}
+    .tile:active{transform:translateY(0)}
+
+    /* flowing gradient border like chips */
+    .tile::before{
+      content:""; position:absolute; inset:-1px; border-radius:20px; z-index:-1;
+      background:conic-gradient(from 0turn, var(--tile-a) 0%, var(--tile-b) 25%, transparent 62%);
+      filter:blur(8px); opacity:.60; animation:borderFlow 7s linear infinite;
+    }
+    @keyframes borderFlow{to{transform:rotate(1turn)}}
+
+    .g-schedule{ --tile-a: color-mix(in srgb, var(--accent-schedule) 40%, transparent);
+                 --tile-b: color-mix(in srgb, var(--accent-schedule) 0%, transparent);
+                 background:linear-gradient(0deg,#ffffff, color-mix(in srgb, var(--accent-schedule) 8%, #fff)); }
+    .g-recycle { --tile-a: color-mix(in srgb, var(--accent-recycle) 40%, transparent);
+                 --tile-b: color-mix(in srgb, var(--accent-recycle) 0%, transparent);
+                 background:linear-gradient(0deg,#ffffff, color-mix(in srgb, var(--accent-recycle) 8%, #fff)); }
+    .g-track   { --tile-a: color-mix(in srgb, var(--accent-track) 40%, transparent);
+                 --tile-b: color-mix(in srgb, var(--accent-track) 0%, transparent);
+                 background:linear-gradient(0deg,#ffffff, color-mix(in srgb, var(--accent-track) 8%, #fff)); }
+    .g-complaint{--tile-a: color-mix(in srgb, var(--accent-complaint) 40%, transparent);
+                 --tile-b: color-mix(in srgb, var(--accent-complaint) 0%, transparent);
+                 background:linear-gradient(0deg,#ffffff, color-mix(in srgb, var(--accent-complaint) 8%, #fff)); }
+
+    .tile .shine{position:absolute; inset:auto 12px 12px 12px; height:44%; border-radius:16px; filter:blur(6px); opacity:.85}
+    .g-schedule .shine{background:radial-gradient(120px 90px at 50% 120%, color-mix(in srgb, var(--accent-schedule) 38%, transparent), transparent 70%)}
+    .g-recycle  .shine{background:radial-gradient(120px 90px at 50% 120%, color-mix(in srgb, var(--accent-recycle) 38%, transparent), transparent 70%)}
+    .g-track    .shine{background:radial-gradient(120px 90px at 50% 120%, color-mix(in srgb, var(--accent-track) 38%, transparent), transparent 70%)}
+    .g-complaint .shine{background:radial-gradient(120px 90px at 50% 120%, color-mix(in srgb, var(--accent-complaint) 38%, transparent), transparent 70%)}
+
+    .tile .ripple{position:absolute; border-radius:999px; transform:translate(-50%,-50%); pointer-events:none; opacity:.35; animation:ripple .7s ease-out forwards}
+    @keyframes ripple{0%{width:0;height:0;opacity:.35} 100%{width:500px;height:500px;opacity:0}}
+
+    /* ---------- FAQ (previous simple style) ---------- */
+    .faq{margin-top:22px; padding:18px; border-radius:22px}
+    .faq h3{margin:0 0 12px; font-weight:800; letter-spacing:.02em; font-size:1.3rem}
+    details{background:#ffffffed; border:1px solid #d8efe6; border-radius:14px; padding:14px 16px; margin:10px 0; box-shadow:0 6px 18px rgba(0,0,0,.04)}
+    details[open]{background:#f3fffa}
+    summary{cursor:pointer; font-weight:700; color:#064e3b; font-size:1.02rem}
+
+    /* ---------- Other contact options (dynamic flow) ---------- */
+    .other{margin-top:22px; display:grid; grid-template-columns:repeat(3,1fr); gap:12px}
+    @media (max-width:980px){ .other{grid-template-columns:1fr} }
+
+    .chip{
+      position:relative; display:flex; align-items:center; gap:14px;
+      padding:18px 20px; border-radius:16px; text-decoration:none; color:#054e3b;
+      background:#ffffffea; border:1px solid #d8efe6; font-size:1.04rem;
+      box-shadow:0 10px 24px rgba(15,122,77,.06); transition:transform .15s, box-shadow .15s, border-color .15s;
+      overflow:hidden; isolation:isolate;
+    }
+    .chip:hover{transform:translateY(-3px); box-shadow:0 16px 34px rgba(15,122,77,.10)}
+    .chip:active{transform:translateY(0)}
+
+    /* flowing gradient border + sweep */
+    .chip::before{
+      content:""; position:absolute; inset:-1px; border-radius:18px; z-index:-1;
+      background:conic-gradient(from 0turn, var(--chip-a) 0%, var(--chip-b) 25%, transparent 62%);
+      filter:blur(8px); opacity:.6; animation:borderFlow 7s linear infinite;
+    }
+
+    .chip .shine{
+      position:absolute; inset:0; border-radius:16px; pointer-events:none; opacity:.0;
+      background:linear-gradient(120deg,transparent 40%, #fff8 50%, transparent 60%);
+      transform:translateX(-120%); transition:opacity .3s;
+    }
+    .chip:hover .shine{opacity:.5; animation:sweep 1s ease-out forwards}
+    @keyframes sweep{to{transform:translateX(120%)}}
+
+    .chip .ico{
+      width:40px; height:40px; border-radius:12px; display:grid; place-items:center;
+      background:#ecfdf5; border:1px solid #b8f3db; font-size:20px; box-shadow:0 6px 18px rgba(16,122,77,.10);
+      animation:pulse 2.2s ease-in-out infinite;
+    }
+    @keyframes pulse{0%,100%{transform:scale(1)} 50%{transform:scale(1.06)}}
+
+    /* per-chip accents */
+    .chip.email { --chip-a: color-mix(in srgb, var(--accent-email) 40%, transparent);
+                  --chip-b: color-mix(in srgb, var(--accent-email) 0%, transparent); }
+    .chip.call  { --chip-a: color-mix(in srgb, var(--accent-call) 40%, transparent);
+                  --chip-b: color-mix(in srgb, var(--accent-call) 0%, transparent); }
+    .chip.wa    { --chip-a: color-mix(in srgb, var(--accent-wa) 40%, transparent);
+                  --chip-b: color-mix(in srgb, var(--accent-wa) 0%, transparent); }
+
+    .chip small{color:#426056}
+    .chip strong{font-weight:800}
+  </style>
 </head>
 <body>
-<h1>Contact Us</h1> <br>
-<a href="{% url 'home' %}">  Home</a>
+  <div class="bg"><span></span><span></span><span></span><span></span></div>
+
+  <header class="topbar glass">
+    <div class="logo-pill"><div class="bolt">⚡</div><span>CleanTrack+</span></div>
+    <nav class="nav-actions">
+      <a class="nav-btn" href="{% url 'home' %}"> Home</a>
+    </nav>
+  </header>
+
+  <div class="wrap">
+    <section class="hero glass">
+      <h1 class="title">Contact Us</h1>
+      <p class="sub">Have a question or need help? Send us a message and our team will get back to you.</p>
+    </section>
+
+    {% if messages %}
+      <div class="messages">
+        {% for m in messages %}
+          <div class="msg">{{ m }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <!-- FORM -->
+    <section class="card glass">
+      <!-- IMPORTANT: post to the correct view -->
+      <form class="ct-form" method="post" action="{% url 'users:contact' %}" novalidate>
+        {% csrf_token %}
+        <input type="text" name="hp" autocomplete="off" style="position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden" tabindex="-1" aria-hidden="true">
+
+        <!-- Row 1 -->
+        <div class="field">
+          <span class="label">Your Name</span>
+          <div class="pill-field">
+            <div class="pill-badge">👤</div>
+            <input id="id_name" class="pill-input" type="text" name="name" placeholder="Full name" value="{{ data.name|default_if_none:'' }}" required>
+          </div>
+          {% if errors.name %}<div class="err" style="color:#b42318">{{ errors.name }}</div>{% endif %}
+        </div>
+
+        <div class="field">
+          <span class="label">Email</span>
+          <div class="pill-field">
+            <div class="pill-badge">✉️</div>
+            <input id="id_email" class="pill-input" type="email" name="email" placeholder="you@example.com" value="{{ data.email|default_if_none:'' }}" required>
+          </div>
+          {% if errors.email %}<div class="err" style="color:#b42318">{{ errors.email }}</div>{% endif %}
+        </div>
+
+        <!-- Row 2: Subject centered -->
+        <div class="centerline">
+          <div class="centerwrap field">
+            <span class="label">Subject (optional)</span>
+            <div class="pill-field">
+              <div class="pill-badge">🧾</div>
+              <input id="id_subject" class="pill-input" type="text" name="subject" placeholder="What is this about?" value="{{ data.subject|default_if_none:'' }}">
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 3: Message centered -->
+        <div class="centerline">
+          <div class="centerwrap field">
+            <span class="label">Message</span>
+            <div class="pill-field">
+              <div class="pill-badge">💬</div>
+              <textarea id="id_message" class="pill-textarea" name="message" placeholder="Write your message…" rows="8" maxlength="2000" required>{{ data.message|default_if_none:'' }}</textarea>
+            </div>
+            <div style="display:flex;justify-content:space-between;color:#5b6876;font-size:1rem;margin-top:6px">
+              <span>Be specific so we can help faster.</span>
+              <span id="counter">0 / 2000</span>
+            </div>
+            {% if errors.message %}<div class="err" style="color:#b42318">{{ errors.message }}</div>{% endif %}
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="actions">
+          <button class="btn" type="submit">Send Message</button>
+          <span class="hint">We usually reply within 1–2 business days.</span>
+        </div>
+      </form>
+
+      <!-- 4 dynamic tiles (now same flowing border style as chips) -->
+      <div class="tiles" id="tiles">
+        <a class="tile g-schedule" href="{% url 'users:auth_gate' 'schedule' %}">
+          <div class="emoji">📅</div>
+          <strong>Schedule</strong>
+          <small>WASTE PICKUPS</small>
+          <div class="shine"></div>
+        </a>
+        <a class="tile g-recycle" href="{% url 'users:auth_gate' 'recycling' %}">
+          <div class="emoji">♻️</div>
+          <strong>Recycle</strong>
+          <small>GUIDE & TIPS</small>
+          <div class="shine"></div>
+        </a>
+        <a class="tile g-track" href="{% url 'users:auth_gate' 'track' %}">
+          <div class="emoji">📍</div>
+          <strong>Track</strong>
+          <small>DRIVER ETA</small>
+          <div class="shine"></div>
+        </a>
+        <a class="tile g-complaint" href="{% url 'users:auth_gate' 'complaint' %}">
+          <div class="emoji">📝</div>
+          <strong>Complaint</strong>
+          <small>REPORT ISSUE</small>
+          <div class="shine"></div>
+        </a>
+      </div>
+    </section>
+
+    <!-- FAQ (previous style) -->
+    <section class="faq glass">
+      <h3>Frequently asked questions</h3>
+      <details><summary>How soon will you reply?</summary><p>Most messages get a response within 1–2 business days. Urgent route issues are prioritized.</p></details>
+      <details><summary>Can I reschedule or cancel a pickup?</summary><p>Yes. Go to <strong>Schedule</strong> → select your booking → <em>Edit</em> or <em>Cancel</em>. Changes are allowed up to 2 hours before your window.</p></details>
+      <details><summary>What qualifies as bulky waste?</summary><p>Sofas, mattresses, wardrobes, tables, appliances. Choose <strong>Bulky Waste</strong> at booking and attach a clear photo so we dispatch the right vehicle.</p></details>
+      <details><summary>Do you take e-waste or batteries?</summary><p>Yes, but pack separately and label clearly. For items with hazardous components, follow the on-screen instructions when scheduling.</p></details>
+      <details><summary>Do I need to be at home during pickup?</summary><p>Not for regular bins if they are accessible. For bulky items, ensure access (gate codes, concierge notes) and keep pathways clear.</p></details>
+      <details><summary>What is the pickup window?</summary><p>Drivers may arrive ±15 minutes around your chosen time due to batching and traffic. Live ETA updates are visible on <strong>Track</strong>.</p></details>
+      <details><summary>My pickup was missed—what should I do?</summary><p>Open <strong>Complaint</strong> and choose “Missed pickup.” We’ll prioritize a make-good visit and credit your account where applicable.</p></details>
+      <details><summary>How do Eco Points work?</summary><p>You earn points for verified recycling, on-time set-outs, and photo confirmations. Redeem discounts from the Rewards area in your dashboard.</p></details>
+      <details><summary>Is there a fee for stairs or long carries?</summary><p>For bulky items, a handling fee may apply beyond 2 flights of stairs or 25 m carry distance. Estimates are shown before you confirm.</p></details>
+      <details><summary>Which containers are accepted for recycling?</summary><p>Paper/cardboard, clean plastics, metals, and glass. Please rinse containers and flatten boxes; keep plastic bags out of the recycling bin.</p></details>
+      <details><summary>How do I add special instructions?</summary><p>Use the <em>Additional Instruction</em> box while scheduling. You can edit these notes until 2 hours before the window.</p></details>
+      <details><summary>Can I donate usable items?</summary><p>Yes—select <strong>Donate</strong> from your dashboard for accepted items and partner drop-off schedules. Some pickups can be combined.</p></details>
+      <details><summary>What happens to photos I upload?</summary><p>They’re used only to plan routing, equipment, and proof of service. Photos are stored securely and follow our retention policy.</p></details>
+      <details><summary>I didn’t get the activation email.</summary><p>Check spam/junk, then use “Resend activation” on the login page. If still missing, contact us here and we’ll help verify manually.</p></details>
+      <details><summary>How is my data used?</summary><p>Only to provide and improve service. We never sell personal data. See our Privacy Policy for full details.</p></details>
+    </section>
+
+    <!-- LAST: only here -->
+    <section class="glass" style="padding:18px; border-radius:22px; margin-top:18px">
+      <h3 style="margin:0 0 10px; font-size:1.28rem">Other contact options</h3>
+      <div class="other" id="contactChips">
+        <!-- Email -->
+        <a class="chip email"
+           href="mailto:support@cleantrack.test?subject=Support%20request&body=Hi%20CleanTrack%2B%2C%0A%0A"
+           aria-label="Email CleanTrack Plus support">
+          <span class="ico">✉️</span>
+          <span><strong>Email</strong><br><small>support@cleantrack.test</small></span>
+          <span class="shine"></span>
+        </a>
+        <!-- Call (E.164) -->
+        <a class="chip call"
+           href="tel:+8801715766469"
+           aria-label="Call CleanTrack Plus support">
+          <span class="ico">📞</span>
+          <span><strong>Call</strong><br><small>+880 1715-766-469</small></span>
+          <span class="shine"></span>
+        </a>
+        <!-- WhatsApp (no +, no spaces, no leading zero) -->
+        <a class="chip wa"
+           href="https://wa.me/8801715766469?text=Hi%20CleanTrack%2B%20support"
+           target="_blank" rel="noopener"
+           aria-label="Chat on WhatsApp with CleanTrack Plus support">
+          <span class="ico">💬</span>
+          <span><strong>WhatsApp</strong><br><small>Chat with support</small></span>
+          <span class="shine"></span>
+        </a>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // background parallax
+    (function(){
+      const spans=document.querySelectorAll('.bg span'); if(!spans.length) return;
+      let w=innerWidth,h=innerHeight;
+      addEventListener('mousemove',e=>{
+        const x=(e.clientX/w-.5)*6, y=(e.clientY/h-.5)*6;
+        spans.forEach((s,i)=> s.style.transform=`translate(${x*(i+1)}vmin, ${y*(i+1)}vmin)`);
+      });
+      addEventListener('resize',()=>{w=innerWidth;h=innerHeight});
+    })();
+
+    // message character counter
+    (function(){
+      const ta=document.getElementById('id_message');
+      const c=document.getElementById('counter');
+      if(!ta||!c) return;
+      const update=()=>{ c.textContent=`${ta.value.length} / ${ta.maxLength||2000}`; };
+      ta.addEventListener('input',update); update();
+    })();
+
+    // quick client validation highlight
+    (function(){
+      const form=document.querySelector('.ct-form');
+      if(!form) return;
+      form.addEventListener('submit',(e)=>{
+        const req=['id_name','id_email','id_message'];
+        let ok=true;
+        req.forEach(id=>{
+          const el=document.getElementById(id);
+          if(!el.value.trim()){
+            const wrap=el.closest('.pill-field');
+            if(wrap){ wrap.style.boxShadow='0 0 0 6px #fecaca66'; }
+            ok=false;
+          }
+        });
+        if(!ok) e.preventDefault();
+      });
+    })();
+
+    // Ripple effect for 4 tiles
+    (function(){
+      const tiles=document.getElementById('tiles');
+      if(!tiles) return;
+      tiles.addEventListener('click',function(e){
+        const t=e.target.closest('.tile'); if(!t) return;
+        const rect=t.getBoundingClientRect();
+        const x=e.clientX-rect.left, y=e.clientY-rect.top;
+        const r=document.createElement('span');
+        r.className='ripple';
+        r.style.left=x+'px'; r.style.top=y+'px';
+        r.style.background='rgba(14,165,160,.35)'; /* teal tint */
+        t.appendChild(r);
+        setTimeout(()=>r.remove(),700);
+      });
+    })();
+
+    // Tiny ripple for bottom contact chips
+    (function(){
+      const wrap=document.getElementById('contactChips');
+      if(!wrap) return;
+      wrap.addEventListener('click',function(e){
+        const chip=e.target.closest('.chip'); if(!chip) return;
+        const rect=chip.getBoundingClientRect();
+        const x=e.clientX-rect.left, y=e.clientY-rect.top;
+        const r=document.createElement('span');
+        r.style.cssText="position:absolute;border-radius:999px;transform:translate(-50%,-50%);pointer-events:none;background:rgba(34,197,94,.25);opacity:.35;animation:ripple .7s ease-out forwards";
+        r.style.left=x+'px'; r.style.top=y+'px';
+        chip.appendChild(r);
+        setTimeout(()=>r.remove(),700);
+      });
+    })();
+  </script>
 </body>
 </html>

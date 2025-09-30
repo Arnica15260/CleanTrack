@@ -2,6 +2,8 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
 from .models import User
+from .models import PickupRequest
+from .models import ContactMessage
 
 class UserAdmin(BaseUserAdmin):
     list_display = ("username", "email", "role", "is_staff", "is_active")
@@ -23,3 +25,12 @@ class UserAdmin(BaseUserAdmin):
     )
 
 admin.site.register(User, UserAdmin)
+admin.site.register(PickupRequest)
+
+
+@admin.register(ContactMessage)
+class ContactMessageAdmin(admin.ModelAdmin):
+    list_display = ("name", "email", "subject", "created_at", "is_resolved")
+    list_filter = ("is_resolved", "created_at")
+    search_fields = ("name", "email", "subject", "message")
+    readonly_fields = ("name", "email", "subject", "message", "created_at")
