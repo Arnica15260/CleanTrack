@@ -20,6 +20,7 @@ urlpatterns = [
     path("track/", views.page_track, name="track"),
     path("complaint/", views.page_complaint, name="complaint"),
     path("contact/", contact_view, name="contact"),
+    path("profile/", views.profile_view, name="profile"),
     path("go/<str:target>/", views.auth_gate, name="auth_gate"),
 
     path(

@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "widget_tweaks",
 ]
 
 MIDDLEWARE = [
@@ -93,7 +94,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # i18n / tz
 # ------------------------------------------------------------------------------
 LANGUAGE_CODE = "en-us"
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Dhaka"
 USE_I18N = True
 USE_TZ = True
 

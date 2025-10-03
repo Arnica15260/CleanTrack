@@ -5,127 +5,399 @@
   <meta charset="utf-8" />
   <title>Regular Dashboard — CleanTrack+</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <style>
     :root{
-      --brand:#0f7a4d; --brand-2:#0ea5a0;
-      --glass:#ffffffc8; --glass-border:#ffffffa2;
-      --muted:#5b6876; --radius:20px;
-      --shadow:0 12px 30px rgba(0,0,0,.08);
+      --brand:#0f7a4d; --brand2:#0ea5a0;
+      --ink:#0f172a; --muted:#566471;
+      --glass:#ffffffcc; --glass-b:#ffffffa6;
+      --ghost:#eafff5; --shadow:0 14px 36px rgba(0,0,0,.09);
+      --ok:#16a34a; --warn:#f59e0b; --info:#0ea5a0; --bad:#e11d48;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;color:#0f172a}
-
-    /* ===== Animated background (no images) ===== */
-    .bg{position:fixed;inset:0;z-index:-2;
-        background:linear-gradient(180deg,#f4fff9 0%,#ecfff6 50%,#f9fffe 100%)}
-    .bg span{position:absolute;width:45vmax;height:45vmax;border-radius:50%;
-      background:radial-gradient(35% 35% at 30% 30%,#dcfff4,transparent 70%),
-                 radial-gradient(35% 35% at 70% 70%,#bff3e3,transparent 70%);
-      filter:blur(28px);mix-blend-mode:multiply;
-      animation:float 18s var(--delay,0s) ease-in-out infinite alternate}
-    .bg span:nth-child(1){top:-10vmax;left:-10vmax;--delay:-0s}
-    .bg span:nth-child(2){top:10vmax;right:-12vmax;--delay:-3s}
-    .bg span:nth-child(3){bottom:-12vmax;left:25vmax;--delay:-6s}
-    .bg span:nth-child(4){bottom:-6vmax;right:-8vmax;--delay:-9s}
-    @keyframes float{
-      0%{transform:translate(0,0)}
-      50%{transform:translate(3vmax,-2vmax)}
-      100%{transform:translate(-2vmax,2vmax)}
+    body{
+      margin:0; font-family:Manrope,system-ui,Segoe UI,Roboto,Arial;
+      color:var(--ink); line-height:1.55; background:#f8fffb; font-size:17.5px;
+      display:flex; flex-direction:column; min-height:100vh;
     }
 
-    /* ===== Glass look / layout ===== */
-    .glass{background:var(--glass);backdrop-filter:blur(12px) saturate(1.2);
-           -webkit-backdrop-filter:blur(12px) saturate(1.2);
-           border:1px solid var(--glass-border);box-shadow:var(--shadow)}
-    .topbar{position:sticky;top:0;margin:18px;border-radius:999px;padding:10px 16px;
-            display:flex;align-items:center;justify-content:space-between}
-    .brand{display:flex;align-items:center;gap:10px;font-weight:900}
-    .brand .logo{width:34px;height:34px;display:grid;place-items:center;background:#eafff5;border-radius:12px}
-    .home-btn{display:inline-flex;gap:8px;align-items:center;text-decoration:none;background:#eafff5;
-              border:1px solid #c6f6e5;color:#084c3c;padding:10px 14px;border-radius:999px;font-weight:700}
+    /* soft background */
+    .bg{position:fixed; inset:0; z-index:-2; background:linear-gradient(180deg,#f4fff9 0%,#ecfff6 50%,#f9fffe 100%)}
+    .bg span{position:absolute;width:46vmax;height:46vmax;border-radius:50%;
+      background:radial-gradient(35% 35% at 30% 30%,#dcfff4,transparent 70%),
+                 radial-gradient(35% 35% at 70% 70%,#bff3e3,transparent 70%);
+      filter:blur(28px); mix-blend-mode:multiply; animation:float 18s var(--d,0s) ease-in-out infinite alternate}
+    .bg span:nth-child(1){top:-10vmax; left:-10vmax}
+    .bg span:nth-child(2){top:12vmax; right:-12vmax; --d:-3s}
+    .bg span:nth-child(3){bottom:-12vmax; left:25vmax; --d:-6s}
+    .bg span:nth-child(4){bottom:-8vmax; right:-8vmax; --d:-9s}
+    @keyframes float{0%{transform:translate(0,0)}50%{transform:translate(3vmax,-2vmax)}100%{transform:translate(-2vmax,2vmax)}}
 
-    .layout{display:grid;grid-template-columns:240px 1fr;gap:18px;padding:12px 18px 24px}
-    @media (max-width:1050px){.layout{grid-template-columns:1fr}.sidebar{display:none}}
+    .glass{background:var(--glass); backdrop-filter:blur(14px) saturate(1.15);
+           -webkit-backdrop-filter:blur(14px) saturate(1.15);
+           border:1px solid var(--glass-b); box-shadow:var(--shadow)}
 
-    .sidebar{align-self:start;position:sticky;top:96px;padding:12px;border-radius:22px}
-    .nav-item{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;
-              text-decoration:none;color:#073b2e;font-weight:600}
-    .nav-item:hover{background:#eafff5}
-    .nav-item.active{background:var(--brand);color:#fff}
-    .ico{width:20px;height:20px;display:inline-grid;place-items:center}
-    .ico::before{content:attr(data-emoji)}         /* we’ll use emoji as inline “icons” */
+    /* header */
+    .topbar{position:sticky; top:0; z-index:60; margin:18px; border-radius:999px;
+            padding:10px 16px; display:flex; align-items:center; justify-content:space-between}
+    .brand{display:flex; align-items:center; gap:10px; color:#fff; padding:10px 16px; border-radius:999px; font-weight:900;
+           background:linear-gradient(120deg,var(--brand),var(--brand2),var(--brand)); background-size:200% 100%; animation:logoFlow 6s linear infinite}
+    @keyframes logoFlow{to{background-position:200% 50%}}
+    .bolt{width:26px; height:26px; border-radius:10px; background:#ffffff22; display:grid; place-items:center}
+    .home-btn{display:inline-flex; gap:8px; align-items:center; text-decoration:none; background:var(--ghost);
+              border:1px solid #c6f6e5; color:#084c3c; padding:10px 14px; border-radius:999px; font-weight:800}
 
-    .content{padding:6px}
-    .card{border-radius:18px;padding:20px}
+    /* TWO INDEPENDENT SCROLLING AREAS */
+    .layout{
+      display:grid; grid-template-columns:260px 1fr; gap:16px; padding:0 18px 28px;
+      flex:1; min-height:0; overflow:hidden;
+    }
+    @media (max-width:1100px){ .layout{grid-template-columns:1fr} .sidebar{display:none} }
+
+    .sidebar{align-self:stretch; border-radius:22px; padding:10px;
+             overflow:auto; -webkit-overflow-scrolling:touch}
+    .logo-row{display:flex; align-items:center; gap:10px; font-weight:900; margin:8px 8px 12px; color:#0a4b3a}
+    .profile-card{display:flex; gap:10px; align-items:center; padding:12px; margin:6px; border-radius:16px; background:#ffffff; border:1px solid #d7efe6}
+    .avatar{width:36px;height:36px;border-radius:50%;background:#eafff5;display:grid;place-items:center;font-weight:900}
+    .nav{display:flex; flex-direction:column; gap:6px; margin:6px}
+    .nav a{display:flex; gap:12px; align-items:center; padding:12px; border-radius:12px; color:#063c31; text-decoration:none; font-weight:700}
+    .nav a:hover{background:#effdf7}
+    .nav a.active{background:linear-gradient(120deg,var(--brand),var(--brand2)); color:#fff}
+    .ico{width:22px;height:22px;display:grid;place-items:center}
+
+    .main{display:grid; gap:16px; overflow:auto; -webkit-overflow-scrolling:touch; padding-right:2px}
+    .grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+    @media (max-width:900px){ .grid2{grid-template-columns:1fr} }
+
+    .card{border-radius:20px; padding:18px; position:relative; overflow:hidden; background:#fff}
+    .card h2{margin:0 0 10px; font-size:22px}
     .muted{color:var(--muted)}
+    .list{display:grid; gap:10px}
+
+    /* row + colored states */
+    .row{display:grid; grid-template-columns:1fr auto auto; gap:10px; align-items:center; padding:12px; border-radius:14px;
+         background:#fff; border:1px solid #d7efe6; position:relative; transition:box-shadow .2s ease,border-color .2s ease,background .2s ease;
+         cursor:pointer}
+    .row.ok{border-color:#b7ebc9;background:#f6fffa;box-shadow:0 0 0 1px #b7ebc955 inset,0 10px 24px rgba(22,163,74,.07)}
+    .row.warn{border-color:#fbd4a8;background:#fff9f3;box-shadow:0 0 0 1px #fbd4a855 inset,0 10px 24px rgba(245,158,11,.08)}
+    .row.info{border-color:#b9efe3;background:#f3fffc;box-shadow:0 0 0 1px #b9efe355 inset,0 10px 24px rgba(14,165,160,.08)}
+    .row.bad{border-color:#fec7d2;background:#fff6f8;box-shadow:0 0 0 1px #fec7d255 inset,0 10px 24px rgba(225,29,72,.08)}
+
+    .title-sm{font-weight:800}
+    .sub-sm{font-size:13px; color:var(--muted)}
+    .badge{display:inline-flex; gap:8px; align-items:center; background:#f3fff9; border:1px solid #cdeee2; color:#0c4b3a; padding:6px 10px; border-radius:999px; font-weight:800; font-size:12px}
+
+    /* expand/collapse panel */
+    .reveal{max-height:0; overflow:hidden; opacity:.0; transition:max-height .25s ease,opacity .25s ease}
+    .reveal.open{max-height:360px; opacity:1}
+    .reveal .kv{display:grid; grid-template-columns:110px 1fr; gap:8px; margin:10px 6px 2px}
+    .reveal .kv .k{font-weight:900; color:#0b4a3a}
+
+    /* points ring */
+    .ring{--p:0; width:100px; height:100px; border-radius:50%;
+          background:conic-gradient(#84cc16 calc(var(--p)*1%), #e6f5ee 0); display:grid; place-items:center;}
+    .ring .inner{width:74px; height:74px; border-radius:50%; background:#fff; display:grid; place-items:center; box-shadow:inset 0 0 0 1px #e6efe9}
+
+    /* profile-style reveal animation for the cards */
+    .reveal-card{opacity:0; transform:translateY(14px) scale(.985)}
+    .reveal-card.in{opacity:1; transform:none; transition:opacity .5s ease, transform .5s ease; transition-delay:var(--d,0ms)}
   </style>
 </head>
 <body>
-  <!-- animated background -->
-  <div class="bg">
-    <span></span><span></span><span></span><span></span>
-  </div>
+  <div class="bg"><span></span><span></span><span></span><span></span></div>
 
-  <!-- top bar -->
   <header class="topbar glass">
-    <div class="brand"><div class="logo">⚡</div><span>CleanTrack+</span></div>
-    <a class="home-btn" href="{% url 'users:dashboard' %}">🏠 Home</a>
+    <div class="brand"><div class="bolt">⚡</div>CleanTrack+</div>
+    {% url 'home' as home_url %}
+    <a class="home-btn" href="{{ home_url|default:'/' }}" rel="noopener">🏠 Home</a>
   </header>
 
-  <!-- layout -->
   <div class="layout">
-    <!-- sidebar -->
+    <!-- SIDEBAR (independent scroll) -->
     <aside class="sidebar glass">
-      {% with p=request.path %}
-        <a class="nav-item {% if '/users/dashboard/' in p %}active{% endif %}" href="{% url 'users:dashboard' %}">
-          <span class="ico" data-emoji="📊"></span> Dashboard
-        </a>
-        <a class="nav-item {% if '/users/schedule/' in p %}active{% endif %}" href="{% url 'users:schedule' %}">
-          <span class="ico" data-emoji="🗓️"></span> Schedule Pickup
-        </a>
-        <a class="nav-item {% if '/users/recycling/' in p %}active{% endif %}" href="{% url 'users:recycling' %}">
-          <span class="ico" data-emoji="♻️"></span> Recycling
-        </a>
-        <a class="nav-item {% if '/users/reuse/' in p %}active{% endif %}" href="{% url 'users:reuse' %}">
-          <span class="ico" data-emoji="🎁"></span> Reuse
-        </a>
-        <a class="nav-item {% if '/users/track/' in p %}active{% endif %}" href="{% url 'users:track' %}">
-          <span class="ico" data-emoji="📍"></span> Track
-        </a>
-        <a class="nav-item {% if '/users/complaint/' in p %}active{% endif %}" href="{% url 'users:complaint' %}">
-          <span class="ico" data-emoji="📝"></span> Complaint
-        </a>
-      {% endwith %}
+      <div class="logo-row">🌿 <span>Menu</span></div>
+
+      <div class="profile-card">
+        <div class="avatar">{{ request.user.username|slice:":1"|upper }}</div>
+        <div>
+          <div style="font-weight:800">{{ request.user.username }}</div>
+          <div class="sub-sm">{{ request.user.email }}</div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <a class="active" href="{% url 'users:dashboard' %}"><span class="ico">🏠</span>Dashboard</a>
+        <a href="{% url 'users:profile' %}"><span class="ico">🧑</span>Profile</a>
+        <a href="{% url 'users:schedule' %}"><span class="ico">🗓️</span>Schedule</a>
+        <a href="{% url 'users:recycling' %}"><span class="ico">♻️</span>Recycling</a>
+        <a href="{% url 'users:reuse' %}"><span class="ico">🎁</span>Donate / Reuse</a>
+        <a href="{% url 'users:track' %}"><span class="ico">📍</span>Track</a>
+        <a href="{% url 'users:complaint' %}"><span class="ico">📝</span>Complaints</a>
+        <a href="{% url 'users:logout' %}"><span class="ico">↩︎</span>Logout</a>
+      </nav>
     </aside>
 
-    <!-- main content (you can replace this with any page content) -->
-    <main class="content">
-      <div class="card glass">
-        <h1 style="margin:0 0 6px">Regular Dashboard</h1>
-        <p class="muted" style="margin:0 0 14px">
-          Welcome, <strong>{{ request.user.username }}</strong>
-          (role: {{ request.user.role|default:"regular" }})
-        </p>
+    <!-- MAIN (independent scroll) -->
+    <main class="main">
 
-        <!-- Put your page-specific content here -->
-        <p>Select a section from the left sidebar. The middle cards/info are intentionally omitted as you asked.</p>
+      <!-- ROW 1 -->
+      <section class="grid2">
+        <!-- Pickups -->
+        <article class="card glass reveal-card" data-anim>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <h2 style="margin:0">Pickup History</h2>
+            <a class="badge" href="{% url 'users:schedule' %}">📅 Book new</a>
+          </div>
+
+          {% if pickups %}
+            <div class="list">
+              {% for p in pickups %}
+                <div class="row {{ p.row_class|default:'info' }} js-toggle">
+                  <div>
+                    <div class="title-sm">🗑️ {{ p.address|default:"Address not set" }}</div>
+                    <div class="sub-sm">{% if p.when_dt %}{{ p.when_dt|date:"D, M j, g:i a" }}{% else %}—{% endif %}</div>
+                  </div>
+                  <div class="badge">🚚 {{ p.vehicle|default:"Van" }}</div>
+                  <div class="badge">{{ p.status|default:"scheduled" }}</div>
+                </div>
+                <div class="reveal">
+                  <div class="kv"><div class="k">Waste type:</div><div>{{ p.waste_type|default:"—" }}</div></div>
+                  <div class="kv"><div class="k">Notes:</div><div>{{ p.notes|default:"—" }}</div></div>
+                  {% if p.photo %}<div class="kv"><div class="k">Photo:</div><div><a href="{{ p.photo.url }}" target="_blank" rel="noopener">Open</a></div></div>{% endif %}
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="muted">No pickups yet — schedule your first one.</div>
+          {% endif %}
+        </article>
+
+        <!-- Points -->
+        <article class="card glass reveal-card" data-anim id="pointsCard">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <h2 style="margin:0">Points</h2>
+            <span class="badge">Eco Points</span>
+          </div>
+
+          <div style="display:flex; gap:16px; align-items:center; margin:6px 0 12px">
+            <div class="ring" id="ring" style="--p:0">
+              <div class="inner">
+                <div style="text-align:center">
+                  <div style="font-size:22px;font-weight:900">{{ rewards_points|default_if_none:"0" }}</div>
+                  <div class="sub-sm">Total</div>
+                </div>
+              </div>
+            </div>
+            <div class="muted">Next reward at <strong>400</strong> pts.</div>
+          </div>
+
+          <div class="list">
+            {% if rewards_history %}
+              {% for r in rewards_history %}
+                <div class="row ok js-toggle">
+                  <div>
+                    <div class="title-sm points-title">🏅
+                      {% if r.title_text %}
+                        {{ r.title_text }}
+                      {% elif r.source_text %}
+                        {{ r.source_text }}
+                      {% else %}
+                        Activity
+                      {% endif %}
+                    </div>
+                    <div class="sub-sm">{% if r.created_dhaka %}{{ r.created_dhaka|date:"M j, g:i a" }}{% else %}—{% endif %}</div>
+                  </div>
+                  <div></div>
+                  <div class="badge">+{{ r.points|default:"0" }}</div>
+                </div>
+                <div class="reveal">
+                  <div class="kv"><div class="k">Source:</div><div>{{ r.source_text|default:"—" }}</div></div>
+                  <div class="kv"><div class="k">Points:</div><div>{{ r.points|default:"0" }}</div></div>
+                  <div class="kv"><div class="k">Note:</div><div>{{ r.note_text|default:"—" }}</div></div>
+                </div>
+              {% endfor %}
+            {% else %}
+              <div class="muted">No points yet. Log recycling or on-time set-outs to earn points.</div>
+            {% endif %}
+          </div>
+        </article>
+      </section>
+
+      <!-- ROW 2 -->
+      <section class="grid2">
+        <!-- Reuse / Donation -->
+        <article class="card glass reveal-card" data-anim>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <h2 style="margin:0">Reuse / Donation</h2>
+            <a class="badge" href="{% url 'users:reuse' %}">🎁 Add donation</a>
+          </div>
+
+          <div class="list">
+            {% if reuse_donations %}
+              {% for d in reuse_donations %}
+                <div class="row {{ d.row_class|default:'info' }} js-toggle">
+                  <div>
+                    <div class="title-sm">🎁 {{ d.item_name|default:d.description|default:"Donation" }}</div>
+                    <div class="sub-sm">{% if d.when_dt %}{{ d.when_dt|date:"M j, g:i a" }}{% else %}—{% endif %}</div>
+                  </div>
+                  <div class="badge">📦 {{ d.quantity|default:"1" }}</div>
+                  <div class="badge">{{ d.status|default:"pending" }}</div>
+                </div>
+                <div class="reveal">
+                  <div class="kv"><div class="k">Category:</div><div>{{ d.category|default:"—" }}</div></div>
+                  <div class="kv"><div class="k">Partner:</div><div>{{ d.partner|default:"—" }}</div></div>
+                  <div class="kv"><div class="k">Note:</div><div>{{ d.note|default:"—" }}</div></div>
+                  {% if d.photo %}<div class="kv"><div class="k">Photo:</div><div><a href="{{ d.photo.url }}" target="_blank" rel="noopener">Open</a></div></div>{% endif %}
+                </div>
+              {% endfor %}
+            {% else %}
+              <div class="muted">No donations recorded yet.</div>
+            {% endif %}
+          </div>
+        </article>
+
+        <!-- Recycling -->
+        <article class="card glass reveal-card" data-anim>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <h2 style="margin:0">Recycling</h2>
+            <a class="badge" href="{% url 'users:recycling' %}">♻️ Log recycling</a>
+          </div>
+
+          <div class="list">
+            {% if recycling_events %}
+              {% for e in recycling_events %}
+                <div class="row {{ e.status|default:'info'|lower }} js-toggle">
+                  <div>
+                    <div class="title-sm">♻️ {{ e.material|default:"Mixed recyclables" }}</div>
+                    <div class="sub-sm">{% if e.created %}{{ e.created|date:"M j, g:i a" }}{% else %}—{% endif %}</div>
+                  </div>
+                  <div class="badge">⚖️ {{ e.weight_kg|default:"0" }} kg</div>
+                  <div class="badge">{{ e.status|default:"logged" }}</div>
+                </div>
+                <div class="reveal">
+                  <div class="kv"><div class="k">Note:</div><div>{{ e.note|default:"—" }}</div></div>
+                  {% if e.photo %}<div class="kv"><div class="k">Photo:</div><div><a href="{{ e.photo.url }}" target="_blank" rel="noopener">Open</a></div></div>{% endif %}
+                </div>
+              {% endfor %}
+            {% else %}
+              <div class="muted">No recycling entries yet.</div>
+            {% endif %}
+          </div>
+        </article>
+      </section>
+
+      <!-- ROW 3 -->
+      <section class="grid2">
+        <!-- Complaint History -->
+        <article class="card glass reveal-card" data-anim>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <h2 style="margin:0">Complaint History</h2>
+            <a class="badge" href="{% url 'users:complaint' %}">📝 File complaint</a>
+          </div>
+
+          <div class="list">
+            {% if complaints %}
+              {% for c in complaints %}
+                <div class="row {{ c.row_class|default:'warn' }} js-toggle">
+                  <div>
+                    <div class="title-sm">📝 {{ c.category|default:"General" }}</div>
+                    <div class="sub-sm">{% if c.when_dt %}{{ c.when_dt|date:"M j, g:i a" }}{% else %}—{% endif %}</div>
+                  </div>
+                  <div></div>
+                  <div class="badge">{{ c.status|default:"open" }}</div>
+                </div>
+                <div class="reveal">
+                  <div class="kv"><div class="k">Address:</div><div>{{ c.address|default:"—" }}</div></div>
+                  <div class="kv"><div class="k">Details:</div><div>{{ c.description|default:c.details|default:c.note|default:"—" }}</div></div>
+                  {% if c.photo %}<div class="kv"><div class="k">Photo:</div><div><a href="{{ c.photo.url }}" target="_blank" rel="noopener">Open</a></div></div>{% endif %}
+                </div>
+              {% endfor %}
+            {% else %}
+              <div class="muted">No complaints on file.</div>
+            {% endif %}
+          </div>
+        </article>
+
+        <!-- Recent Activity -->
+        <article class="card glass reveal-card" data-anim>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <h2 style="margin:0">Recent Activity</h2>
+            <span class="badge">Latest 10</span>
+          </div>
+
+          <div class="list">
+            {% if recent_activity %}
+              {% for a in recent_activity %}
+                <div class="row {{ a.row|default:'info' }}">
+                  <div>
+                    <div class="title-sm">{{ a.title|default:"Activity" }}</div>
+                    <div class="sub-sm">{% if a.when %}{{ a.when|date:"M j, g:i a" }}{% else %}—{% endif %}</div>
+                  </div>
+                  <div></div>
+                  <div class="badge">{{ a.kind|default:"event" }}</div>
+                </div>
+              {% endfor %}
+            {% else %}
+              <div class="muted">No recent activity yet.</div>
+            {% endif %}
+          </div>
+        </article>
+      </section>
+
+      <div style="display:flex;justify-content:space-between;color:#0a4b3a;font-size:.95rem;margin:6px 2px">
+        <a href="{% url 'users:contact' %}">Contact</a><div>Privacy</div>
       </div>
     </main>
   </div>
 
-  <!-- tiny parallax for background (inline, no external JS) -->
   <script>
+    // fill the ring based on points
     (function(){
-      const spans=document.querySelectorAll('.bg span');
-      if(!spans.length) return;
+      const ring=document.getElementById('ring'); if(!ring) return;
+      const pts = Number('{{ rewards_points|default_if_none:"0" }}') || 0;
+      ring.style.setProperty('--p', Math.max(0, Math.min(100, Math.round((pts/400)*100))));
+    })();
+
+    // toggle the details for ONLY the clicked row
+    document.addEventListener('click', (e)=>{
+      const row = e.target.closest('.row.js-toggle'); if(!row) return;
+      const panel = row.nextElementSibling;
+      if(panel && panel.classList.contains('reveal')) panel.classList.toggle('open');
+    });
+
+    // parallax background
+    (function(){
+      const spans=document.querySelectorAll('.bg span'); if(!spans.length) return;
       let w=innerWidth,h=innerHeight;
-      addEventListener('mousemove',e=>{
-        const x=(e.clientX/w-.5)*6, y=(e.clientY/h-.5)*6;
-        spans.forEach((s,i)=> s.style.transform=`translate(${x*(i+1)}vmin, ${y*(i+1)}vmin)`);
-      });
+      addEventListener('mousemove',e=>{const x=(e.clientX/w-.5)*6,y=(e.clientY/h-.5)*6;spans.forEach((s,i)=>s.style.transform=`translate(${x*(i+1)}vmin, ${y*(i+1)}vmin)`);});
       addEventListener('resize',()=>{w=innerWidth;h=innerHeight});
+    })();
+
+    // profile-style staggered reveal for the dashboard boxes
+    (function(){
+      const cards=[...document.querySelectorAll('[data-anim]')];
+      if(!cards.length) return;
+      cards.forEach((el,i)=> el.style.setProperty('--d', `${i*90}ms`));
+      const io=new IntersectionObserver((entries)=>{
+        entries.forEach(e=>{
+          if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+        });
+      },{threshold:.08});
+      cards.forEach(el=>io.observe(el));
+    })();
+
+    // FINAL FIX: de-duplicate repeated first word in Points titles (e.g., "Donated Donated Fridge")
+    (function(){
+      const scope=document.getElementById('pointsCard'); if(!scope) return;
+      scope.querySelectorAll('.points-title').forEach(el=>{
+        const original = el.textContent.trim();
+        // collapse immediate duplicate first word, case-insensitive
+        const fixed = original.replace(/\b(\w+)\s+\1\b/i, '$1');
+        if (fixed !== original) el.textContent = fixed;
+      });
     })();
   </script>
 </body>
