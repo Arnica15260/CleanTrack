@@ -112,7 +112,7 @@
   <header class="topbar glass">
     <div class="brand"><div class="bolt">⚡</div>CleanTrack+</div>
     {% url 'home' as home_url %}
-    <a class="home-btn" href="{{ home_url|default:'/' }}" rel="noopener">🏠 Home</a>
+    <a class="home-btn" href="{{ home_url|default:'/' }}" rel="noopener"> Home</a>
   </header>
 
   <div class="layout">
@@ -129,7 +129,7 @@
       </div>
 
       <nav class="nav">
-        <a class="active" href="{% url 'users:dashboard' %}"><span class="ico">🏠</span>Dashboard</a>
+        <a class="active" href="{% url 'users:dashboard' %}"><span class="ico">📊</span>Dashboard</a>
         <a href="{% url 'users:profile' %}"><span class="ico">🧑</span>Profile</a>
         <a href="{% url 'users:schedule' %}"><span class="ico">🗓️</span>Schedule</a>
         <a href="{% url 'users:recycling' %}"><span class="ico">♻️</span>Recycling</a>

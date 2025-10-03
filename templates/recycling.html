@@ -3,103 +3,194 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<title>Recycling — CleanTrack+</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
-<style>
-/* (same style block as above; trimmed for brevity—keep your original) */
-:root{--brand:#0f7a4d;--brand2:#0ea5a0;--glass:#ffffffcc;--glass-b:#ffffffa6;--ink:#0f172a;--muted:#5b6876;--shadow:0 14px 36px rgba(0,0,0,.08)}
-*{box-sizing:border-box}html,body{height:100%}
-body{margin:0;font-family:Manrope,system-ui,Segoe UI,Roboto,Arial;color:var(--ink);line-height:1.55;font-size:18px}
-.bg{position:fixed;inset:0;z-index:-2;background:linear-gradient(180deg,#f4fff9 0%,#ecfff6 50%,#f9fffe 100%)}
-.bg span{position:absolute;width:46vmax;height:46vmax;border-radius:50%;background:radial-gradient(35% 35% at 30% 30%,#dcfff4,transparent 70%),radial-gradient(35% 35% at 70% 70%,#bff3e3,transparent 70%);filter:blur(28px);mix-blend-mode:multiply;animation:float 18s var(--d,0s) ease-in-out infinite alternate}
-.bg span:nth-child(1){top:-10vmax;left:-10vmax}.bg span:nth-child(2){top:12vmax;right:-12vmax}.bg span:nth-child(3){bottom:-12vmax;left:25vmax}.bg span:nth-child(4){bottom:-8vmax;right:-8vmax}
-@keyframes float{0%{transform:translate(0,0)}50%{transform:translate(3vmax,-2vmax)}100%{transform:translate(-2vmax,2vmax)}}
-.glass{background:var(--glass);backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px) saturate(1.2);border:1px solid var(--glass-b);box-shadow:var(--shadow)}
-.topbar{position:sticky;top:0;margin:20px;border-radius:999px;padding:12px 18px;display:flex;align-items:center;justify-content:space-between}
-.logo-pill{display:inline-flex;gap:10px;align-items:center;color:#fff;border-radius:999px;padding:12px 20px;font-weight:800;background:linear-gradient(120deg,#0f7a4d,#0ea5a0,#0f7a4d)}
-.nav-actions{display:flex;gap:12px}.nav-btn{display:inline-flex;gap:8px;align-items:center;text-decoration:none;background:#eafff5;border:1px solid #c6f6e5;color:#084c3c;padding:10px 16px;border-radius:999px;font-weight:800}
-.wrap{max-width:980px;margin:0 auto;padding:8px 16px 60px}
-.hero{padding:28px;border-radius:24px;margin-bottom:18px;position:relative;overflow:hidden}
-.title{font-size:44px;margin:6px 0 6px;font-weight:800}.sub{color:var(--muted);margin:0}
-.card{padding:22px;border-radius:22px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-.field{display:flex;flex-direction:column;gap:10px}
-.label{font-weight:900}
-.pill{display:flex;align-items:center;gap:12px;padding:18px;border-radius:18px;border:1.6px solid #cfe9db;background:#fff;box-shadow:0 1px 0 rgba(0,0,0,.02), 0 10px 30px rgba(15,122,77,.06)}
-.badge{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,#ecfdf5,#d1fae5);border:1px solid #b8f3db;color:#0f7a4d;font-size:20px}
-.input,.textarea{flex:1;border:0;background:transparent;outline:0;font:inherit;color:#0f172a;font-size:1.02rem}
-.textarea{min-height:140px;resize:vertical}
-.actions{display:flex;align-items:center;gap:12px;margin-top:10px}
-.btn{border:0;background:linear-gradient(90deg,#0ea5a0,#0f7a4d);color:#fff;padding:14px 20px;border-radius:14px;font-weight:900;box-shadow:0 8px 22px rgba(15,122,77,.22);cursor:pointer}
-.hint{color:var(--muted)}
-.errorlist{color:#b91c1c;margin:4px 0 0;font-size:.95rem}
-@media (max-width:980px){.grid2{grid-template-columns:1fr}}
-</style>
+  <meta charset="utf-8" />
+  <title>Recycling — CleanTrack+</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script>document.documentElement.classList.add('js')</script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --brand:#0f7a4d; --brand2:#0ea5a0;
+      --glass:#ffffffcc; --glass-b:#ffffffa6;
+      --ink:#0f172a; --muted:#5b6876;
+      --shadow:0 14px 36px rgba(0,0,0,.08);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:Manrope,system-ui,Segoe UI,Roboto,Arial;color:var(--ink);line-height:1.55;font-size:18px;background:#f8fffb}
+
+    /* background */
+    .bg{position:fixed;inset:0;z-index:-2;background:linear-gradient(180deg,#f4fff9 0%,#ecfff6 50%,#f9fffe 100%)}
+    .bg span{position:absolute;width:46vmax;height:46vmax;border-radius:50%;
+      background:radial-gradient(35% 35% at 30% 30%,#dcfff4,transparent 70%),
+                 radial-gradient(35% 35% at 70% 70%,#bff3e3,transparent 70%);
+      filter:blur(28px);mix-blend-mode:multiply;animation:float 18s var(--d,0s) ease-in-out infinite alternate}
+    .bg span:nth-child(1){top:-10vmax;left:-10vmax}
+    .bg span:nth-child(2){top:12vmax;right:-12vmax;--d:-3s}
+    .bg span:nth-child(3){bottom:-12vmax;left:25vmax;--d:-6s}
+    .bg span:nth-child(4){bottom:-8vmax;right:-8vmax;--d:-9s}
+    @keyframes float{0%{transform:translate(0,0)}50%{transform:translate(3vmax,-2vmax)}100%{transform:translate(-2vmax,2vmax)}}
+
+    /* glass & layout */
+    .glass{background:var(--glass);backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px) saturate(1.2);border:1px solid var(--glass-b);box-shadow:var(--shadow)}
+    .topbar{position:sticky;top:0;margin:20px;border-radius:999px;padding:12px 18px;display:flex;align-items:center;justify-content:space-between}
+    .brand{display:inline-flex;gap:10px;align-items:center;color:#fff;border-radius:999px;padding:12px 20px;font-weight:800;background:linear-gradient(120deg,var(--brand),var(--brand2),var(--brand))}
+    .bolt{width:22px;height:22px;border-radius:8px;background:#ffffff22;display:grid;place-items:center}
+    .nav-actions{display:flex;gap:12px}
+    .nav-btn{display:inline-flex;gap:8px;align-items:center;text-decoration:none;background:#eafff5;border:1px solid #c6f6e5;color:#084c3c;padding:10px 16px;border-radius:999px;font-weight:800}
+
+    .wrap{max-width:980px;margin:0 auto;padding:8px 16px 60px}
+    .hero{padding:28px;border-radius:24px;margin-bottom:18px;position:relative;overflow:hidden}
+    .title{font-size:44px;margin:6px 0 6px;font-weight:800}
+    .sub{color:var(--muted);margin:0}
+    .card{padding:22px;border-radius:22px}
+
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    @media (max-width:980px){.grid2{grid-template-columns:1fr}}
+
+    .field{display:flex;flex-direction:column;gap:10px}
+    .label{font-weight:900}
+    .pill{display:flex;align-items:center;gap:12px;padding:18px;border-radius:18px;border:1.6px solid #cfe9db;background:#fff;box-shadow:0 1px 0 rgba(0,0,0,.02), 0 10px 30px rgba(15,122,77,.06)}
+    .badge{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,#ecfdf5,#d1fae5);border:1px solid #b8f3db;color:#0f7a4d;font-size:20px}
+    .input,.textarea{flex:1;border:0;background:transparent;outline:0;font:inherit;color:#0f172a;font-size:1.02rem}
+    .textarea{min-height:140px;resize:vertical}
+
+    .actions{display:flex;align-items:center;gap:12px;margin-top:10px}
+    .btn{border:0;background:linear-gradient(90deg,#0ea5a0,#0f7a4d);color:#fff;padding:14px 20px;border-radius:14px;font-weight:900;box-shadow:0 8px 22px rgba(15,122,77,.22);cursor:pointer}
+    .hint{color:var(--muted)}
+    .errorlist{color:#b91c1c;margin:4px 0 0;font-size:.95rem}
+
+    /* extras */
+    .extras{margin-top:20px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    @media (max-width:980px){.extras{grid-template-columns:1fr}}
+    .tile{position:relative;padding:18px;border-radius:20px;overflow:hidden}
+    .tile::before{content:"";position:absolute;inset:-1px;border-radius:22px;background:linear-gradient(135deg,#d7f7ec 0%,#b7f0e7 50%,#dffbea 100%);z-index:-1}
+    .tile.glass{background:rgba(255,255,255,.86)}
+    .tile h3{margin:0 0 8px;font-size:18px}
+    .tile p{margin:0;color:var(--muted)}
+    .tile ul{margin:8px 0 0 18px;padding:0}
+
+    /* reveal animation (like profile) */
+    .js .reveal{opacity:0;transform:translateY(10px) scale(.985)}
+    .js .reveal.in{opacity:1;transform:none;transition:opacity .45s ease, transform .45s ease;transition-delay:var(--d,0ms)}
+  </style>
 </head>
 <body>
-<div class="bg"><span></span><span></span><span></span><span></span></div>
+  <div class="bg"><span></span><span></span><span></span><span></span></div>
 
-<header class="topbar glass">
-  <div class="logo-pill"><div class="bolt">⚡</div><span>CleanTrack+</span></div>
-  <nav class="nav-actions"><a class="nav-btn" href="{% url 'users:dashboard' %}">🏠 Dashboard</a></nav>
-</header>
+  <!-- Nav with Dashboard, Home, Logout on right -->
+  <header class="topbar glass reveal" data-anim>
+    <div class="brand"><div class="bolt">⚡</div><span>CleanTrack+</span></div>
+    <nav class="nav-actions">
+      <a class="nav-btn" href="{% url 'users:dashboard' %}"> Dashboard</a>
+      <a class="nav-btn" href="{% url 'home' %}"> Home</a>
+      <a class="nav-btn" href="{% url 'users:logout' %}">↩︎ Log out</a>
+    </nav>
+  </header>
 
-<div class="wrap">
-  <section class="hero glass">
-    <h1 class="title">Report Recycling</h1>
-    <p class="sub">Log your recycling to earn Eco Points and help optimize routes.</p>
-  </section>
+  <div class="wrap">
+    <section class="hero glass reveal" data-anim style="--d:80ms">
+      <h3 class="title"> Recycling</h3>
+      <p class="sub">Log your recycling to earn Eco Points and help optimize routes.</p>
+    </section>
 
-  <section class="card glass">
-    <form method="post" enctype="multipart/form-data" novalidate>
-      {% csrf_token %}
-      {{ form.non_field_errors }}
+    <section class="card glass reveal" data-anim style="--d:120ms">
+      <form method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        {{ form.non_field_errors }}
 
-      <div class="grid2">
-        <div class="field">
-          <span class="label">Material</span>
-          <div class="pill"><div class="badge">♻️</div>
-            {{ form.material|add_class:"input" }} {{ form.material.errors }}
+        <div class="grid2">
+          <div class="field">
+            <span class="label">Material</span>
+            <div class="pill">
+              <div class="badge">♻️</div>
+              {{ form.material|add_class:"input" }} {{ form.material.errors }}
+            </div>
+          </div>
+
+          <div class="field">
+            <span class="label">Weight (kg)</span>
+            <div class="pill">
+              <div class="badge">⚖️</div>
+              {{ form.weight_kg|add_class:"input" }} {{ form.weight_kg.errors }}
+            </div>
+          </div>
+
+          <div class="field" style="grid-column:1/-1">
+            <span class="label">Note (optional)</span>
+            <div class="pill">
+              <div class="badge">📝</div>
+              {{ form.note|add_class:"textarea" }} {{ form.note.errors }}
+            </div>
+          </div>
+
+          <div class="field" style="grid-column:1/-1">
+            <span class="label">Photo (optional)</span>
+            <div class="pill">
+              <div class="badge">📷</div>
+              {{ form.photo }} {{ form.photo.errors }}
+            </div>
           </div>
         </div>
 
-        <div class="field">
-          <span class="label">Weight (kg)</span>
-          <div class="pill"><div class="badge">⚖️</div>
-            {{ form.weight_kg|add_class:"input" }} {{ form.weight_kg.errors }}
-          </div>
+        <div class="actions">
+          <button class="btn" type="submit">Save Recycling</button>
+          <span class="hint">Thank you for keeping it green 🌱</span>
         </div>
+      </form>
+    </section>
 
-        <div class="field" style="grid-column:1/-1">
-          <span class="label">Note (optional)</span>
-          <div class="pill"><div class="badge">📝</div>
-            {{ form.note|add_class:"textarea" }} {{ form.note.errors }}
-          </div>
-        </div>
+    <!-- Helpful extras -->
+    <section class="extras">
+      <article class="tile glass reveal" data-anim style="--d:160ms">
+        <h3>What counts as recyclable?</h3>
+        <ul>
+          <li>Paper &amp; cardboard (flatten boxes)</li>
+          <li>Metal cans, glass bottles, PET/HDPE plastics</li>
+          <li>Keep batteries &amp; e-waste separate</li>
+        </ul>
+      </article>
+      <article class="tile glass reveal" data-anim style="--d:200ms">
+        <h3>Weighing tips</h3>
+        <ul>
+          <li>Zero the empty bag or subtract its weight</li>
+          <li>Round to one decimal (e.g., 1.8 kg)</li>
+          <li>Log one material per entry; choose Mixed recyclables if it’s mixed</li>
+        </ul>
+      </article>
+      <article class="tile glass reveal" data-anim style="--d:240ms">
+        <h3>Earn Eco Points</h3>
+        <p>Verified entries add to your total. Check your Points on the dashboard and redeem rewards when available.</p>
+      </article>
+    </section>
+  </div>
 
-        <div class="field" style="grid-column:1/-1">
-          <span class="label">Photo (optional)</span>
-          <div class="pill"><div class="badge">📷</div>
-            {{ form.photo }} {{ form.photo.errors }}
-          </div>
-        </div>
-      </div>
+  <script>
+    // Parallax
+    (function(){
+      const s=document.querySelectorAll('.bg span'); if(!s.length) return;
+      let w=innerWidth,h=innerHeight;
+      addEventListener('mousemove',e=>{
+        const x=(e.clientX/w-.5)*6, y=(e.clientY/h-.5)*6;
+        s.forEach((n,i)=> n.style.transform=`translate(${x*(i+1)}vmin, ${y*(i+1)}vmin)`);
+      });
+      addEventListener('resize',()=>{w=innerWidth;h=innerHeight});
+    })();
 
-      <div class="actions">
-        <button class="btn" type="submit">Save Recycling</button>
-        <span class="hint">Thank you for keeping it green 🌱</span>
-      </div>
-    </form>
-  </section>
-</div>
-
-<script>
-(function(){const s=document.querySelectorAll('.bg span');if(!s.length)return;let w=innerWidth,h=innerHeight;
-addEventListener('mousemove',e=>{const x=(e.clientX/w-.5)*6,y=(e.clientY/h-.5)*6;s.forEach((n,i)=>n.style.transform=`translate(${x*(i+1)}vmin, ${y*(i+1)}vmin)`);});
-addEventListener('resize',()=>{w=innerWidth;h=innerHeight});})();
-</script>
+    // Staggered reveal (same as profile page)
+    (function(){
+      const items=[...document.querySelectorAll('[data-anim]')];
+      if(!items.length) return;
+      items.forEach((el,i)=>{ if(!el.style.getPropertyValue('--d')) el.style.setProperty('--d', `${80+i*60}ms`) });
+      const io=new IntersectionObserver((entries)=>{
+        entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+      },{threshold:.08});
+      items.forEach(el=>io.observe(el));
+    })();
+  </script>
 </body>
 </html>
