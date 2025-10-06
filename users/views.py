@@ -10,15 +10,16 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.views import LoginView
 from django.core.mail import EmailMultiAlternatives
 from django.db import models
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
 from django.urls import reverse, NoReverseMatch
 from django.utils import timezone
+from django.views.decorators.http import require_POST
 
 from .forms import RegisterForm, LoginEmailOrUsernameForm, PickupRequestForm, ContactForm, RecyclingForm, ReuseForm, \
     ComplaintForm
 from .tokens import account_activation_token
-from .models import ContactMessage, PickupRequest
+from .models import ContactMessage, PickupRequest, ReuseDonation
 
 User = get_user_model()
 
@@ -408,3 +409,110 @@ def contact_view(request):
             return redirect("users:contact")
         return render(request, "contact.html", {"form": form, "errors": form.errors, "data": request.POST})
     return render(request, "contact.html", {"form": ContactForm(), "errors": {}, "data": {}})
+
+
+# users/views.py
+
+
+@login_required
+@require_POST
+def reuse_accept(request, pk):
+    """
+    Current user claims an item. Uses a conditional UPDATE so only the first click wins.
+    """
+    # can't accept your own item
+    if ReuseDonation.objects.filter(pk=pk, user=request.user).exists():
+        messages.warning(request, "You can’t accept your own donation.")
+        return redirect("users:reuse_market")
+
+    # atomic, race-proof one-liner: only updates if still pending & unclaimed
+    rows = (ReuseDonation.objects
+            .filter(pk=pk, status__iexact="pending", accepted_by__isnull=True)
+            .exclude(user=request.user)
+            .update(status="accepted", accepted_by=request.user, accepted_at=timezone.now()))
+
+    if rows == 0:
+        messages.info(request, "This item is no longer available.")
+        return redirect("users:reuse_market")
+
+    # Success: email the poster (best-effort)
+    donation = get_object_or_404(ReuseDonation.objects.select_related("user"), pk=pk)
+    try:
+        to_email = getattr(donation.user, "email", None)
+        taker_name = request.user.get_full_name() or request.user.username
+        poster_name = donation.user.get_full_name() or donation.user.username
+        desc = getattr(donation, "item_name", None) or donation.description or donation.category or "your item"
+
+        if to_email:
+            subj = "Your reuse item was accepted"
+            body = (
+                f"Hi {poster_name},\n\n"
+                f"{taker_name} has accepted {desc}.\n"
+                f"You can reply to this email to contact them.\n\n"
+                f"— CleanTrack+"
+            )
+            EmailMultiAlternatives(
+                subj, body, settings.DEFAULT_FROM_EMAIL, [to_email],
+                reply_to=[request.user.email] if request.user.email else None,
+            ).send(fail_silently=True)
+    except Exception:
+        pass
+
+    messages.success(request, "Accepted! The donor has been notified.")
+    return redirect("users:reuse_market")
+
+
+
+@login_required
+def reuse_market(request):
+    """
+    Public marketplace list:
+    - Show all reuse donations (pending at the top, then accepted, then donated/cancelled)
+    - Provide per-item helpers the template expects
+    - No POST here (accept is handled by reuse_accept)
+    """
+    # Pull the model directly; you’ve already imported ReuseDonation at top
+    qs = (ReuseDonation.objects
+          .select_related("user", "accepted_by"))
+
+    # Sort "pending" first, then "accepted", then others; newest first inside each group
+    qs = qs.annotate(
+        status_rank=models.Case(
+            models.When(status__iexact="pending", then=models.Value(0)),
+            models.When(status__iexact="accepted", then=models.Value(1)),
+            models.When(status__iexact="donated",  then=models.Value(2)),
+            default=models.Value(3),
+            output_field=models.IntegerField(),
+        )
+    ).order_by("status_rank", "-created")
+
+    items = list(qs[:120])  # reasonable cap
+
+    # Decorate for template convenience
+    for it in items:
+        # created timestamp in Dhaka (uses your helper)
+        try:
+            it.created_dhaka = _to_dhaka(getattr(it, "created", None))
+        except Exception:
+            it.created_dhaka = getattr(it, "created", None)
+
+        # ensure these exist even if model fields are blank
+        if not getattr(it, "item_name", None):
+            it.item_name = (it.category or "Donation")
+        if not getattr(it, "description", None):
+            it.description = (it.note or "")
+
+        # contact info to show in the popup (email + optional phone)
+        it.poster_email = getattr(it.user, "email", "") or ""
+        it.poster_phone = getattr(it.user, "phone_number", "") or ""
+
+        # convenience flags
+        it.is_owner = (it.user_id == request.user.id)
+        it.is_accepted_by_me = (getattr(it, "accepted_by_id", None) == request.user.id)
+        it.can_accept = (
+            (it.status or "").lower() == "pending"
+            and not it.is_owner
+            and getattr(it, "accepted_by_id", None) is None
+        )
+
+    return render(request, "users/reuse_market.html", {"items": items})

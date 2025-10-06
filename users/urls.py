@@ -22,6 +22,10 @@ urlpatterns = [
     path("contact/", contact_view, name="contact"),
     path("profile/", views.profile_view, name="profile"),
     path("go/<str:target>/", views.auth_gate, name="auth_gate"),
+    path("reuse_market/", views.reuse_market, name="reuse_market"),
+    path("reuse/accept/<int:pk>/", views.reuse_accept, name="reuse_accept"),
+
+
 
     path(
         "password-reset/",

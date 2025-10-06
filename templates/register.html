@@ -1,526 +1,314 @@
-{% load static tz %}
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Regular Dashboard — CleanTrack+</title>
+  <title>Create Account — CleanTrack+</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- Make sure CSS knows JS is enabled before styles apply -->
-  <script>document.documentElement.classList.add('js');</script>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <style>
     :root{
-      --brand:#0f7a4d; --brand2:#0ea5a0;
-      --ink:#0f172a; --muted:#566471;
-      --glass:#ffffffcc; --glass-b:#ffffffa6;
-      --ghost:#eafff5; --field:#cfe9db;
-      --shadow:0 14px 36px rgba(0,0,0,.09);
-
-      --ok:#16a34a; --warn:#f59e0b; --info:#0ea5a0; --bad:#e11d48;
-      --row:#fff; --row-br:#d7efe6;
+      --brand-50:#f2fbf5; --brand-100:#e7f7ee; --brand-200:#d7f2e4; --brand-300:#bde9d3;
+      --brand-400:#85d3ac; --brand-500:#2fa873; --brand-600:#19895c; --brand-700:#0f5f42;
+      --ink:#0f2b1f;
+      --card-bg: rgba(255,255,255,.80);
+      --card-stroke: rgba(25,137,92,.14);
+      --shadow-lg: 0 22px 50px rgba(16, 94, 64, .22);
+      --shadow-md: 0 12px 28px rgba(16,94,64,.18);
+      --error:#b42318; --error-bg:#ffe9e9;
+      --info:#0b3d91; --info-bg:#eef7ff;
     }
-    *{box-sizing:border-box}
-    html,body{height:100%}
+
+    /* ====== Animated background ====== */
     body{
-      margin:0; font-family:Manrope,system-ui,Segoe UI,Roboto,Arial;
-      color:var(--ink); line-height:1.55; background:#f8fffb; font-size:17.5px;
-      display:flex; flex-direction:column; min-height:100vh;
+      margin:0; min-height:100dvh; display:grid; place-items:center; padding:28px;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+      color:var(--ink);
+      background:
+        radial-gradient(1200px 600px at 85% -10%, rgba(47,168,115,.18), transparent 60%),
+        radial-gradient(1000px 520px at -10% 5%, rgba(25,137,92,.20), transparent 60%),
+        linear-gradient(180deg, #ffffff 0%, var(--brand-50) 100%);
+      overflow-x:hidden;
+    }
+    .bg-blur{
+      position:fixed; inset:-20% -20% -20% -20%; pointer-events:none; z-index:-1;
+      background:
+        radial-gradient(400px 400px at 20% 30%, rgba(133,211,172,.45), transparent 60%),
+        radial-gradient(520px 520px at 80% 20%, rgba(47,168,115,.35), transparent 60%),
+        radial-gradient(460px 460px at 60% 80%, rgba(25,137,92,.28), transparent 60%);
+      filter: blur(40px) saturate(120%);
+      animation: floatBlobs 16s ease-in-out infinite alternate;
+    }
+    @keyframes floatBlobs{
+      0%{ transform: translate3d(0,0,0) scale(1); }
+      50%{ transform: translate3d(0,-1.2%,0) scale(1.02); }
+      100%{ transform: translate3d(0,1.2%,0) scale(0.98); }
     }
 
-    /* background ornaments (non-interactive) */
-    .bg{position:fixed; inset:0; z-index:-2;
-      background:linear-gradient(180deg,#f4fff9 0%,#ecfff6 50%,#f9fffe 100%)}
-    .bg *{pointer-events:none}
-    .bg span{position:absolute;width:46vmax;height:46vmax;border-radius:50%;
-      background:radial-gradient(35% 35% at 30% 30%,#dcfff4,transparent 70%),
-                 radial-gradient(35% 35% at 70% 70%,#bff3e3,transparent 70%);
-      filter:blur(28px); mix-blend-mode:multiply; animation:float 18s var(--d,0s) ease-in-out infinite alternate}
-    .bg span:nth-child(1){top:-10vmax; left:-10vmax}
-    .bg span:nth-child(2){top:12vmax; right:-12vmax; --d:-3s}
-    .bg span:nth-child(3){bottom:-12vmax; left:25vmax; --d:-6s}
-    .bg span:nth-child(4){bottom:-8vmax; right:-8vmax; --d:-9s}
-    @keyframes float{0%{transform:translate(0,0)}50%{transform:translate(3vmax,-2vmax)}100%{transform:translate(-2vmax,2vmax)}}
-
-    .glass{background:var(--glass); backdrop-filter:blur(14px) saturate(1.15); -webkit-backdrop-filter:blur(14px) saturate(1.15);
-           border:1px solid var(--glass-b); box-shadow:var(--shadow)}
-
-    /* header */
-    .topbar{position:sticky; top:0; z-index:40; margin:18px; border-radius:999px; padding:10px 16px; display:flex; align-items:center; justify-content:space-between}
-    .brand{display:flex; align-items:center; gap:10px; color:#fff; padding:10px 16px; border-radius:999px; font-weight:900;
-           background:linear-gradient(120deg,var(--brand),var(--brand2),var(--brand)); background-size:200% 100%; animation:logoFlow 6s linear infinite}
-    @keyframes logoFlow{0%{background-position:0% 50%}100%{background-position:200% 50%}}
-    .bolt{width:26px; height:26px; border-radius:10px; background:#ffffff22; display:grid; place-items:center}
-    .home-btn{display:inline-flex; gap:8px; align-items:center; text-decoration:none; background:var(--ghost); border:1px solid #c6f6e5; color:#084c3c;
-              padding:10px 14px; border-radius:999px; font-weight:800}
-
-    /* 2-column layout with independent scrollbars */
-    .layout{
-      display:grid; grid-template-columns:280px 1fr; gap:16px; padding:0 18px 22px;
-      flex:1; min-height:0; overflow:hidden;
+    /* Top badges */
+    .brand-chip{
+      /* moved to LEFT */
+      position:fixed; top:14px; left:14px;
+      background:linear-gradient(135deg, var(--brand-600), var(--brand-500));
+      color:#fff; padding:10px 16px; border-radius:999px; font-weight:700; letter-spacing:.2px;
+      box-shadow:0 10px 30px rgba(7,72,49,.25); overflow:hidden; z-index:20;
     }
-    @media (max-width:1100px){ .layout{grid-template-columns:1fr} .sidebar{display:none} }
-
-    .sidebar{
-      align-self:stretch; overflow:auto; -webkit-overflow-scrolling:touch;
-      border-radius:22px; padding:10px;
+    .brand-chip::after{
+      content:""; position:absolute; inset:0;
+      background:linear-gradient(100deg, transparent 0%, rgba(255,255,255,.35) 35%, transparent 70%);
+      transform: translateX(-120%); filter: blur(2px);
+      animation: shimmer 3.2s ease-in-out infinite;
     }
-    .side-card{border-radius:20px; background:#fff; border:1px solid #e6f3ed; padding:10px}
-    .logo-row{display:flex; align-items:center; gap:10px; font-weight:900; margin:8px; color:#0a4b3a}
-    .profile-card{display:flex; gap:12px; align-items:center; padding:12px; border-radius:16px; border:1px solid #d7efe6; background:#fff; margin:8px}
-    .avatar{width:36px;height:36px;border-radius:50%;background:#eafff5;display:grid;place-items:center;font-weight:900}
-    .nav{display:flex; flex-direction:column; gap:6px; margin:6px}
-    .nav a{display:flex; gap:12px; align-items:center; padding:12px; border-radius:12px; color:#063c31; text-decoration:none; font-weight:700}
-    .nav a:hover{background:#effdf7}
-    .nav a.active{background:linear-gradient(120deg,var(--brand),var(--brand2)); color:#fff}
-    .ico{width:22px;height:22px;display:grid;place-items:center}
+    @keyframes shimmer{ 0%{transform:translateX(-120%)} 60%{transform:translateX(120%)} 100%{transform:translateX(120%)} }
 
-    .main{display:grid; gap:16px; overflow:auto; -webkit-overflow-scrolling:touch; padding-right:2px}
-    .grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px}
-    @media (max-width:900px){ .grid2{grid-template-columns:1fr} }
-
-    /* cards */
-    .card{border-radius:22px; padding:18px; background:#fff; border:1px solid #e6f3ed; position:relative}
-    .card h2{margin:0 0 10px; font-size:22px}
-    .muted{color:var(--muted)}
-
-    /* rows + status shades */
-    .list{display:grid; gap:10px}
-    .row{
-      background:var(--row); border:1px solid var(--row-br); border-radius:14px; padding:12px;
-      display:grid; grid-template-columns:1fr auto auto; gap:10px; align-items:center; cursor:pointer;
-      transition: box-shadow .18s ease, transform .18s ease;
+    .top-right{
+      position:fixed; top:14px; right:14px; z-index:20; display:flex; gap:10px;
     }
-    .row:hover{transform:translateY(-1px)}
-    .row.ok{box-shadow:0 6px 20px rgba(22,163,74,.15)}
-    .row.warn{box-shadow:0 6px 20px rgba(245,158,11,.16)}
-    .row.info{box-shadow:0 6px 20px rgba(14,165,160,.16)}
-    .row.bad{box-shadow:0 6px 20px rgba(225,29,72,.16)}
-
-    .title-sm{font-weight:800}
-    .sub-sm{font-size:13px; color:var(--muted)}
-    .status{font-size:12px; padding:6px 8px; border-radius:999px; font-weight:900; border:1px solid transparent; justify-self:end}
-    .status.ok{background:#e9f9ee; color:#065f46; border-color:#b7ebc9}
-    .status.warn{background:#fff7ed; color:#9a3412; border-color:#fbd4a8}
-    .status.info{background:#effdf9; color:#0b4a3a; border-color:#b9efe3}
-    .status.bad{background:#fff1f2; color:#9f1239; border-color:#fec7d2}
-    .badge{display:inline-flex; gap:8px; align-items:center; background:#f3fff9; border:1px solid #cdeee2; color:#0c4b3a; padding:6px 10px; border-radius:999px; font-weight:800; font-size:12px}
-
-    /* details: smooth expand/collapse */
-    .details{
-      display:block; max-height:0; opacity:0; overflow:hidden;
-      margin-top:8px; padding:0 12px; background:#f8fffb; border:1px dashed #d8efe6; border-radius:12px;
-      transition:max-height .3s ease, opacity .3s ease, padding .3s ease;
+    .home-btn{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:10px 14px; border-radius:999px; text-decoration:none;
+      color:var(--brand-700); font-weight:800; letter-spacing:.2px;
+      background:linear-gradient(135deg, rgba(255,255,255,.9), rgba(244,251,247,.9));
+      border:1px solid var(--card-stroke);
+      box-shadow:0 10px 30px rgba(7,72,49,.18);
+      backdrop-filter: blur(10px) saturate(115%);
+      -webkit-backdrop-filter: blur(10px) saturate(115%);
+      transition: transform .06s, box-shadow .25s, opacity .2s;
     }
-    .row[data-open="1"] .details{ max-height:420px; opacity:1; padding:12px; }
+    .home-btn:hover{ transform:translateY(-1px); }
+    .home-btn svg{ width:18px; height:18px; }
 
-    /* points ring */
-    .ring{--p:0; width:108px; height:108px; border-radius:50%;
-      background:conic-gradient(#22c55e calc(var(--p)*1%), #e6f5ee 0);
-      display:grid; place-items:center;}
-    .ring .inner{width:80px; height:80px; border-radius:50%; background:#fff; display:grid; place-items:center; box-shadow:inset 0 0 0 1px #e6efe9}
+    /* ====== Glass card with glow ring & parallax tilt ====== */
+    .card-wrap{ perspective:1200px; width:min(92vw, 760px); }
+    .card{
+      position:relative; background:var(--card-bg);
+      border:1px solid var(--card-stroke); border-radius:22px;
+      box-shadow:var(--shadow-lg); backdrop-filter: blur(12px) saturate(115%);
+      -webkit-backdrop-filter: blur(12px) saturate(115%); overflow:hidden;
+      transform-style:preserve-3d; animation: riseIn .5s cubic-bezier(.22,.9,.28,1) both;
+    }
+    .glow{
+      content:""; position:absolute; inset:-2px; border-radius:24px; z-index:-1;
+      background:conic-gradient(from 120deg, rgba(47,168,115,.45), rgba(133,211,172,.25), rgba(47,168,115,.45));
+      filter: blur(22px); opacity:.35; animation: spin 10s linear infinite;
+    }
+    @keyframes spin{ to{ transform:rotate(1turn) } }
+    @keyframes riseIn{ from{ opacity:0; transform: translateY(14px) scale(.98) } to{ opacity:1; transform: translateY(0) scale(1)} }
 
-    /* --- Reveal animation (simple + robust) --- */
-    .js .reveal{opacity:0; transform:translateY(12px) scale(.985)}
-    .js .reveal.in{opacity:1; transform:none; transition:opacity .45s ease, transform .45s ease; transition-delay:var(--d,0ms)}
+    .card-head{
+      padding:30px 30px 18px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.60), rgba(255,255,255,.80)),
+        radial-gradient(600px 240px at 20% -10%, rgba(133,211,172,.35), transparent 70%);
+    }
+    h1{ margin:0 0 8px; font-size: clamp(22px, 2.6vw, 30px); line-height:1.15; color:var(--brand-700); letter-spacing:.2px; }
+    .subtitle{ margin:0; color:#375547; font-size:14px; }
+    .pill{ display:inline-block; margin-top:12px; font-size:12px; color:#0a2e22; background:linear-gradient(135deg, #ffffff, #f4fbf7); border:1px solid var(--card-stroke); padding:6px 10px; border-radius:999px; }
+
+    .body{ padding:20px 28px 28px; }
+
+    .messages, .errors, ul.errorlist{
+      margin:14px 0; padding:12px 14px; border-radius:12px; border:1px solid; will-change:transform,opacity;
+      animation: slideIn .35s cubic-bezier(.21,.95,.31,.99);
+    }
+    .messages{ background:var(--info-bg); color:var(--info); border-color:#c5ddff; }
+    .errors, ul.errorlist{ background:var(--error-bg); color:var(--error); border-color:#ffd0cb; }
+    ul.errorlist{ list-style:none; padding-left:14px; }
+    @keyframes slideIn{ from{opacity:0; transform:translateY(-6px)} to{opacity:1; transform:translateY(0)} }
+
+    .grid{ display:grid; gap:16px 18px; }
+    .two-col{ grid-template-columns:1fr 1fr; }
+    @media (max-width: 640px){ .two-col{ grid-template-columns:1fr; } }
+
+    .field{
+      position:relative; padding:12px; border-radius:14px;
+      background: linear-gradient(180deg, #ffffff 0%, #f7fcf9 100%);
+      border:1px solid #cfe8db; transition: box-shadow .25s, border-color .25s, transform .2s;
+    }
+    .field:hover{ transform: translateY(-1px); }
+    .field:focus-within{
+      border-color: var(--brand-400);
+      box-shadow: 0 0 0 5px rgba(47,168,115,.15), 0 8px 24px rgba(16,94,64,.12);
+      background:#fff;
+    }
+    label{
+      display:block; font-size:13px; font-weight:700; color:#1d3a2e; margin:0 0 6px; letter-spacing:.2px;
+      transition: color .2s ease;
+    }
+    .field:focus-within label{ color:var(--brand-600); }
+
+    input, select{
+      width:100%; box-sizing:border-box; border:0; outline:none; background:transparent;
+      padding:10px 2px 8px; color:#0a2e22; font-size:14px;
+    }
+    input::placeholder{ color:#8aa89c; }
+
+    .actions{ display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-top:4px; }
+
+    .btn{
+      position:relative; border:0; border-radius:14px; padding:12px 18px;
+      font-weight:800; letter-spacing:.2px; cursor:pointer; overflow:hidden;
+      transition: transform .06s ease, box-shadow .25s ease, opacity .2s ease;
+      box-shadow: var(--shadow-md);
+      will-change: transform;
+    }
+    .btn-primary{
+      color:#fff;
+      background: linear-gradient(135deg, var(--brand-600), var(--brand-500), var(--brand-600));
+      background-size: 200% 200%;
+      animation: hueShift 6s ease-in-out infinite;
+    }
+    @keyframes hueShift{ 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+    .btn:hover{ transform: translateY(-1px); }
+    .btn:active{ transform: translateY(0); }
+    .btn-ghost{ background:transparent; color:var(--brand-600); border:1px solid var(--brand-300); }
+
+    .ripple{
+      position:absolute; border-radius:50%; transform:translate(-50%,-50%) scale(0);
+      background:rgba(255,255,255,.6); animation:ripple .6s ease-out forwards; pointer-events:none;
+    }
+    @keyframes ripple{ to{ transform:translate(-50%,-50%) scale(10); opacity:0 } }
+
+    .links{ margin-top:10px; font-size:14px; color:#204b3a; }
+    .links a{ color:var(--brand-600); text-decoration:none; background:linear-gradient(currentColor,currentColor) no-repeat 0 100%/0 1px; transition:background-size .25s; }
+    .links a:hover{ background-size:100% 1px; }
+
+    .fineprint{ color:#486c5d; font-size:12px; margin-top:2px; }
+
+    @media (prefers-reduced-motion: reduce){
+      * { animation-duration:.001ms !important; animation-iteration-count:1 !important; transition:none !important; }
+    }
   </style>
 </head>
 <body>
-  <div class="bg"><span></span><span></span><span></span><span></span></div>
+  <div class="bg-blur" aria-hidden="true"></div>
 
-  <!-- header -->
-  <header class="topbar glass reveal" data-anim>
-    <div class="brand"><div class="bolt">⚡</div>CleanTrack+</div>
-    <a class="home-btn" href="{% url 'users:dashboard' %}">🏠 Home</a>
-  </header>
+  <!-- Top badges -->
+  <div class="brand-chip">⚡ CleanTrack+</div>
+  <div class="top-right">
+    <!-- If you have a named URL for home, replace href="/" with: {% url 'home' %} -->
+    <a href="/" class="home-btn" data-ripple aria-label="Go to homepage">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M3 11.5 12 4l9 7.5" stroke="#0f5f42" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M5 10.5V20h5v-5h4v5h5v-9.5" stroke="#2fa873" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Home
+    </a>
+  </div>
 
-  <div class="layout">
-    <!-- Left: Sidebar (independent scroll) -->
-    <aside class="sidebar">
-      <div class="side-card reveal" data-anim>
-        <div class="logo-row">🌿 <span>Menu</span></div>
+  <div class="card-wrap" id="tilt-wrap">
+    <div class="glow" aria-hidden="true"></div>
+    <main class="card" role="main" aria-labelledby="signup-title">
+      <header class="card-head">
+        <h1 id="signup-title">Create your account</h1>
+        <p class="subtitle">Welcome! Let’s get you started with CleanTrack+ </p>
+        <span class="pill">Choose role: <b>Regular</b> or <b>Driver</b> </span>
+      </header>
 
-        <div class="profile-card">
-          <div class="avatar">{{ request.user.username|first|upper }}</div>
-          <div>
-            <div style="font-weight:800">{{ request.user.username }}</div>
-            <div class="sub-sm">{{ request.user.email }}</div>
+      <section class="body">
+        {% if messages %}
+          <div class="messages">
+            {% for message in messages %}<div>{{ message }}</div>{% endfor %}
           </div>
+        {% endif %}
+
+        {% if form.non_field_errors %}
+          <div class="errors">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <form method="post" action="{% url 'users:signup' %}" class="grid two-col">
+          {% csrf_token %}
+
+          <div class="field" style="grid-column:1 / -1">
+            <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+            {{ form.username }}
+            {% if form.username.errors %}<ul class="errorlist">{{ form.username.errors }}</ul>{% endif %}
+          </div>
+
+          <div class="field" style="grid-column:1 / -1">
+            <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+            {{ form.email }}
+            {% if form.email.errors %}<ul class="errorlist">{{ form.email.errors }}</ul>{% endif %}
+          </div>
+
+          <div class="field">
+            <label for="{{ form.role.id_for_label }}">{{ form.role.label }}</label>
+            {{ form.role }}
+            {% if form.role.errors %}<ul class="errorlist">{{ form.role.errors }}</ul>{% endif %}
+          </div>
+
+          <div class="field">
+            <label for="{{ form.phone_number.id_for_label }}">{{ form.phone_number.label }}</label>
+            {{ form.phone_number }}
+            {% if form.phone_number.errors %}<ul class="errorlist">{{ form.phone_number.errors }}</ul>{% endif %}
+          </div>
+
+          <div class="field">
+            <label for="{{ form.password1.id_for_label }}">{{ form.password1.label }}</label>
+            {{ form.password1 }}
+            {% if form.password1.errors %}<ul class="errorlist">{{ form.password1.errors }}</ul>{% endif %}
+          </div>
+
+          <div class="field">
+            <label for="{{ form.password2.id_for_label }}">{{ form.password2.label }}</label>
+            {{ form.password2 }}
+            {% if form.password2.errors %}<ul class="errorlist">{{ form.password2.errors }}</ul>{% endif %}
+          </div>
+
+          <div class="actions" style="grid-column:1 / -1">
+            <button type="submit" class="btn btn-primary" data-ripple>Create account</button>
+            <a class="btn btn-ghost" href="{% url 'users:login' %}" data-ripple>Already have an account</a>
+          </div>
+
+          <div class="fineprint" style="grid-column:1 / -1">
+            By creating an account, you agree to our Terms & Privacy Policy.
+          </div>
+        </form>
+
+        <div class="links">
+          <a href="{% url 'users:password_reset' %}">Forgot your password?</a>
         </div>
-
-        <nav class="nav">
-          <a class="active" href="{% url 'users:dashboard' %}"><span class="ico">🏠</span>Dashboard</a>
-          <a href="{% url 'users:profile' %}"><span class="ico">🧑</span>Profile</a>
-          <a href="{% url 'users:schedule' %}"><span class="ico">🗓️</span>Schedule</a>
-          <a href="{% url 'users:recycling' %}"><span class="ico">♻️</span>Recycling</a>
-          <a href="{% url 'users:reuse' %}"><span class="ico">🎁</span>Donate / Reuse</a>
-          <a href="{% url 'users:complaint' %}"><span class="ico">📝</span>Complaints</a>
-          <a href="{% url 'users:track' %}"><span class="ico">📍</span>Track</a>
-          <a href="{% url 'users:contact' %}"><span class="ico">✉️</span>Contact</a>
-          <a href="{% url 'users:logout' %}"><span class="ico">↩︎</span>Logout</a>
-        </nav>
-      </div>
-    </aside>
-
-    <!-- Right: Main content (independent scroll) -->
-    <main class="main">
-      {% localtime on %}{% timezone "Asia/Dhaka" %}
-
-      <!-- Row 1 -->
-      <section class="grid2">
-        <!-- Pickups -->
-        <article class="card glass reveal" data-anim>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-            <h2 style="margin:0">Pickup History</h2>
-            <a class="accent" href="{% url 'users:schedule' %}"><span class="em">📅</span> Book new</a>
-          </div>
-
-          <div class="list">
-            {% if pickups %}
-              {% for p in pickups %}
-                {% if p.status == 'completed' %}
-                  {% with row_class="ok" st_label="completed" %}
-                {% elif p.status == 'assigned' %}
-                  {% with row_class="info" st_label="assigned" %}
-                {% elif p.status == 'cancelled' %}
-                  {% with row_class="bad" st_label="cancelled" %}
-                {% else %}
-                  {% with row_class="warn" st_label=p.status|default:"pending" %}
-                {% endif %}
-
-                <div class="row {{ row_class }} reveal" data-anim data-expand data-open="0">
-                  <div>
-                    <div class="title-sm">🗑️ {{ p.address|default:"Address not set" }}</div>
-                    <div class="sub-sm">
-                      {% if p.date %}{{ p.date|date:"D, M j" }}{% else %}—{% endif %}
-                      •
-                      {% if p.time %}{{ p.time|time:"P" }}{% else %}—{% endif %}
-                    </div>
-                  </div>
-                  <div class="badge">🚚 {{ p.vehicle|default:"Van" }}</div>
-                  <div class="status {{ row_class }}">{{ st_label }}</div>
-
-                  <div class="details">
-                    <div><strong>Waste type:</strong> {{ p.waste_type|default:"Regular" }}</div>
-                    <div><strong>Status:</strong> {{ p.status|default:"pending" }}</div>
-                    <div><strong>Address:</strong> {{ p.address|default:"—" }}</div>
-                    <div><strong>Booked at:</strong>
-                      {% if p.created %}{{ p.created|date:"M j, Y" }} {{ p.created|time:"P" }}{% else %}—{% endif %}
-                    </div>
-                    {% if p.notes %}<div><strong>Notes:</strong> {{ p.notes }}</div>{% endif %}
-                    {% if p.photo %}<div><strong>Photo:</strong> <a href="{{ p.photo.url }}" target="_blank" rel="noopener">Open</a></div>{% endif %}
-                    {% if p.photo %}<div class="thumbs"><img src="{{ p.photo.url }}" alt="pickup photo"></div>{% endif %}
-                  </div>
-                </div>
-
-                {% endwith %}
-              {% empty %}
-                <div class="muted">No pickups yet — schedule your first one.</div>
-              {% endfor %}
-            {% else %}
-              <div class="muted">No pickups yet — schedule your first one.</div>
-            {% endif %}
-          </div>
-        </article>
-
-        <!-- Points -->
-        <article class="card glass reveal" data-anim>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-            <h2 style="margin:0">Points</h2>
-            <span class="badge">Eco Points</span>
-          </div>
-
-          <div style="display:flex; gap:16px; align-items:center; margin:6px 0 12px">
-            <div class="ring" id="ring" style="--p:0">
-              <div class="inner">
-                <div style="text-align:center">
-                  <div style="font-size:22px;font-weight:900">{{ rewards_points|default_if_none:"0" }}</div>
-                  <div class="sub-sm">Total</div>
-                </div>
-              </div>
-            </div>
-            <div class="muted">Next reward at <strong>400</strong> pts.</div>
-          </div>
-
-          <div class="list">
-            {% if rewards_history %}
-              {% for r in rewards_history %}
-                <div class="row ok reveal" data-anim data-expand data-open="0">
-                  <div>
-                    <div class="title-sm">🏅 {{ r.source|default:"Activity" }}</div>
-                    <div class="sub-sm">{% if r.created %}{{ r.created|date:"M j, g:i a" }}{% else %}—{% endif %}</div>
-                  </div>
-                  <div></div>
-                  <div class="status ok">+{{ r.points|default:"0" }}</div>
-
-                  <div class="details">
-                    <div><strong>Source:</strong> {{ r.source|default:"—" }}</div>
-                    {% if r.note %}<div><strong>Note:</strong> {{ r.note }}</div>{% endif %}
-                    <div><strong>Points:</strong> {{ r.points|default:"0" }}</div>
-                  </div>
-                </div>
-              {% endfor %}
-            {% else %}
-              <div class="muted">No points yet. Log recycling or on-time set-outs to earn points.</div>
-            {% endif %}
-          </div>
-        </article>
       </section>
-
-      <!-- Row 2 -->
-      <section class="grid2">
-        <!-- Reuse / Donation -->
-        <article class="card glass reveal" data-anim>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-            <h2 style="margin:0">Reuse / Donation</h2>
-            <a class="accent" href="{% url 'users:reuse' %}"><span class="em">🎁</span> Add donation</a>
-          </div>
-
-          <div class="list">
-            {% if reuse_donations %}
-              {% for d in reuse_donations %}
-                {% if d.status == 'completed' or d.status == 'donated' %}
-                  {% with row_class="ok" st_label=d.status %}
-                {% elif d.status == 'pending' %}
-                  {% with row_class="warn" st_label="pending" %}
-                {% elif d.status == 'cancelled' %}
-                  {% with row_class="bad" st_label="cancelled" %}
-                {% else %}
-                  {% with row_class="info" st_label=d.status|default:"info" %}
-                {% endif %}
-
-                <div class="row {{ row_class }} reveal" data-anim data-expand data-open="0">
-                  <div>
-                    <div class="title-sm">🎁 {{ d.item_name|default:d.description|default:"Donation" }}</div>
-                    <div class="sub-sm">{% if d.created %}{{ d.created|date:"M j, g:i a" }}{% else %}—{% endif %}</div>
-                  </div>
-                  <div class="badge">📦 {{ d.quantity|default:"1" }}</div>
-                  <div class="status {{ row_class }}">{{ st_label }}</div>
-
-                  <div class="details">
-                    <div><strong>Category:</strong> {{ d.category|default:"—" }}</div>
-                    {% if d.partner %}<div><strong>Partner:</strong> {{ d.partner }}</div>{% endif %}
-                    {% if d.note %}<div><strong>Note:</strong> {{ d.note }}</div>{% endif %}
-                    {% if d.photo %}<div><strong>Photo:</strong> <a href="{{ d.photo.url }}" target="_blank" rel="noopener">Open</a></div>{% endif %}
-                    {% if d.photo %}<div class="thumbs"><img src="{{ d.photo.url }}" alt="donation photo"></div>{% endif %}
-                  </div>
-                </div>
-
-                {% endwith %}
-              {% endfor %}
-            {% else %}
-              <div class="muted">No donations recorded yet.</div>
-            {% endif %}
-          </div>
-        </article>
-
-        <!-- Recycling -->
-        <article class="card glass reveal" data-anim>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-            <h2 style="margin:0">Recycling</h2>
-            <a class="accent" href="{% url 'users:recycling' %}"><span class="em">♻️</span> Log recycling</a>
-          </div>
-
-          <div class="list">
-            {% if recycling_events %}
-              {% for e in recycling_events %}
-                {% if e.status == 'verified' %}
-                  {% with row_class="ok" st_label="verified" %}
-                {% elif e.status == 'logged' %}
-                  {% with row_class="info" st_label="logged" %}
-                {% else %}
-                  {% with row_class="warn" st_label=e.status|default:"info" %}
-                {% endif %}
-
-                <div class="row {{ row_class }} reveal" data-anim data-expand data-open="0">
-                  <div>
-                    <div class="title-sm">♻️ {{ e.material|default:"Mixed recyclables" }}</div>
-                    <div class="sub-sm">{% if e.created %}{{ e.created|date:"M j, g:i a" }}{% else %}—{% endif %}</div>
-                  </div>
-                  <div class="badge">⚖️ {{ e.weight_kg|default:"0" }} kg</div>
-                  <div class="status {{ row_class }}">{{ st_label }}</div>
-
-                  <div class="details">
-                    {% if e.note %}<div><strong>Note:</strong> {{ e.note }}</div>{% endif %}
-                    {% if e.photo %}<div><strong>Photo:</strong> <a href="{{ e.photo.url }}" target="_blank" rel="noopener">Open</a></div>{% endif %}
-                    {% if e.photo %}<div class="thumbs"><img src="{{ e.photo.url }}" alt="recycling photo"></div>{% endif %}
-                  </div>
-                </div>
-
-                {% endwith %}
-              {% endfor %}
-            {% else %}
-              <div class="muted">No recycling entries yet.</div>
-            {% endif %}
-          </div>
-        </article>
-      </section>
-
-      <!-- Row 3 -->
-      <section class="grid2">
-        <!-- Complaints -->
-        <article class="card glass reveal" data-anim>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-            <h2 style="margin:0">Complaints</h2>
-            <a class="accent" href="{% url 'users:complaint' %}"><span class="em">📝</span> File complaint</a>
-          </div>
-
-          <div class="list">
-            {% if complaints %}
-              {% for c in complaints %}
-                {% if c.status == 'resolved' %}
-                  {% with row_class="ok" st_label="resolved" %}
-                {% elif c.status == 'rejected' %}
-                  {% with row_class="bad" st_label="rejected" %}
-                {% elif c.status == 'open' %}
-                  {% with row_class="warn" st_label="open" %}
-                {% else %}
-                  {% with row_class="info" st_label=c.status|default:"info" %}
-                {% endif %}
-
-                <div class="row {{ row_class }} reveal" data-anim data-expand data-open="0">
-                  <div>
-                    <div class="title-sm">📝 {{ c.category|default:"General" }}</div>
-                    <div class="sub-sm">{% if c.created %}{{ c.created|date:"M j, g:i a" }}{% else %}—{% endif %}</div>
-                  </div>
-                  <div></div>
-                  <div class="status {{ row_class }}">{{ st_label }}</div>
-
-                  <div class="details">
-                    {% if c.subject %}<div><strong>Subject:</strong> {{ c.subject }}</div>{% endif %}
-                    {% if c.description %}<div><strong>Description:</strong> {{ c.description }}</div>{% endif %}
-                    {% if c.photo %}<div><strong>Photo:</strong> <a href="{{ c.photo.url }}" target="_blank" rel="noopener">Open</a></div>{% endif %}
-                    {% if c.photo %}<div class="thumbs"><img src="{{ c.photo.url }}" alt="complaint photo"></div>{% endif %}
-                  </div>
-                </div>
-
-                {% endwith %}
-              {% endfor %}
-            {% else %}
-              <div class="muted">No complaints on file.</div>
-            {% endif %}
-          </div>
-        </article>
-
-        <!-- Recent Activity -->
-        <article class="card glass reveal" data-anim>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-            <h2 style="margin:0">Recent Activity</h2>
-            <span class="badge">Latest 10</span>
-          </div>
-
-          <div class="list">
-            {% if recent_activity %}
-              {% for a in recent_activity %}
-                <div class="row info reveal" data-anim data-expand data-open="0">
-                  <div>
-                    <div class="title-sm">{{ a.title|default:"Activity" }}</div>
-                    <div class="sub-sm">{% if a.when %}{{ a.when|date:"M j, g:i a" }}{% else %}—{% endif %}</div>
-                  </div>
-                  <div></div>
-                  <div class="status info">{{ a.kind|default:"event" }}</div>
-
-                  <div class="details">
-                    <div><strong>Type:</strong> {{ a.kind|default:"event" }}</div>
-                    {% if a.note %}<div><strong>Note:</strong> {{ a.note }}</div>{% else %}<div class="muted">No extra details for this item.</div>{% endif %}
-                    {% if a.photo %}<div class="thumbs"><img src="{{ a.photo.url }}" alt="activity photo"></div>{% endif %}
-                  </div>
-                </div>
-              {% endfor %}
-            {% else %}
-              {% if recent_pickups %}
-                {% for p in recent_pickups|slice:":5" %}
-                  <div class="row ok reveal" data-anim data-expand data-open="0">
-                    <div>
-                      <div class="title-sm">✅ Pickup</div>
-                      <div class="sub-sm">
-                        {% if p.date %}{{ p.date|date:"M j" }}{% else %}—{% endif %}
-                        •
-                        {% if p.time %}{{ p.time|time:"P" }}{% else %}—{% endif %}
-                      </div>
-                    </div>
-                    <div></div><div class="status ok">{{ p.status|default:"done" }}</div>
-                    <div class="details">
-                      <div><strong>Address:</strong> {{ p.address|default:"—" }}</div>
-                      {% if p.photo %}<div class="thumbs"><img src="{{ p.photo.url }}" alt="pickup photo"></div>{% endif %}
-                    </div>
-                  </div>
-                {% endfor %}
-              {% else %}
-                <div class="muted">No recent activity yet.</div>
-              {% endif %}
-            {% endif %}
-          </div>
-        </article>
-      </section>
-
-      {% endtimezone %}{% endlocaltime %}
     </main>
   </div>
 
   <script>
-    // Simple visual parallax
-    (function(){
-      const spans=document.querySelectorAll('.bg span'); if(!spans.length) return;
-      let w=innerWidth,h=innerHeight;
-      addEventListener('mousemove',e=>{
-        const x=(e.clientX/w-.5)*6, y=(e.clientY/h-.5)*6;
-        spans.forEach((s,i)=> s.style.transform=`translate(${x*(i+1)}vmin, ${y*(i+1)}vmin)`);
-      });
-      addEventListener('resize',()=>{w=innerWidth;h=innerHeight});
-    })();
-
-    // Expand/collapse rows: ignore real interactive elements so links work
-    document.addEventListener('click', (e) => {
-      const interactive = e.target.closest('a, button, input, textarea, select, label, [role="button"]');
-      if (interactive) return;
-      const row = e.target.closest('[data-expand]');
-      if (!row) return;
-      row.dataset.open = row.dataset.open === '1' ? '0' : '1';
+    // Ripple effect
+    document.addEventListener('click', function(e){
+      const btn = e.target.closest('[data-ripple]');
+      if(!btn) return;
+      const rect = btn.getBoundingClientRect();
+      const ripple = document.createElement('span');
+      const size = Math.max(rect.width, rect.height);
+      ripple.className = 'ripple';
+      ripple.style.width = ripple.style.height = size + 'px';
+      ripple.style.left = (e.clientX - rect.left) + 'px';
+      ripple.style.top  = (e.clientY - rect.top)  + 'px';
+      btn.appendChild(ripple);
+      ripple.addEventListener('animationend', () => ripple.remove());
     });
-    // Keyboard accessibility
-    (function () {
-      document.querySelectorAll('[data-expand]').forEach(el => {
-        el.setAttribute('tabindex', '0');
-        el.setAttribute('role', 'button');
-        el.addEventListener('keydown', (ev) => {
-          if (ev.key === 'Enter' || ev.key === ' ') {
-            ev.preventDefault();
-            el.dataset.open = el.dataset.open === '1' ? '0' : '1';
-          }
-        });
+
+    // Parallax tilt
+    const wrap = document.getElementById('tilt-wrap');
+    const card = wrap.querySelector('.card');
+    let rafId = null;
+    function handleMove(e){
+      const r = wrap.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width;
+      const y = (e.clientY - r.top) / r.height;
+      const rotY = (x - .5) * 10;
+      const rotX = (0.5 - y) * 8;
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        card.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg) translateZ(0)`;
       });
-    })();
+    }
+    function resetTilt(){ card.style.transform = 'rotateX(0deg) rotateY(0deg)'; }
+    wrap.addEventListener('mousemove', handleMove);
+    wrap.addEventListener('mouseleave', resetTilt);
 
-    // Points ring fill
-    (function(){
-      const ring=document.getElementById('ring'); if(!ring) return;
-      const raw='{{ rewards_points|default_if_none:"0" }}';
-      const pts = Number(raw) || 0;
-      const pct = Math.max(0, Math.min(100, Math.round((pts/400)*100)));
-      ring.style.setProperty('--p', pct);
-    })();
-
-    // Staggered reveal on load/scroll (fast, robust)
-    (function(){
-      const items = [...document.querySelectorAll('[data-anim]')];
-      if (!items.length) return;
-
-      // Assign a small delay in order of appearance
-      items.forEach((el, i) => el.style.setProperty('--d', `${i*70}ms`));
-
-      const io = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('in'); // triggers CSS transition
-            io.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.08 });
-
-      items.forEach(el => io.observe(el));
-    })();
+    if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      wrap.removeEventListener('mousemove', handleMove);
+      wrap.removeEventListener('mouseleave', resetTilt);
+    }
   </script>
 </body>
 </html>

@@ -1,0 +1,257 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Reuse Market — CleanTrack+</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    :root{
+      --brand:#0f7a4d; --brand2:#0ea5a0;
+      --ink:#0f172a; --muted:#566471;
+      --glass:#ffffffcc; --glass-b:#ffffffa6; --ghost:#eafff5;
+      --shadow:0 14px 36px rgba(0,0,0,.09);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0; font-family:Manrope,system-ui,Segoe UI,Roboto,Arial; color:var(--ink); background:#f8fffb}
+
+    /* bg */
+    .bg{position:fixed; inset:0; z-index:-2; background:linear-gradient(180deg,#f4fff9 0%,#ecfff6 50%,#f9fffe 100%)}
+    .bg span{position:absolute;width:46vmax;height:46vmax;border-radius:50%;
+      background:radial-gradient(35% 35% at 30% 30%,#dcfff4,transparent 70%),
+                 radial-gradient(35% 35% at 70% 70%,#bff3e3,transparent 70%);
+      filter:blur(28px); mix-blend-mode:multiply; animation:float 18s var(--d,0s) ease-in-out infinite alternate}
+    .bg span:nth-child(1){top:-10vmax; left:-10vmax}
+    .bg span:nth-child(2){top:12vmax; right:-12vmax; --d:-3s}
+    .bg span:nth-child(3){bottom:-12vmax; left:25vmax; --d:-6s}
+    .bg span:nth-child(4){bottom:-8vmax; right:-8vmax; --d:-9s}
+    @keyframes float{0%{transform:translate(0,0)}50%{transform:translate(3vmax,-2vmax)}100%{transform:translate(-2vmax,2vmax)}}
+
+    .glass{background:var(--glass); backdrop-filter:blur(14px) saturate(1.15); -webkit-backdrop-filter:blur(14px) saturate(1.15);
+           border:1px solid var(--glass-b); box-shadow:var(--shadow)}
+
+    /* header */
+    .topbar{position:sticky; top:0; margin:18px; border-radius:999px; padding:10px 16px; display:flex; align-items:center; justify-content:space-between}
+    .brand{display:flex; align-items:center; gap:10px; color:#fff; padding:10px 16px; border-radius:999px; font-weight:900;
+           background:linear-gradient(120deg,#0f7a4d,#0ea5a0,#0f7a4d); background-size:200% 100%; animation:logoFlow 6s linear infinite}
+    @keyframes logoFlow{to{background-position:200% 50%}}
+    .bolt{width:26px; height:26px; border-radius:10px; background:#ffffff22; display:grid; place-items:center}
+    .nav-actions{display:flex; gap:10px}
+    .nav-btn{display:inline-flex; gap:8px; align-items:center; text-decoration:none; background:var(--ghost); border:1px solid #c6f6e5; color:#084c3c; padding:10px 14px; border-radius:999px; font-weight:800}
+
+    /* layout */
+    .wrap{max-width:1100px; margin:0 auto; padding:10px 16px 60px}
+    .hero{padding:24px; border-radius:22px; margin-bottom:16px}
+    .title{font-size:36px; font-weight:900; margin:0 0 6px}
+    .sub{color:var(--muted); margin:0}
+
+    .grid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
+    @media (max-width:1100px){ .grid{grid-template-columns:1fr 1fr} }
+    @media (max-width:720px){ .grid{grid-template-columns:1fr} }
+
+    /* card */
+    .item{position:relative; overflow:hidden; border-radius:20px}
+    .card{position:relative; border-radius:20px; padding:16px; background:#fff; border:1px solid #e6f3ed}
+    .top{display:flex; gap:10px; align-items:center; margin-bottom:10px}
+    .avatar{width:36px;height:36px;border-radius:10px;background:#eafff5;display:grid;place-items:center;font-weight:900;color:#0a4b3a}
+    .who{font-weight:800}
+    .when{font-size:13px; color:var(--muted)}
+    .name{font-weight:900; font-size:18px; margin:4px 0 4px}
+    .note{color:#0b3b31; margin:0 0 8px}
+    .meta{display:flex; gap:8px; flex-wrap:wrap; margin:6px 0 10px}
+    .pill{display:inline-flex; gap:8px; align-items:center; padding:6px 10px; border-radius:999px; border:1px solid #cdeee2; background:#f3fff9; color:#0c4b3a; font-weight:800; font-size:12px}
+    .badge-own{background:#ecfdf5; border:1px solid #b8f3db; color:#065f46}
+    .status{margin-left:auto; font-weight:900; font-size:12px; padding:6px 10px; border-radius:999px; border:1px solid #d7efe6}
+    .status.pending{background:#fff9f3; border-color:#fbd4a8; color:#9a3412}
+    .status.accepted{background:#e9f9ee; border-color:#b7ebc9; color:#065f46}
+    .status.donated{background:#ecfeff; border-color:#bae6fd; color:#075985}
+
+    .thumb{margin:6px 0 10px}
+    .thumb img{width:100%; max-height:180px; object-fit:cover; border-radius:12px; border:1px solid #e6f3ed}
+
+    .actions{display:flex; gap:10px; margin-top:8px; flex-wrap:wrap}
+    .btn{appearance:none; border:0; border-radius:12px; padding:10px 14px; font-weight:900; cursor:pointer}
+    .btn-primary{background:linear-gradient(90deg,#0ea5a0,#0f7a4d); color:#fff; box-shadow:0 8px 20px rgba(15,122,77,.18)}
+    .btn-ghost{background:var(--ghost); border:1px solid #c6f6e5; color:#084c3c; text-decoration:none; display:inline-flex; align-items:center}
+
+    /* contact + taker blocks */
+    details.ctc{display:inline-block}
+    details.ctc > summary{list-style:none}
+    details.ctc > summary::-webkit-details-marker{display:none}
+    details.ctc > summary{cursor:pointer}
+    .contact-sheet{min-width:240px; margin-top:6px; padding:12px; border-radius:12px; background:#f7fffb; border:1px solid #cdeee2; box-shadow:var(--shadow)}
+    .contact-line{display:flex; gap:8px; align-items:center; margin:6px 0; color:#0a4b3a}
+    .taker{margin-top:10px; padding:12px; border-radius:14px; border:1px solid #d7efe6}
+    .taker .row{display:grid; grid-template-columns:140px 1fr; gap:8px; align-items:center; padding:4px 0}
+    .hide{display:none}
+
+    /* reveal */
+    .reveal{opacity:0; transform:translateY(10px) scale(.985)}
+    .reveal.in{opacity:1; transform:none; transition:opacity .42s ease, transform .42s ease; transition-delay:var(--d,0ms)}
+  </style>
+</head>
+<body>
+  <div class="bg"><span></span><span></span><span></span><span></span></div>
+
+  <header class="topbar glass reveal" data-anim>
+    <div class="brand"><div class="bolt">⚡</div>CleanTrack+</div>
+    <nav class="nav-actions">
+      <a class="nav-btn" href="{% url 'users:dashboard' %}"> Dashboard</a>
+      <a class="nav-btn" href="{% url 'home' %}"> Home</a>
+      <a class="nav-btn" href="{% url 'users:logout' %}"> Logout</a>
+    </nav>
+  </header>
+
+  <div class="wrap">
+    <section class="hero glass reveal" data-anim style="--d:60ms">
+      <h1 class="title">Reuse Market</h1>
+      <p class="sub">Find items offered by neighbors. React if you’d like to take one — we’ll notify the poster.</p>
+      {% if messages %}
+        <div style="margin-top:10px; display:grid; gap:8px">
+          {% for m in messages %}
+            <div class="glass" style="padding:10px 12px; border-radius:12px; font-weight:700; color:#0a4b3a">{{ m }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </section>
+
+    <section class="grid">
+      {% for it in items %}
+        {% with st=it.status|default:"pending"|lower %}
+        <article class="item reveal" data-anim style="--d:{{ forloop.counter0|add:'1' }}00ms">
+          <div class="card">
+            <div class="top">
+              <div class="avatar">{{ it.user.username|slice:":1"|upper }}</div>
+              <div>
+                <div class="who">
+                  {{ it.user.get_full_name|default:it.user.username }}
+                  {% if request.user.id == it.user_id %}
+                    <span class="pill badge-own"> Your post</span>
+                  {% endif %}
+                </div>
+                <div class="when">{% if it.created %}{{ it.created|date:"M j, g:i a" }}{% endif %}</div>
+              </div>
+              <div class="status {{ st }}" style="margin-left:auto; text-transform:capitalize">{{ st }}</div>
+            </div>
+
+            <div class="name">{{ it.item_name|default:it.description|default:"Donation" }}</div>
+            {% if it.note %}<p class="note">{{ it.note }}</p>{% endif %}
+
+            <div class="meta">
+              <span class="pill">📦 Qty: {{ it.quantity|default:"1" }}</span>
+              {% if it.category %}<span class="pill">🏷️ {{ it.category }}</span>{% endif %}
+              {% if it.partner %}<span class="pill">🤝 {{ it.partner }}</span>{% endif %}
+            </div>
+
+            {% if it.photo %}
+              <div class="thumb"><img src="{{ it.photo.url }}" alt="donation photo"></div>
+            {% endif %}
+
+            <div class="actions">
+              {# Accept button for other people's pending items #}
+              {% if st == "pending" and request.user.id != it.user_id %}
+                <form method="post" action="{% url 'users:reuse_accept' it.id %}">
+                  {% csrf_token %}
+                  <button class="btn btn-primary" type="submit">I’m interested</button>
+                </form>
+              {% elif st == "accepted" and it.accepted_by_id == request.user.id %}
+                <span class="pill" style="background:#e9f9ee;border-color:#b7ebc9;color:#065f46">✔ You accepted</span>
+              {% elif st == "accepted" %}
+                {% if request.user.id == it.user_id %}
+                  <button class="btn btn-ghost js-reveal" type="button" data-target="#taker-{{it.id}}">👤 View taker</button>
+                {% else %}
+                  <span class="pill">⏳ Taken</span>
+                {% endif %}
+              {% else %}
+                <span class="pill">ℹ️ {{ st|title }}</span>
+              {% endif %}
+
+              {# Contact sheet – ALWAYS visible to everyone #}
+              <details class="ctc">
+                <summary class="btn btn-ghost">✉️ Contact poster</summary>
+                <div class="contact-sheet">
+                  <div class="contact-line">👤 <strong>{{ it.user.get_full_name|default:it.user.username }}</strong></div>
+
+                  {% with phone=it.user.phone_number email=it.user.email %}
+                    {% if email %}
+                      <div class="contact-line">📧 <a href="mailto:{{ email }}">{{ email }}</a></div>
+                    {% else %}
+                      <div class="contact-line">📧 Not provided</div>
+                    {% endif %}
+
+                    {% if phone %}
+                      <div class="contact-line">📞 <a href="tel:{{ phone }}">{{ phone }}</a></div>
+                    {% else %}
+                      <div class="contact-line">📞 Not provided</div>
+                    {% endif %}
+                  {% endwith %}
+
+                  {% if request.user.id == it.user_id %}
+                    <div class="contact-line" style="opacity:.8">💡 Tip: update your email/phone on the Profile page so others can reach you easily.</div>
+                  {% endif %}
+                </div>
+              </details>
+            </div>
+
+            {# Private taker details for poster only #}
+            {% if st == "accepted" and request.user.id == it.user_id %}
+              <div id="taker-{{it.id}}" class="taker glass hide">
+                <div class="row"><span>Accepted by</span>
+                  <strong>{{ it.accepted_by.get_full_name|default:it.accepted_by.username }}</strong>
+                </div>
+                {% if it.accepted_at %}<div class="row"><span>Accepted at</span><strong>{{ it.accepted_at|date:"M j, g:i a" }}</strong></div>{% endif %}
+                {% if it.accepted_by.email %}<div class="row"><span>Email</span><a href="mailto:{{it.accepted_by.email}}">{{ it.accepted_by.email }}</a></div>{% endif %}
+                {% if it.accepted_by.phone_number %}<div class="row"><span>Phone</span><a href="tel:{{it.accepted_by.phone_number}}">{{ it.accepted_by.phone_number }}</a></div>{% endif %}
+              </div>
+            {% endif %}
+          </div>
+        </article>
+        {% endwith %}
+      {% empty %}
+        <div class="glass" style="grid-column:1/-1; padding:20px; border-radius:18px; font-weight:800; color:#0a4b3a">
+          No reuse items yet. Be the first to post from the <a href="{% url 'users:reuse' %}">Donate / Reuse</a> page.
+        </div>
+      {% endfor %}
+    </section>
+  </div>
+
+  <script>
+    // parallax
+    (function(){
+      const spans=document.querySelectorAll('.bg span'); if(!spans.length) return;
+      let w=innerWidth,h=innerHeight;
+      addEventListener('mousemove',e=>{
+        const x=(e.clientX/w-.5)*6, y=(e.clientY/h-.5)*6;
+        spans.forEach((s,i)=> s.style.transform=`translate(${x*(i+1)}vmin, ${y*(i+1)}vmin)`);
+      });
+      addEventListener('resize',()=>{w=innerWidth;h=innerHeight});
+    })();
+
+    // reveal
+    (function(){
+      const items=[...document.querySelectorAll('[data-anim]')];
+      if(!items.length) return;
+      items.forEach((el,i)=>{ if(!el.style.getPropertyValue('--d')) el.style.setProperty('--d', `${i*70}ms`) });
+      const io=new IntersectionObserver((entries)=>{
+        entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+      },{threshold:.08});
+      items.forEach(el=>io.observe(el));
+    })();
+
+    // toggle taker panel (poster only)
+    document.addEventListener('click', (e)=>{
+      const btn = e.target.closest('.js-reveal');
+      if(!btn) return;
+      const sel = btn.getAttribute('data-target');
+      const box = sel ? document.querySelector(sel) : null;
+      if(box){ box.classList.toggle('hide'); }
+    });
+  </script>
+</body>
+</html>

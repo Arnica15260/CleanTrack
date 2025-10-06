@@ -39,6 +39,28 @@ body{margin:0;font-family:Manrope,system-ui,Segoe UI,Roboto,Arial;color:var(--in
 .hint{color:var(--muted)}
 .errorlist{color:#b91c1c;margin:4px 0 0;font-size:.95rem}
 @media (max-width:980px){.grid2{grid-template-columns:1fr}}
+
+/* Helpful extras (bottom tiles) */
+.helpful{margin-top:22px;display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+@media (max-width:980px){.helpful{grid-template-columns:1fr}}
+.tile{position:relative;padding:20px;border-radius:20px;overflow:hidden}
+.tile::before{
+  content:""; position:absolute; inset:-1px; border-radius:22px;
+  background:linear-gradient(135deg,#d7f7ec 0%,#b7f0e7 50%,#dffbea 100%);
+  z-index:-1; filter:blur(.5px);
+}
+.tile.glass{background:rgba(255,255,255,.86)}
+.cap{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-weight:900}
+.cap .b{
+  width:36px;height:36px;border-radius:12px;display:grid;place-items:center;
+  background:linear-gradient(135deg,#ecfdf5,#d1fae5);border:1px solid #b8f3db;color:#0f7a4d;
+  box-shadow:0 6px 18px rgba(16,122,77,.12);
+}
+.tile p{margin:0;color:var(--muted)}
+.tile ul{margin:8px 0 0 0;padding-left:18px}
+.tile li{margin:6px 0}
+.shine{position:absolute;top:0;left:0;height:4px;width:0;background:linear-gradient(90deg,transparent,#a7f3d0,transparent);animation:shinebar 4s ease-in-out infinite}
+@keyframes shinebar{0%{left:0;width:0}30%{width:40%}60%{left:60%;width:40%}100%{left:100%;width:0}}
 </style>
 </head>
 <body>
@@ -46,7 +68,11 @@ body{margin:0;font-family:Manrope,system-ui,Segoe UI,Roboto,Arial;color:var(--in
 
 <header class="topbar glass">
   <div class="logo-pill"><div class="bolt">⚡</div><span>CleanTrack+</span></div>
-  <nav class="nav-actions"><a class="nav-btn" href="{% url 'users:dashboard' %}">🏠 Dashboard</a></nav>
+  <nav class="nav-actions">
+    <a class="nav-btn" href="{% url 'users:dashboard' %}"> Dashboard</a>
+    <a class="nav-btn" href="{% url 'home' %}"> Home</a>
+    <a class="nav-btn" href="{% url 'users:logout' %}">︎ Logout</a>
+  </nav>
 </header>
 
 <div class="wrap">
@@ -103,6 +129,50 @@ body{margin:0;font-family:Manrope,system-ui,Segoe UI,Roboto,Arial;color:var(--in
         <span class="hint">Thanks for keeping items out of landfill.</span>
       </div>
     </form>
+  </section>
+
+  <!-- Helpful extras -->
+  <section class="helpful">
+    <article class="tile glass">
+      <div class="shine"></div>
+      <div class="cap"><div class="b">✅</div><div>What can I donate?</div></div>
+      <p>Almost anything in usable condition.</p>
+      <ul>
+        <li>Furniture, appliances, kitchenware, toys, books</li>
+        <li>Clothing/shoes (clean), electronics (working)</li>
+        <li>Large/bulky? Just add a photo for routing</li>
+      </ul>
+    </article>
+
+    <article class="tile glass">
+      <div class="shine"></div>
+      <div class="cap"><div class="b">🛡️</div><div>Safety & privacy</div></div>
+      <ul>
+        <li>Meet in a visible place if possible</li>
+        <li>Share only what you’re comfortable with</li>
+        <li>Keep paths clear for movers/van access</li>
+      </ul>
+    </article>
+
+    <article class="tile glass">
+      <div class="shine"></div>
+      <div class="cap"><div class="b">🚚</div><div>Pickup tips</div></div>
+      <ul>
+        <li>Disassemble big items if you can</li>
+        <li>Label fragile parts and bag small pieces</li>
+        <li>Take a photo so takers know what to expect</li>
+      </ul>
+    </article>
+
+    <article class="tile glass">
+      <div class="shine"></div>
+      <div class="cap"><div class="b">🔔</div><div>After someone accepts</div></div>
+      <ul>
+        <li>Coordinate pickup via email/phone</li>
+        <li>Mark it “Donated” on your dashboard afterward</li>
+      </ul>
+      <p style="margin-top:10px"><a class="nav-btn" href="{% url 'users:reuse_market' %}">🔎 View Reuse Market</a></p>
+    </article>
   </section>
 </div>
 
