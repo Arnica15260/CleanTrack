@@ -229,6 +229,8 @@ class ReuseDonation(TimeStamped):
         self.save(update_fields=["status", "accepted_by", "accepted_at"])
 
 
+# users/models.py
+
 class Complaint(TimeStamped):
     TYPES = (
         ("missed_pickup", "Missed Pickup"),
@@ -248,6 +250,20 @@ class Complaint(TimeStamped):
     description = models.TextField()
     photo = models.ImageField(upload_to="complaint_photos/", blank=True, null=True)
     status = models.CharField(max_length=20, default="open")  # open|in_progress|resolved
+
+    # NEW (optional) links used by the driver/dispatch features:
+    task = models.ForeignKey(
+        "users.DeliveryTask",           # string ref avoids import order issues
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name="complaints",
+    )
+    driver = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name="driver_complaints",
+    )
 
     class Meta:
         ordering = ("-created",)
@@ -282,6 +298,129 @@ class RewardEvent(TimeStamped):
 
     def __str__(self):
         return f"{self.user} +{self.points} ({self.source})"
+
+
+# users/models.py  (append near the end)
+
+from django.core.validators import MinValueValidator, MaxValueValidator
+from django.db.models import Q, F, TextChoices
+
+# --- Driver tasking & tracking ---
+
+class DeliveryTask(TimeStamped):
+    class Status(TextChoices):
+        ASSIGNED  = "assigned",  "Assigned"
+        ACCEPTED  = "accepted",  "Accepted"
+        ENROUTE   = "enroute",   "En Route"
+        ARRIVED   = "arrived",   "Arrived"
+        COMPLETED = "completed", "Completed"
+        CANCELLED = "cancelled", "Cancelled"
+
+    # Who is this delivery for (the customer)
+    customer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="delivery_tasks",
+    )
+
+    # Optional link to an existing pickup
+    pickup_request = models.ForeignKey(
+        "users.PickupRequest",
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name="tasks",
+    )
+
+    # Assignment
+    assigned_to = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="driver_tasks",
+        help_text="Driver user",
+    )
+
+    address = models.CharField(max_length=255)
+    window_start = models.DateTimeField(null=True, blank=True)
+    window_end   = models.DateTimeField(null=True, blank=True)
+    notes = models.CharField(max_length=255, blank=True, default="")
+
+    status = models.CharField(max_length=16, choices=Status.choices, default=Status.ASSIGNED, db_index=True)
+
+    accepted_at  = models.DateTimeField(null=True, blank=True)
+    started_at   = models.DateTimeField(null=True, blank=True)   # enroute
+    arrived_at   = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    proof_photo = models.ImageField(upload_to="driver_proof/", null=True, blank=True)
+
+    points_awarded = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ("-created",)
+        indexes = [models.Index(fields=("status", "-created"))]
+
+    def __str__(self):
+        who = getattr(self.assigned_to, "username", "driver")
+        return f"Task to {self.address} for {self.customer} → {who} [{self.status}]"
+
+    # simple helpers used by views
+    def award_points(self, driver, pts: int, reason="delivery"):
+        DriverPointEvent.objects.create(driver=driver, task=self, points=pts, reason=reason)
+        self.points_awarded = (self.points_awarded or 0) + pts
+        self.save(update_fields=["points_awarded"])
+
+
+class DriverLocation(models.Model):
+    """Last known live location per driver (for fast queries)."""
+    driver = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="driver_location"
+    )
+    lat = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    lng = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    last_seen = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.driver} @ {self.lat},{self.lng} ({self.last_seen})"
+
+
+class LocationPing(TimeStamped):
+    """Optional history of pings (keep if you want trails on the map)."""
+    driver = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="location_pings")
+    task   = models.ForeignKey(DeliveryTask, on_delete=models.SET_NULL, null=True, blank=True, related_name="pings")
+    lat    = models.DecimalField(max_digits=9, decimal_places=6)
+    lng    = models.DecimalField(max_digits=9, decimal_places=6)
+
+    class Meta:
+        ordering = ("-created",)
+
+
+class DriverPointEvent(TimeStamped):
+    """Score ledger for drivers."""
+    driver = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="driver_points")
+    task   = models.ForeignKey(DeliveryTask, on_delete=models.SET_NULL, null=True, blank=True, related_name="point_events")
+    points = models.IntegerField(default=0)
+    reason = models.CharField(max_length=80, default="delivery")
+
+    class Meta:
+        ordering = ("-created",)
+
+    def __str__(self):
+        return f"{self.driver} {'+' if self.points >= 0 else ''}{self.points} ({self.reason})"
+
+
+
+
+
+# users/models.py (append bottom)
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+@receiver(post_save, sender=Complaint)
+def penalize_driver_on_complaint(sender, instance: Complaint, created, **kwargs):
+    if not created:
+        return
+    if instance.driver_id:
+        DriverPointEvent.objects.create(driver=instance.driver, task=instance.task, points=-5, reason="complaint")
 
 
 

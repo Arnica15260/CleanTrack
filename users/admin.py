@@ -69,3 +69,29 @@ class RewardAdmin(admin.ModelAdmin):
     list_display = ("user","source","points","memo","created")
     list_filter = ("source",)
     search_fields = ("user__username","memo")
+
+# users/admin.py
+from django.contrib import admin
+from .models import DeliveryTask, DriverLocation, LocationPing, DriverPointEvent
+
+@admin.register(DeliveryTask)
+class DeliveryTaskAdmin(admin.ModelAdmin):
+    list_display = ("id", "customer", "assigned_to", "address", "status", "window_start", "completed_at")
+    list_filter  = ("status", "assigned_to")
+    search_fields = ("address", "customer__username", "assigned_to__username")
+    autocomplete_fields = ("customer", "assigned_to", "pickup_request")
+
+@admin.register(DriverLocation)
+class DriverLocationAdmin(admin.ModelAdmin):
+    list_display = ("driver", "lat", "lng", "last_seen")
+    search_fields = ("driver__username",)
+
+@admin.register(LocationPing)
+class LocationPingAdmin(admin.ModelAdmin):
+    list_display = ("driver", "task", "lat", "lng", "created")
+    list_filter = ("driver", "task")
+
+@admin.register(DriverPointEvent)
+class DriverPointEventAdmin(admin.ModelAdmin):
+    list_display = ("driver", "task", "points", "reason", "created")
+    list_filter  = ("driver", "reason")

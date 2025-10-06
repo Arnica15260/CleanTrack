@@ -1,0 +1,32 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Assign Task — CleanTrack+</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>:root{--brand:#0f7a4d;--brand2:#0ea5a0;--glass:#ffffffcc;--glass-b:#ffffffa6;--ink:#0f172a}
+body{margin:0;font-family:Manrope;background:#f8fffb;color:var(--ink)}.wrap{max-width:800px;margin:40px auto;padding:16px}
+.card{background:#fff;border:1px solid #d7efe6;border-radius:18px;padding:18px}
+label{display:block;font-weight:800;margin:8px 0 4px}
+input,select,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #cdeee2}
+.btn{margin-top:12px;border:0;background:linear-gradient(90deg,#0ea5a0,#0f7a4d);color:#fff;padding:12px 16px;border-radius:12px;font-weight:900}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Assign a Driver Task</h1>
+  <div class="card">
+    <form method="post">{% csrf_token %}
+      {{ form.non_field_errors }}
+      {% for f in form %}
+        <label for="{{ f.id_for_label }}">{{ f.label }}</label>
+        {{ f }}
+        {{ f.errors }}
+      {% endfor %}
+      <button class="btn" type="submit">Assign</button>
+    </form>
+  </div>
+</div>
+</body>
+</html>

@@ -1,9 +1,254 @@
+{% load static %}
 <!doctype html>
-<html>
-<head><meta charset="utf-8"><title>Track</title></head>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Track Pickup — CleanTrack+</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <style>
+    :root{
+      --brand:#0f7a4d; --brand2:#0ea5a0;
+      --ink:#0f172a; --muted:#566471;
+      --glass:#ffffffcc; --glass-b:#ffffffa6; --ghost:#eafff5;
+      --ok:#16a34a; --warn:#f59e0b; --info:#0ea5a0; --bad:#e11d48;
+      --shadow:0 14px 36px rgba(0,0,0,.09);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:Manrope,system-ui,Segoe UI,Roboto,Arial;color:var(--ink);background:#f8fffb}
+
+    /* bg */
+    .bg{position:fixed; inset:0; z-index:-2; background:linear-gradient(180deg,#f4fff9 0%,#ecfff6 50%,#f9fffe 100%)}
+    .bg span{position:absolute;width:46vmax;height:46vmax;border-radius:50%;
+      background:radial-gradient(35% 35% at 30% 30%,#dcfff4,transparent 70%),
+                 radial-gradient(35% 35% at 70% 70%,#bff3e3,transparent 70%);
+      filter:blur(28px); mix-blend-mode:multiply; animation:float 18s var(--d,0s) ease-in-out infinite alternate}
+    .bg span:nth-child(1){top:-10vmax; left:-10vmax}
+    .bg span:nth-child(2){top:12vmax; right:-12vmax; --d:-3s}
+    .bg span:nth-child(3){bottom:-12vmax; left:25vmax; --d:-6s}
+    .bg span:nth-child(4){bottom:-8vmax; right:-8vmax; --d:-9s}
+    @keyframes float{0%{transform:translate(0,0)}50%{transform:translate(3vmax,-2vmax)}100%{transform:translate(-2vmax,2vmax)}}
+
+    .glass{background:var(--glass);backdrop-filter:blur(14px) saturate(1.15);-webkit-backdrop-filter:blur(14px) saturate(1.15);
+           border:1px solid var(--glass-b);box-shadow:var(--shadow)}
+
+    /* header */
+    .topbar{position:sticky; top:0; margin:18px; border-radius:999px; padding:10px 16px; display:flex; align-items:center; justify-content:space-between}
+    .brand{display:flex; align-items:center; gap:10px; color:#fff; padding:10px 16px; border-radius:999px; font-weight:900;
+           background:linear-gradient(120deg,var(--brand),var(--brand2),var(--brand)); background-size:200% 100%; animation:logoFlow 6s linear infinite}
+    @keyframes logoFlow{to{background-position:200% 50%}}
+    .bolt{width:26px; height:26px; border-radius:10px; background:#ffffff22; display:grid; place-items:center}
+    .nav-actions{display:flex; gap:10px}
+    .nav-btn{display:inline-flex; gap:8px; align-items:center; text-decoration:none; background:var(--ghost); border:1px solid #c6f6e5; color:#084c3c; padding:10px 14px; border-radius:999px; font-weight:800}
+
+    /* layout */
+    .wrap{max-width:1180px; margin:0 auto; padding:8px 16px 60px}
+    .hero{padding:24px; border-radius:22px; margin-bottom:16px}
+    .title{font-size:42px; font-weight:900; margin:0 0 8px}
+    .sub{color:var(--muted); margin:0}
+
+    .grid{display:grid; grid-template-columns:2fr 1.1fr; gap:16px}
+    @media (max-width:1000px){ .grid{grid-template-columns:1fr} }
+
+    /* cards & chips */
+    .card{background:#fff; border:1px solid #e6f3ed; border-radius:22px; padding:18px}
+    .h2{font-size:24px; margin:0 0 12px; font-weight:900}
+    .pill{display:inline-flex; gap:8px; align-items:center; padding:8px 12px; border-radius:999px; border:1px solid #cdeee2; background:#f3fff9; color:#0c4b3a; font-weight:800; font-size:14px}
+    .chip{display:inline-flex; gap:8px; align-items:center; padding:10px 16px; border-radius:999px; border:1px solid #d7efe6; background:#ecfdf5; color:#065f46; font-weight:900}
+    .chip.warn{background:#fff9f3; border-color:#fbd4a8; color:#9a3412}
+    .chip.info{background:#f0fcfc; border-color:#b6f5f5; color:#0e7490}
+    .chip.ok{background:#e9f9ee; border-color:#b7ebc9; color:#065f46}
+    .row{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+
+    .task-list{display:grid; gap:12px; max-height:520px; overflow:auto}
+    .tcard{border:1px solid #e6f3ed; border-radius:16px; padding:12px}
+    .trow{display:flex; align-items:center; justify-content:space-between; gap:10px}
+    .tmeta{display:flex; gap:8px; flex-wrap:wrap; margin-top:6px}
+
+    /* map */
+    #map{height:380px; border-radius:16px; border:1px solid #e6f3ed; overflow:hidden}
+
+    /* reveal */
+    .reveal{opacity:0; transform:translateY(10px) scale(.985)}
+    .reveal.in{opacity:1; transform:none; transition:opacity .42s ease, transform .42s ease; transition-delay:var(--d,0ms)}
+  </style>
+</head>
 <body>
-  <h1>Track</h1>
-  <p>This is the Track page.</p>
-  <p><a href="{% url 'users:dashboard' %}">Back to Dashboard</a></p>
+  <div class="bg"><span></span><span></span><span></span><span></span></div>
+
+  <header class="topbar glass reveal" data-anim>
+    <div class="brand"><div class="bolt">⚡</div>CleanTrack+</div>
+    <nav class="nav-actions">
+      <a class="nav-btn" href="{% url 'users:dashboard' %}"> Dashboard</a>
+         <a class="nav-btn" href="{% url 'home' %}"> Home</a>
+      <a class="nav-btn" href="{% url 'users:logout' %}"> Logout</a>
+    </nav>
+  </header>
+
+  <div class="wrap">
+    <!-- Hero -->
+    <section class="hero glass reveal" data-anim style="--d:60ms">
+      <h1 class="title">Track Pickup Status</h1>
+      <p class="sub">Enter your request ID to track the status of your waste pickup.</p>
+
+      <form method="get" class="row" style="margin-top:14px">
+        <input name="q" value="{{ request.GET.q|default:active_id }}" placeholder="Request ID"
+               style="flex:1; min-width:200px; border-radius:999px; padding:12px 16px; border:1px solid #c6f6e5; background:#fff; font:inherit">
+        <button class="nav-btn" type="submit">Track</button>
+      </form>
+
+      {% if messages %}
+        <div style="margin-top:10px; display:grid; gap:8px">
+          {% for m in messages %}
+            <div class="glass" style="padding:10px 12px; border-radius:12px; font-weight:700; color:#0a4b3a">{{ m }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </section>
+
+    <section class="grid">
+      <!-- LEFT: status + live map + (conditional) item photo -->
+      <article class="card reveal" data-anim style="--d:120ms">
+        <div class="row" style="justify-content:space-between; align-items:flex-start">
+          <div>
+            <div class="h2" id="h-id">Pickup ID: <span style="font-weight:900">#{{ task.id|default:active_id|default:"—" }}</span></div>
+            <div style="color:var(--muted); font-weight:700" id="h-driver">
+              {% if driver_name %}{{ driver_name }}{% else %}—{% endif %} (Driver)
+            </div>
+          </div>
+          <div><div id="h-badge" class="chip ok">{{ status_badge|default:"Any time" }}</div></div>
+        </div>
+
+        <div class="tmeta" style="margin-top:12px">
+          <span class="pill">📍 <span id="h-address">{{ task.address|default:"—" }}</span></span>
+          <span class="pill">🕒 <span id="h-hint">{{ status_hint|default:"Soon driver will pick your waste" }}</span></span>
+        </div>
+
+        <div class="row" style="margin-top:12px">
+          <a class="nav-btn" href="{% url 'users:schedule' %}">⏳ Reschedule</a>
+          {% if driver_email %}<a class="nav-btn" href="mailto:{{ driver_email }}">✉️ Message</a>{% endif %}
+          {% if driver_phone %}<a class="nav-btn" href="tel:{{ driver_phone }}">📞 Driver Number</a>{% endif %}
+        </div>
+
+        <h3 class="h2" style="margin-top:16px">Show Live Location</h3>
+        <div id="map"></div>
+
+        {% if show_photo and pickup_photo_url %}
+          <h3 class="h2" style="margin-top:16px">Item Photo</h3>
+          <img src="{{ pickup_photo_url }}" alt="Pickup item photo"
+               style="width:100%; max-height:240px; object-fit:cover; border-radius:16px; border:1px solid #e6f3ed" />
+        {% endif %}
+      </article>
+
+      <!-- RIGHT: recent tasks -->
+      <aside class="card reveal" data-anim style="--d:160ms">
+        <div class="h2">Recent Requests</div>
+        <div class="task-list">
+          {% for t in items %}
+            <div class="tcard">
+              <div class="trow">
+                <div style="font-weight:900">#{{ t.id }}</div>
+                <a class="nav-btn" href="?q={{ t.id }}">Track</a>
+              </div>
+              <div class="tmeta">
+                <span class="pill">📍 {{ t.address|truncatechars:40 }}</span>
+                <span class="pill">🏷️ {{ t.status|title }}</span>
+                {% if t.window_start %}<span class="pill">🗓️ {{ t.window_start|date:"M j, g:i a" }}</span>{% endif %}
+              </div>
+            </div>
+          {% empty %}
+            <div style="color:var(--muted)">No recent deliveries yet.</div>
+          {% endfor %}
+        </div>
+      </aside>
+    </section>
+  </div>
+
+  <!-- handy data hook for JS -->
+  <div id="js-data"
+       data-url-latest="{% url 'users:user_track_latest' %}"
+       data-url-task-tpl="{% url 'users:user_track_task' 999999 %}"></div>
+
+  <script>
+    // Parallax bg
+    (function(){
+      const spans=document.querySelectorAll('.bg span'); if(!spans.length) return;
+      let w=innerWidth,h=innerHeight;
+      addEventListener('mousemove',e=>{
+        const x=(e.clientX/w-.5)*6, y=(e.clientY/h-.5)*6;
+        spans.forEach((s,i)=> s.style.transform=`translate(${x*(i+1)}vmin, ${y*(i+1)}vmin)`);});
+      addEventListener('resize',()=>{w=innerWidth;h=innerHeight});
+    })();
+    // Reveal
+    (function(){
+      const items=[...document.querySelectorAll('[data-anim]')];
+      if(!items.length) return;
+      items.forEach((el,i)=>{ if(!el.style.getPropertyValue('--d')) el.style.setProperty('--d', `${i*70}ms`) });
+      const io=new IntersectionObserver((entries)=>{
+        entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+      },{threshold:.08});
+      items.forEach(el=>io.observe(el));
+    })();
+
+    // ---- Map + live polling ----
+    const dhaka=[23.8103, 90.4125];
+    const startLat={{ last_lat|default:"null" }}; const startLng={{ last_lng|default:"null" }};
+    const map=L.map('map',{zoomControl:true}).setView(
+      (startLat!==null && startLng!==null) ? [startLat,startLng] : dhaka, 13
+    );
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(map);
+    const marker=L.marker((startLat!==null && startLng!==null) ? [startLat,startLng] : dhaka).addTo(map);
+
+    const hId=document.getElementById('h-id');
+    const hDriver=document.getElementById('h-driver');
+    const hBadge=document.getElementById('h-badge');
+    const hAddress=document.getElementById('h-address');
+    const hHint=document.getElementById('h-hint');
+
+    const activeId={{ active_id|default:"null" }};
+    const dataEl=document.getElementById('js-data');
+    const urlLatest=dataEl.dataset.urlLatest;
+    const urlTaskTpl=dataEl.dataset.urlTaskTpl;
+    const taskUrl=(id)=> urlTaskTpl.replace(/999999/, String(id));
+
+    async function pull(){
+      const url = (activeId!==null) ? taskUrl(activeId) : urlLatest;
+      try{
+        const r=await fetch(url,{headers:{"Accept":"application/json"}});
+        if(!r.ok) return;
+        const data=await r.json(); if(!data.ok) return;
+
+        const t=data.task||{}; const d=t.driver||{}; const loc=data.driver_location||null;
+
+        // header
+        hId.innerHTML = `Pickup ID: <span style="font-weight:900">#${t.id??"—"}</span>`;
+        hDriver.textContent = (d.name? d.name : "—") + " (Driver)";
+        hAddress.textContent = t.address || "—";
+        hHint.textContent = t.status_hint || "";
+        hBadge.textContent = t.status_badge || (t.status||"").replace("_"," ").toUpperCase();
+        hBadge.className = "chip " + (
+          (t.status||"").includes("completed") ? "ok" :
+          (t.status||"").match(/route|enroute|arrived|accepted/) ? "info" : "warn"
+        );
+
+        // position
+        if(loc && typeof loc.lat==="number" && typeof loc.lng==="number"){
+          const p=[loc.lat, loc.lng];
+          marker.setLatLng(p);
+          if(!pull._fitted){ map.setView(p, 14); pull._fitted=true; }
+        }
+      }catch(e){ /* silent */ }
+    }
+    pull(); setInterval(pull, 8000);
+  </script>
 </body>
 </html>

@@ -31,6 +31,7 @@ SESSION_COOKIE_SAMESITE = "Lax"
 # Applications
 # ------------------------------------------------------------------------------
 INSTALLED_APPS = [
+    "channels",
     "users.apps.UsersConfig",     # custom users app (with custom User model)
     "django.contrib.admin",
     "django.contrib.auth",
@@ -136,3 +137,11 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+
+ASGI_APPLICATION = "CleanTrack.asgi.application"
+
+# Dev: in-memory layer is OK. For production use RedisChannelLayer
+CHANNEL_LAYERS = {
+    "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}
+}

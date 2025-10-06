@@ -1,0 +1,74 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Track Delivery — CleanTrack+</title>
+<link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+html,body{height:100%;margin:0;font-family:Manrope,system-ui}
+#map{height:70vh;border-radius:16px;border:1px solid #cdeee2;margin:16px}
+.panel{margin:16px}
+.badge{display:inline-block;background:#eafff5;border:1px solid #c6f6e5;padding:6px 10px;border-radius:999px;font-weight:800}
+</style>
+</head>
+<body>
+<div class="panel">
+  <h2>Tracking task #{{ task.id }} → {{ task.address }}</h2>
+  <div class="badge">Driver: {{ task.assigned_to.get_full_name|default:task.assigned_to.username }}</div>
+  <div class="badge">Status: {{ task.status|title }}</div>
+</div>
+<div id="map"></div>
+
+<script>
+const map = L.map('map');
+const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}); osm.addTo(map);
+let driverMarker = null;
+
+function place(lat, lng){
+  if(!driverMarker){
+    driverMarker = L.marker([lat,lng]).addTo(map);
+    map.setView([lat,lng], 15);
+  }else{
+    driverMarker.setLatLng([lat,lng]);
+  }
+}
+
+// seed with last known
+{% if last_lat and last_lng %}
+place({{ last_lat }}, {{ last_lng }});
+{% else %}
+map.setView([23.8103, 90.4125], 12); // Dhaka fallback
+{% endif %}
+
+// WebSocket live updates
+(function(){
+  const proto = (location.protocol === "https:") ? "wss" : "ws";
+  const ws = new WebSocket(`${proto}://${location.host}/ws/task/{{ task.id }}/`);
+  ws.onmessage = (ev)=>{
+    try{
+      const data = JSON.parse(ev.data);
+      if(data.type === "pos"){
+        place(parseFloat(data.lat), parseFloat(data.lng));
+      }
+    }catch(e){}
+  };
+  ws.onerror = ()=>{ fallbackPoll(); };
+  ws.onclose = ()=>{ fallbackPoll(); };
+
+  let polled=false;
+  function fallbackPoll(){
+    if(polled) return; polled=true;
+    setInterval(async ()=>{
+      try{
+        const r = await fetch("{% url 'users:task_positions_api' task.id %}");
+        const j = await r.json();
+        if(j.ok && j.pos){ place(j.pos.lat, j.pos.lng); }
+      }catch(e){}
+    }, 5000);
+  }
+})();
+</script>
+</body>
+</html>

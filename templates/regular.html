@@ -113,6 +113,9 @@
     <div class="brand"><div class="bolt">⚡</div>CleanTrack+</div>
     {% url 'home' as home_url %}
     <a class="home-btn" href="{{ home_url|default:'/' }}" rel="noopener"> Home</a>
+
+
+
   </header>
 
   <div class="layout">
@@ -350,10 +353,70 @@
       </section>
 
       <div style="display:flex;justify-content:space-between;color:#0a4b3a;font-size:.95rem;margin:6px 2px">
-        <a href="{% url 'users:contact' %}">Contact</a><div>Privacy</div>
+            <a class="home-btn" href="{{ contact_url|default:'/' }}" rel="noopener"> Contact</a>
+
       </div>
     </main>
   </div>
+
+
+  <!-- Accepted from neighbors (reuse taken) -->
+<section class="card glass reveal" data-anim>
+  <h2 style="margin:0 0 10px">Accepted from Neighbors</h2>
+
+  {% if reuse_taken %}
+    <div style="display:grid; gap:12px">
+      {% for it in reuse_taken %}
+        <article class="item" style="border:1px solid #e6f3ed; border-radius:16px; padding:12px">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px">
+            <div style="width:36px;height:36px;border-radius:10px;background:#eafff5;display:grid;place-items:center;font-weight:900;color:#0a4b3a">
+              {{ it.user.username|slice:":1"|upper }}
+            </div>
+            <div style="flex:1">
+              <div style="font-weight:800">
+                {{ it.user.get_full_name|default:it.user.username }}
+                <span class="pill" style="margin-left:6px">🧑‍💼 Poster</span>
+              </div>
+              <div style="font-size:13px; color:#566471">
+                {% if it.accepted_at %}{{ it.accepted_at|date:"M j, g:i a" }}{% else %}{{ it.created|date:"M j, g:i a" }}{% endif %}
+              </div>
+            </div>
+            <div class="pill" style="text-transform:capitalize">✔ Accepted</div>
+          </div>
+
+          <div style="font-weight:900; font-size:17px">{{ it.item_name|default:it.category }}</div>
+          {% if it.description %}<p style="margin:6px 0 8px; color:#0b3b31">{{ it.description }}</p>{% endif %}
+
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin:6px 0 6px">
+            <span class="pill">📦 Qty: {{ it.quantity|default:"1" }}</span>
+            {% if it.category %}<span class="pill">🏷️ {{ it.category }}</span>{% endif %}
+            {% if it.partner %}<span class="pill">🤝 {{ it.partner }}</span>{% endif %}
+          </div>
+
+          {% if it.photo %}
+            <div><img src="{{ it.photo.url }}" alt="item photo"
+                      style="width:100%; max-height:180px; object-fit:cover; border-radius:12px; border:1px solid #e6f3ed"></div>
+          {% endif %}
+
+          <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap">
+            {% if it.user.email %}
+              <a class="nav-btn" href="mailto:{{ it.user.email }}">✉️ Email poster</a>
+            {% endif %}
+            {% if it.user.phone_number %}
+              <a class="nav-btn" href="tel:{{ it.user.phone_number }}">📞 Call poster</a>
+            {% endif %}
+            <span class="pill">🔒 Only you can see this</span>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="glass" style="padding:12px; border-radius:12px; color:#0a4b3a">
+      You haven’t accepted any reuse items yet. Check the <a href="{% url 'users:reuse_market' %}">Reuse Market</a>.
+    </div>
+  {% endif %}
+</section>
+
 
   <script>
     // fill the ring based on points

@@ -1,3 +1,250 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Driver — CleanTrack+</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-<h1>Driver Dashboard</h1>
-<p>Welcome, {{ request.user.username }} (role: {{ request.user.role }})</p>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+<style>
+:root{--brand:#0f7a4d;--brand2:#0ea5a0;--ink:#0f172a;--muted:#566471;--glass:#ffffffcc;--glass-b:#ffffffa6;--ghost:#eafff5;--shadow:0 14px 36px rgba(0,0,0,.09)}
+*{box-sizing:border-box}html,body{height:100%}
+body{margin:0;font-family:Manrope,system-ui,Segoe UI,Roboto,Arial;background:#f8fffb;color:var(--ink)}
+.bg{position:fixed;inset:0;z-index:-2;background:linear-gradient(180deg,#f4fff9 0%,#ecfff6 50%,#f9fffe 100%)}
+.glass{background:var(--glass);backdrop-filter:blur(14px) saturate(1.15);border:1px solid var(--glass-b);box-shadow:var(--shadow)}
+.topbar{position:sticky;top:0;margin:18px;border-radius:999px;padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px;color:#fff;padding:10px 16px;border-radius:999px;font-weight:900;background:linear-gradient(120deg,var(--brand),var(--brand2),var(--brand))}
+.nav-actions{display:flex;gap:10px}
+.nav-btn{display:inline-flex;gap:8px;align-items:center;text-decoration:none;background:var(--ghost);border:1px solid #c6f6e5;color:#084c3c;padding:10px 14px;border-radius:999px;font-weight:800}
+
+.layout{display:grid;grid-template-columns:260px 1fr;gap:16px;padding:0 18px 28px}
+.sidebar{border-radius:22px;padding:10px;overflow:auto}
+.nav a{display:flex;gap:12px;align-items:center;padding:12px;border-radius:12px;color:#063c31;text-decoration:none;font-weight:700}
+.nav a:hover{background:#effdf7}
+
+.main{display:grid;gap:16px;overflow:auto}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:1000px){.layout{grid-template-columns:1fr}.sidebar{display:none}.grid2{grid-template-columns:1fr}}
+
+.card{border-radius:20px;padding:18px;background:#fff;border:1px solid #d7efe6}
+.row{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:12px;border-radius:14px;background:#fff;border:1px solid #d7efe6}
+.badge{display:inline-flex;gap:8px;align-items:center;background:#f3fff9;border:1px solid #cdeee2;color:#0c4b3a;padding:6px 10px;border-radius:999px;font-weight:800;font-size:12px}
+.title-sm{font-weight:800}
+.sub-sm{font-size:13px;color:var(--muted)}
+.btn{appearance:none;border:0;border-radius:12px;padding:10px 14px;font-weight:900;cursor:pointer}
+.btn-primary{background:linear-gradient(90deg,#0ea5a0,#0f7a4d);color:#fff}
+.pill{display:inline-flex;gap:8px;align-items:center;padding:6px 10px;border-radius:999px;border:1px solid #cdeee2;background:#f3fff9;color:#0c4b3a;font-weight:800;font-size:12px}
+
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px}
+select, .btn-lite{border:1px solid #cdeee2;border-radius:10px;padding:8px 10px;background:#fff;font-weight:700}
+.btn-stop{background:#eef2f7;color:#0f172a}
+.status-dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:6px;background:#9ca3af}
+.status-online{background:#16a34a}
+#map{height:300px;border-radius:14px;border:1px solid #d7efe6}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+
+<header class="topbar glass">
+  <div class="brand">⚡ CleanTrack+</div>
+  <nav class="nav-actions">
+    <a class="nav-btn" href="{% url 'users:dashboard' %}"> Dashboard</a>
+            <a class="nav-btn" href="{% url 'home' %}"> Home</a>
+    <a class="nav-btn" href="{% url 'users:logout' %}">↩︎ Logout</a>
+  </nav>
+</header>
+
+<div class="layout">
+  <aside class="sidebar glass">
+    <nav class="nav">
+      <a href="{% url 'users:driver_dashboard' %}">👤 Profile</a>
+      <a href="{% url 'users:driver_dashboard' %}#online">📡 Go online</a>
+      <a href="{% url 'users:driver_dashboard' %}#tasks">🗓️ Tasks</a>
+      <a href="{% url 'users:driver_dashboard' %}#forum">👥 Driver forum</a>
+      <a href="{% url 'users:driver_dashboard' %}#activity">📈 Activity</a>
+      <a href="{% url 'users:driver_dashboard' %}#complaints">📝 Complaints</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+
+    <!-- LIVE LOCATION / PINGS -->
+    <section class="card glass" id="online" data-ping-url="{% url 'users:driver_ping' %}">
+      <h2 style="margin:0 0 10px">Live location</h2>
+
+      <div class="controls">
+        <label for="activeTask" class="sub-sm" style="font-weight:800">Active task</label>
+        <select id="activeTask">
+          <option value="">— none —</option>
+          {% for t in active %}
+            <option value="{{ t.id }}">#{{ t.id }} — {{ t.address|truncatechars:40 }}</option>
+          {% endfor %}
+        </select>
+
+        <button id="goOnline"  class="btn btn-primary">Go online</button>
+        <button id="goOffline" class="btn btn-stop">Stop</button>
+
+        <span class="sub-sm" id="pingStatus"><span class="status-dot" id="dot"></span>offline</span>
+      </div>
+
+      <div id="map"></div>
+      <div class="sub-sm" style="margin-top:8px">While online, we send your GPS to dispatch every 10s.</div>
+    </section>
+
+    <!-- ASSIGNED / ACTIVE -->
+    <section class="card glass" id="tasks">
+      <h2 style="margin:0 0 10px">Assigned / Active</h2>
+      {% if active %}
+        {% for t in active %}
+          <div class="row" style="margin:8px 0">
+            <div>
+              <div class="title-sm">📦 {{ t.address }}</div>
+              <div class="sub-sm">{{ t.customer.get_full_name|default:t.customer.username }} — {{ t.status|title }}</div>
+            </div>
+            <a class="badge" href="{% url 'users:track_task' t.id %}">🗺️ Track</a>
+            <div>
+              <form style="display:inline" method="post" action="{% url 'users:driver_task_start' t.id %}">{% csrf_token %}<button class="btn btn-primary" type="submit">Start</button></form>
+              <form style="display:inline" method="post" action="{% url 'users:driver_task_arrive' t.id %}">{% csrf_token %}<button class="btn" type="submit">Arrived</button></form>
+              <form style="display:inline" method="post" action="{% url 'users:driver_task_complete' t.id %}">{% csrf_token %}<button class="btn" type="submit">Complete</button></form>
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="sub-sm">No active tasks.</div>
+      {% endif %}
+    </section>
+
+    <section class="grid2">
+      <article class="card glass" id="activity">
+        <h2 style="margin:0 0 8px">Recent Activity</h2>
+        {% for a in recent_activity %}
+          <div class="row" style="margin:8px 0">
+            <div><div class="title-sm">{{ a.title }}</div><div class="sub-sm">{{ a.when|date:"M j, g:i a" }}</div></div>
+            <div class="pill">{{ a.kind }}</div>
+          </div>
+        {% empty %}
+          <div class="sub-sm">No activity yet.</div>
+        {% endfor %}
+      </article>
+
+      <article class="card glass" id="complaints">
+        <h2 style="margin:0 0 8px">Complaint History</h2>
+        {% for c in complaints %}
+          <div class="row" style="margin:8px 0">
+            <div><div class="title-sm">{{ c.subject }}</div><div class="sub-sm">{{ c.created|date:"M j, g:i a" }}</div></div>
+            <div class="pill">{{ c.status }}</div>
+          </div>
+        {% empty %}<div class="sub-sm">No complaints.</div>{% endfor %}
+      </article>
+    </section>
+
+   <section class="card glass" id="forum">
+  <h2 style="margin:0 0 10px">Driver Forum (directory)</h2>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+    {% for d in drivers %}
+      <div class="card" style="border-radius:16px">
+        <div class="title-sm">{{ d.get_full_name|default:d.username }}</div>
+        <div class="sub-sm">
+          {{ d.email|default:"No email" }} · {{ d.phone_number|default:"No phone" }}
+        </div>
+      </div>
+    {% empty %}
+      <div class="sub-sm">No drivers yet.</div>
+    {% endfor %}
+  </div>
+</section>
+
+
+    <section class="card glass">
+      <h2 style="margin:0 0 10px">Points</h2>
+      <div class="title-sm">Total: {{ points }}</div>
+      <div class="sub-sm">+10 per completed delivery, −5 per complaint.</div>
+    </section>
+
+    <section class="card glass">
+      <h2 style="margin:0 0 10px">Completed (recent)</h2>
+      {% for t in history %}
+        <div class="row" style="margin:8px 0">
+          <div><div class="title-sm">{{ t.address }}</div><div class="sub-sm">{{ t.completed_at|date:"M j, g:i a" }}</div></div>
+          <div class="pill">Completed</div>
+        </div>
+      {% empty %}<div class="sub-sm">No completed tasks yet.</div>{% endfor %}
+    </section>
+  </main>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function () {
+  // --- CSRF (from cookie) ---
+  function getCookie(name){
+    const m=document.cookie.match('(^|;)\\s*'+name+'\\s*=\\s*([^;]+)');
+    return m?m.pop():'';
+  }
+  const csrftoken = getCookie('csrftoken');
+
+  const pingBox   = document.querySelector('#online');
+  const pingUrl   = pingBox?.getAttribute('data-ping-url');
+  const taskSel   = document.getElementById('activeTask');
+  const startBtn  = document.getElementById('goOnline');
+  const stopBtn   = document.getElementById('goOffline');
+  const statusEl  = document.getElementById('pingStatus');
+  const dot       = document.getElementById('dot');
+
+  let timer=null, map=null, marker=null;
+
+  function setOnline(on){
+    statusEl.textContent = on ? 'online' : 'offline';
+    statusEl.prepend(dot);
+    dot.className = 'status-dot ' + (on ? 'status-online' : '');
+  }
+
+  function ensureMap(lat,lng){
+    if(!document.getElementById('map')) return;
+    if(!map){
+      map = L.map('map').setView([lat,lng], 14);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
+      marker = L.marker([lat,lng]).addTo(map);
+    }else{
+      map.setView([lat,lng]);
+      marker.setLatLng([lat,lng]);
+    }
+  }
+
+  function ping(){
+    if(!navigator.geolocation){ setOnline(false); statusEl.append(' (no GPS)'); return; }
+    navigator.geolocation.getCurrentPosition(function(pos){
+      const lat = +pos.coords.latitude.toFixed(6);
+      const lng = +pos.coords.longitude.toFixed(6);
+      ensureMap(lat,lng);
+
+      const fd = new FormData();
+      fd.append('lat', lat);
+      fd.append('lng', lng);
+      if(taskSel && taskSel.value) fd.append('task_id', taskSel.value);
+
+      fetch(pingUrl, {method:'POST', headers:{'X-CSRFToken': csrftoken}, body: fd})
+        .then(()=> setOnline(true))
+        .catch(()=> setOnline(false));
+    }, function(){
+      setOnline(false);
+    }, {enableHighAccuracy:true, maximumAge:10000, timeout:10000});
+  }
+
+  startBtn?.addEventListener('click', function(){
+    if(timer) return;
+    ping();                       // fire once immediately
+    timer = setInterval(ping, 10000);  // then every 10s
+  });
+
+  stopBtn?.addEventListener('click', function(){
+    clearInterval(timer); timer=null; setOnline(false);
+  });
+})();
+</script>
+</body>
+</html>
