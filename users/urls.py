@@ -39,6 +39,12 @@ urlpatterns = [
     path("api/track/latest/", views.user_track_latest, name="user_track_latest"),
 
     path("track/api/task/<int:pk>/", views.user_track_task, name="user_track_task"),
+    path("accepted/", views.accepted_list, name="accepted_list"),
+    path("accepted/<int:pk>/complete/", views.accepted_mark_complete, name="accepted_mark_complete"),
+    path("accepted/<int:pk>/cancel/", views.accepted_cancel, name="accepted_cancel"),
+
+
+
 
 
 

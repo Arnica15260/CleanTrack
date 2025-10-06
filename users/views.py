@@ -9,12 +9,15 @@ from django.contrib.auth import get_user_model, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.views import LoginView
 from django.core.mail import EmailMultiAlternatives
+from django.core.paginator import Paginator
 from django.db import models
-from django.http import JsonResponse, HttpResponseForbidden, Http404
+from django.db.models import Sum, Q
+from django.http import JsonResponse, HttpResponseForbidden, Http404, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
 from django.urls import reverse, NoReverseMatch
 from django.utils import timezone
+from django.utils.dateparse import parse_date
 from django.views.decorators.http import require_POST
 
 from asgiref.sync import async_to_sync
@@ -1117,3 +1120,72 @@ def task_positions_api(request, pk):
             "pos": {"lat": float(p.lat), "lng": float(p.lng), "ts": p.created.isoformat()},
         }
     )
+
+from .models import ReuseDonation  # fields used below: accepted_by, accepted_at, created, user, item_name, category, quantity, partner, description/note, photo, status
+
+
+@login_required
+def accepted_list(request):
+    status = request.GET.get("status") or "accepted"
+
+    base_qs = (ReuseDonation.objects.select_related("user", "accepted_by")
+               .filter(accepted_by=request.user)
+               .order_by("-accepted_at", "-created"))
+
+    qs = base_qs
+    if status in {"accepted", "completed", "cancelled"}:
+        qs = qs.filter(status=status)
+
+    # small pagination
+    paginator = Paginator(qs, 12)
+    page_obj = paginator.get_page(request.GET.get("page"))
+
+    # counts for tabs
+    counts = {
+        "accepted": base_qs.filter(status="accepted").count(),
+        "completed": base_qs.filter(status="completed").count(),
+        "cancelled": base_qs.filter(status="cancelled").count(),
+    }
+
+    # stats row
+    agg = qs.aggregate(sum_quantity=Sum("quantity"))
+    sum_quantity = agg.get("sum_quantity") or 0
+    first = qs.first()
+    last_accepted = (first.accepted_at or first.created) if first else None
+
+    ctx = {
+        "page_obj": page_obj,
+        "status": status,
+        "counts": counts,
+        "total": paginator.count,
+        "sum_quantity": sum_quantity,
+        "last_accepted": last_accepted,
+    }
+    return render(request, "accepted_list.html", ctx)
+
+
+@login_required
+def accepted_mark_complete(request, pk: int):
+    if request.method != "POST":
+        return HttpResponseForbidden()
+    it = get_object_or_404(ReuseDonation, pk=pk, accepted_by=request.user)
+    it.status = "completed"
+    it.save(update_fields=["status"])
+    messages.success(request, "Marked as collected. 🎉")
+    return redirect(request.META.get("HTTP_REFERER") or "users:accepted_list")
+
+
+@login_required
+def accepted_cancel(request, pk: int):
+    if request.method != "POST":
+        return HttpResponseForbidden()
+    it = get_object_or_404(ReuseDonation, pk=pk, accepted_by=request.user)
+    # Free it back to the market
+    it.status = "open"
+    it.accepted_by = None
+    it.accepted_at = None
+    it.save(update_fields=["status", "accepted_by", "accepted_at"])
+    messages.success(request, "Acceptance cancelled. The item is available again.")
+    return redirect("users:accepted_list")
+
+

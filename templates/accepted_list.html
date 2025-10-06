@@ -1,0 +1,181 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>My Accepted — CleanTrack+</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root{--brand:#0f7a4d;--brand2:#0ea5a0;--ink:#0f172a;--muted:#566471;--ghost:#eafff5;--glass-b:#ffffffa6;--shadow:0 14px 36px rgba(0,0,0,.09)}
+    *{box-sizing:border-box} html,body{height:100%}
+    body{margin:0;font-family:Manrope,system-ui,Segoe UI,Roboto,Arial;background:#f8fffb;color:var(--ink)}
+
+    /* BG */
+    .bg{position:fixed;inset:0;z-index:-2;background:linear-gradient(180deg,#f4fff9 0%,#ecfff6 50%,#f9fffe 100%)}
+
+    /* Glass + layout */
+    .glass{background:#ffffffee;border:1px solid var(--glass-b);box-shadow:var(--shadow);backdrop-filter:blur(12px) saturate(1.1)}
+    .wrap{max-width:1100px;margin:0 auto;padding:14px 16px 60px}
+
+    /* Header */
+    .topbar{position:sticky;top:0;margin:18px;border-radius:999px;padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
+    .brand{display:flex;align-items:center;gap:10px;color:#fff;padding:10px 16px;border-radius:999px;font-weight:900;
+      background:linear-gradient(120deg,#0f7a4d,#0ea5a0,#0f7a4d);background-size:200% 100%;animation:logoFlow 6s linear infinite}
+    @keyframes logoFlow{to{background-position:200% 50%}}
+    .nav-btn{display:inline-flex;gap:8px;align-items:center;text-decoration:none;background:var(--ghost);border:1px solid #c6f6e5;color:#084c3c;padding:10px 14px;border-radius:999px;font-weight:800}
+
+    /* Hero + tabs */
+    .hero{padding:22px;border-radius:22px}
+    .title{font-size:30px;font-weight:900;margin:0 0 4px}
+    .sub{color:var(--muted);margin:0 0 10px}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+    .tab{display:inline-flex;gap:8px;align-items:center;padding:8px 12px;border-radius:999px;border:1px solid #d7efe6;background:#fff;text-decoration:none;color:#063c31;font-weight:800}
+    .tab.active{background:linear-gradient(120deg,#0f7a4d,#0ea5a0);color:#fff;border-color:transparent}
+    .count{opacity:.8}
+
+    /* Stats pills */
+    .pill{display:inline-flex;gap:8px;align-items:center;padding:6px 10px;border-radius:999px;border:1px solid #cdeee2;background:#f3fff9;color:#0c4b3a;font-weight:800;font-size:12px}
+
+    /* Grid + cards */
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px}
+    @media (max-width:1100px){.grid{grid-template-columns:1fr 1fr}}
+    @media (max-width:720px){.grid{grid-template-columns:1fr}}
+    .card{position:relative;border-radius:20px;padding:16px;background:#fff;border:1px solid #e6f3ed}
+    .top{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+    .avatar{width:36px;height:36px;border-radius:10px;background:#eafff5;display:grid;place-items:center;font-weight:900;color:#0a4b3a}
+    .who{font-weight:800}
+    .when{font-size:13px;color:var(--muted)}
+    .status{margin-left:auto;font-weight:900;font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid #d7efe6;text-transform:capitalize}
+    .status.accepted{background:#e9f9ee;border-color:#b7ebc9;color:#065f46}
+    .status.completed{background:#ecfeff;border-color:#bae6fd;color:#075985}
+    .status.cancelled{background:#fff6f6;border-color:#fecaca;color:#9f1239}
+    .name{font-weight:900;font-size:18px;margin:4px 0 4px}
+    .note{color:#0b3b31;margin:0 0 8px}
+    .meta{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 10px}
+    .thumb{margin:6px 0 10px}
+    .thumb img{width:100%;max-height:180px;object-fit:cover;border-radius:12px;border:1px solid #e6f3ed}
+    .actions{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap}
+    .btn{appearance:none;border:0;border-radius:12px;padding:10px 14px;font-weight:900;cursor:pointer}
+    .btn-primary{background:linear-gradient(90deg,#0ea5a0,#0f7a4d);color:#fff;box-shadow:0 8px 20px rgba(15,122,77,.18)}
+    .btn-line{background:#fff;border:1px solid #d7efe6;color:#0a4b3a}
+    .btn-ghost{background:var(--ghost);border:1px solid #c6f6e5;color:#084c3c;text-decoration:none;display:inline-flex;align-items:center}
+
+    /* Contact details */
+    details.ctc{display:inline-block}
+    details.ctc > summary{list-style:none;cursor:pointer}
+    details.ctc > summary::-webkit-details-marker{display:none}
+    .contact-sheet{min-width:240px;margin-top:6px;padding:12px;border-radius:12px;background:#f7fffb;border:1px solid #cdeee2;box-shadow:var(--shadow)}
+    .contact-line{display:flex;gap:8px;align-items:center;margin:6px 0;color:#0a4b3a}
+  </style>
+</head>
+<body>
+  <div class="bg"></div>
+
+  <header class="topbar glass">
+    <div class="brand">⚡ CleanTrack+</div>
+    <nav>
+      <a class="nav-btn" href="{% url 'users:dashboard' %}">Dashboard</a>
+      <a class="nav-btn" href="{% url 'users:reuse_market' %}">Reuse Market</a>
+    </nav>
+  </header>
+
+  <div class="wrap">
+    <!-- Hero + tiny tabs -->
+    <section class="hero glass">
+      <h1 class="title">My Accepted</h1>
+      <p class="sub">A clean list of things you’ve accepted. Quick actions only.</p>
+
+      <div class="tabs">
+        <a class="tab {% if status == 'accepted' %}active{% endif %}" href="{% url 'users:accepted_list' %}?status=accepted">Accepted <span class="count">({{ counts.accepted }})</span></a>
+        <a class="tab {% if status == 'completed' %}active{% endif %}" href="{% url 'users:accepted_list' %}?status=completed">Completed <span class="count">({{ counts.completed }})</span></a>
+        <a class="tab {% if status == 'cancelled' %}active{% endif %}" href="{% url 'users:accepted_list' %}?status=cancelled">Cancelled <span class="count">({{ counts.cancelled }})</span></a>
+      </div>
+    </section>
+
+    <!-- Flash messages -->
+    {% if messages %}
+      <div class="glass" style="margin-top:14px;padding:14px 16px;border-radius:14px;font-weight:800;color:#0a4b3a">
+        {% for m in messages %}{{ m }}{% if not forloop.last %}<br/>{% endif %}{% endfor %}
+      </div>
+    {% endif %}
+
+    <!-- Stats pills -->
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px">
+      <span class="pill">📦 Items: <strong>{{ total }}</strong></span>
+      <span class="pill">➕ Quantity total: <strong>{{ sum_quantity }}</strong></span>
+      {% if last_accepted %}
+        <span class="pill">🕒 Last accepted: <strong>{{ last_accepted|date:"M j, g:i a" }}</strong></span>
+      {% endif %}
+    </div>
+
+    <!-- Cards -->
+    <section class="grid">
+      {% for it in page_obj.object_list %}
+        {% with st=it.status|default:'accepted'|lower %}
+        <article class="card">
+          <div class="top">
+            <div class="avatar">{{ it.user.username|slice:":1"|upper }}</div>
+            <div>
+              <div class="who">{{ it.user.get_full_name|default:it.user.username }}</div>
+              <div class="when">
+                {% if it.accepted_at %}Accepted {{ it.accepted_at|date:"M j, g:i a" }}{% endif %}
+              </div>
+            </div>
+            <div class="status {{ st }}">{{ st }}</div>
+          </div>
+
+          <div class="name">{{ it.item_name|default:it.description|default:"Donation" }}</div>
+          {% if it.note %}<p class="note">{{ it.note }}</p>{% endif %}
+
+          <div class="meta">
+            <span class="pill">📦 Qty: {{ it.quantity|default:"1" }}</span>
+            {% if it.category %}<span class="pill">🏷️ {{ it.category }}</span>{% endif %}
+            {% if it.partner %}<span class="pill">🤝 {{ it.partner }}</span>{% endif %}
+            <a class="pill" href="{% url 'users:accepted_receipt' it.id %}" target="_blank" rel="noopener">🧾 Receipt</a>
+          </div>
+
+          {% if it.photo %}<div class="thumb"><img src="{{ it.photo.url }}" alt="item photo"></div>{% endif %}
+
+          <div class="actions">
+            {% if it.accepted_by_id == request.user.id %}
+              {% if st == 'accepted' %}
+                <form method="post" action="{% url 'users:accepted_mark_complete' it.id %}">{% csrf_token %}
+                  <button class="btn btn-primary" type="submit">✔ Mark collected</button>
+                </form>
+                <form method="post" action="{% url 'users:accepted_cancel' it.id %}">{% csrf_token %}
+                  <button class="btn btn-line" type="submit">✖ Cancel</button>
+                </form>
+              {% elif st == 'completed' %}
+                <span class="pill">🎉 Completed</span>
+              {% elif st == 'cancelled' %}
+                <span class="pill">🚫 Cancelled</span>
+              {% endif %}
+            {% endif %}
+
+            <details class="ctc">
+              <summary class="btn btn-ghost">✉️ Poster</summary>
+              <div class="contact-sheet">
+                <div class="contact-line">👤 <strong>{{ it.user.get_full_name|default:it.user.username }}</strong></div>
+                {% with phone=it.user.phone_number email=it.user.email %}
+                  <div class="contact-line">📧 {% if email %}<a href="mailto:{{ email }}">{{ email }}</a>{% else %}Not provided{% endif %}</div>
+                  <div class="contact-line">📞 {% if phone %}<a href="tel:{{ phone }}">{{ phone }}</a>{% else %}Not provided{% endif %}</div>
+                {% endwith %}
+              </div>
+            </details>
+          </div>
+        </article>
+        {% endwith %}
+      {% empty %}
+        <div class="glass" style="grid-column:1/-1; padding:20px; border-radius:18px; font-weight:800; color:#0a4b3a">
+          Nothing here yet. Visit the <a href="{% url 'users:reuse_market' %}">Reuse Market</a> to accept something.
+        </div>
+      {% endfor %}
+    </section>
+
+
+  </div>
+</body>
+</html>
