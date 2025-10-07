@@ -198,241 +198,6 @@
                 display: none; /* Mobile menu can be added later */
             }
         }
-   /* ===== Section 1: Modern Redesigned Hero ===== */
-.hero {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-    padding: 100px 20px; /* breathing space */
-}
-
-.hero::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 60%;
-    height: 60%;
-    background: radial-gradient(circle, rgba(133, 211, 172, 0.35) 0%, transparent 70%);
-    transform: translate(-50%, -50%);
-    animation: heroGlow 10s ease-in-out infinite;
-    z-index: -1;
-    border-radius: 50%;
-}
-
-@keyframes heroGlow {
-    0%, 100% {
-        transform: translate(-50%, -50%) scale(1) rotate(0deg);
-        opacity: 0.6;
-    }
-    50% {
-        transform: translate(-50%, -50%) scale(1.3) rotate(180deg);
-        opacity: 1;
-    }
-}
-
-.hero-content {
-    max-width: 900px;
-    padding: 60px 30px;
-    margin-top: 80px;
-    animation: heroAppear 2.5s ease-out;
-    position: relative;
-}
-
-@keyframes heroAppear {
-    from { opacity: 0; transform: translateY(40px) scale(0.97); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-/* Hero Subtitle */
-.hero-subtitle {
-    font-size: 0.95rem;
-    color: #000000;
-    margin-bottom: 20px;
-    opacity: 0;
-    animation: slideInFromLeft 1.2s ease 0.3s forwards;
-    text-transform: uppercase;
-    letter-spacing: 0.35em;
-    display: inline-block;
-    font-weight: 300;
-    position: relative;
-}
-
-.hero-subtitle::before,
-.hero-subtitle::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    width: 35px;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, #000000, transparent);
-    animation: linePulse 3s ease infinite;
-}
-
-.hero-subtitle::before { left: -50px; }
-.hero-subtitle::after { right: -50px; }
-
-@keyframes linePulse {
-    0%, 100% { opacity: 0.4; transform: scaleX(0.85); }
-    50% { opacity: 1; transform: scaleX(1.2); }
-}
-
-@keyframes slideInFromLeft {
-    from { opacity: 0; transform: translateX(-30px); }
-    to { opacity: 1; transform: translateX(0); }
-}
-
-/* Hero Heading */
-.hero h1 {
-    font-size: clamp(2.2rem, 4vw, 2.8rem);
-    font-weight: 800;
-    background: linear-gradient(90deg, #000000, #000000);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    line-height: 1.15;
-    margin-bottom: 20px;
-    opacity: 0;
-    animation: slideInFromRight 1.2s ease 0.6s forwards;
-    word-break: break-word;
-    text-shadow: 0 2px 6px rgba(0,0,0,0.1); /* subtle depth */
-}
-
-@keyframes slideInFromRight {
-    from { opacity: 0; transform: translateX(30px); }
-    to { opacity: 1; transform: translateX(0); }
-}
-
-/* Hero Description */
-.hero-description p {
-    font-size: 1rem;
-    font-weight: 300;
-    color: #000000;
-    line-height: 1.8;
-    margin: 25px auto 0;
-    max-width: 700px;
-    text-align: center;
-    letter-spacing: 0.03em;
-    word-break: break-word;
-    opacity: 0;
-    animation: fadeInUp 1.2s ease 1s forwards;
-}
-
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-
-/* ===== Hero Stats Modern Fonts ===== */
-.hero-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 30px;
-    margin: 60px auto 50px;
-    max-width: 720px;
-    font-family: 'Inter', sans-serif;
-}
-
-/* ===== Hero Stat Cards ===== */
-.hero-stat {
-    text-align: center;
-    padding: 25px 15px;
-    background: linear-gradient(135deg, #bde9d3, #f2fbf5);
-    border: 1px solid #85d3ac;
-    border-radius: 16px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-weight: 400;
-    transition: transform 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
-    cursor: pointer; /* hover করলে pointer দেখাবে */
-    backdrop-filter: blur(10px);
-}
-
-/* Icons & Text */
-.hero-stat i,
-.hero-stat-number,
-.hero-stat-label {
-    transition: color 0.3s ease;
-}
-
-.hero-stat i {
-    font-size: 1.8rem;
-    color: #000000;
-    margin-bottom: 10px;
-}
-
-.hero-stat-number {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #000000;
-    margin-bottom: 4px;
-}
-
-.hero-stat-label {
-    font-size: 0.5rem;
-    font-weight: 500;
-    color: #000000;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-/* Hover effect */
-.hero-stat:hover {
-    transform: translateY(-6px); /* subtle lift */
-    box-shadow: 0 12px 25px rgba(1, 77, 43, 0.3); /* shadow */
-}
-
-.hero-stat:hover i,
-.hero-stat:hover .hero-stat-number,
-.hero-stat:hover .hero-stat-label {
-    color: #000000; /* dark green on hover */
-}
-
-/* ===== CTA Buttons ===== */
-.cta-button {
-    display: inline-block;
-    padding: 16px 40px;
-    background: linear-gradient(135deg, #bde9d3, #bde9d3, #f2fbf5);
-    color: #000000;
-    text-decoration: none;
-    border-radius: 50px;
-    font-weight: 600;
-    font-size: 0.95rem;
-    transition: transform 0.25s ease, box-shadow 0.25s ease; /* only transform + shadow */
-    position: relative;
-    overflow: visible; /* fix: allow subtle lift */
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    box-shadow: 0 4px 15px rgba(47, 168, 115, 0.5);
-}
-
-/* Secondary button */
-.cta-button.secondary {
-    background: transparent;
-    border: 2px solid #85d3ac;
-    color: #000000;
-    box-shadow: 0 4px 15px rgba(133, 211, 172, 0.4);
-}
-
-/* Hover effect: subtle lift + glow */
-.cta-button:hover {
-    transform: translateY(-3px); /* subtle lift */
-    box-shadow: 0 8px 20px rgba(133, 211, 172, 0.6);
-}
-
-
-.cta-button.secondary:hover {
-    transform: translateY(-3px); /* subtle lift */
-    background: rgba(224, 163, 255, 0.06);
-    box-shadow: 0 8px 20px rgba(224, 163, 255, 0.15);
-}
 
 .mission-vision {
     position: relative;
@@ -451,7 +216,8 @@
     inset: 0;
     background: linear-gradient(
         135deg,
-        #85d3ac 0%,   /* soft white-green */ #f2fbf5 100%  /* pastel green */
+        #85d3ac 0%,   /* soft white-green */
+        #f2fbf5 100%  /* pastel green */
     );
     border-radius: 40px;
     z-index: 1;
@@ -467,23 +233,23 @@
 
 /* Heading */
 .mission-vision .section-header h2 {
-    font-size: 2.8rem;
+    font-size: 2.55rem;
     font-weight: 800;
     margin-bottom: 20px;
     text-transform: uppercase;
     letter-spacing: 1.5px;
     color: #000000; /* slate-900 */
-
 }
 
-/* Paragraph */
+/* Smaller paragraph in mission-vision section */
 .mission-vision .section-header p {
-    font-size: 1rem;
-    line-height: 1.8;
-    color: #000000; /* slate-700 */
+    font-size: 1.4rem;  /* smaller font */
+    line-height: 1.6;   /* adjust line height */
+    color: #000000;
     margin: 0 auto;
     max-width: 750px;
 }
+
 
 /* Cards container */
 .mission-vision-cards {
@@ -515,24 +281,26 @@
 
 /* Card icon */
 .mv-card i {
-    font-size: 2.6rem;
+    font-size: 2rem;
     color: #2fa873; /* fresh green */
     margin-bottom: 18px;
 }
 
 /* Card heading & text */
 .mv-card h3 {
-    font-size: 1.4rem;
-    color: #2563eb; /* deep blue */
+    font-size: 1.8rem;
+    color: #2fa873; /* deep blue */
     margin-bottom: 12px;
     font-weight: 700;
 }
 
 .mv-card p {
-    font-size: 1rem;
+    font-size: 0.9rem;
     color: #475569; /* slate-600 */
     line-height: 1.7;
 }
+
+/* Hero content */
 .hero-content {
     max-width: 1000px;
     padding: 60px 30px; /* hero padding সামঞ্জস্য */
@@ -546,7 +314,7 @@
 }
 
 .hero-subtitle {
-    font-size: 0.9rem;
+    font-size: 0.4rem;
     color: #000000;
     margin-bottom: 20px; /* subtitle gap কমানো */
 }
@@ -563,9 +331,27 @@
 .hero-stats {
     margin: 40px auto 50px; /* hero-stats উপরের gap কমানো */
 }
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .mission-vision .section-header h2 {
+        font-size: 2rem;
+    }
+    .mission-vision .section-header p {
+        font-size: 0.7rem;
+        line-height: 1.5;
+    }
+    .mv-card {
+        padding: 30px 20px;
+    }
+    .mv-card h3 {
+        font-size: 1.2rem;
+    }
+}
+
 /* ===== Section 3: Enhanced Hexagonal Showcase ===== */
 .showcase {
-    padding: 120px 20px;
+    padding: 100px 20px;
     position: relative;
     font-family: 'Inter', sans-serif;
     background: linear-gradient(135deg, #f2fbf5, #85D3AC); /* subtle section background */
@@ -624,7 +410,7 @@
 
 /* Hexagon Icon */
 .hexagon-icon {
-    font-size: 1.8rem;
+    font-size: 2rem;
     margin-bottom: 18px;
     transform: rotate(-30deg);
     color: #2fa873;
@@ -637,7 +423,7 @@
 
 /* Hexagon Heading */
 .hexagon h4 {
-    font-size: 1rem;
+    font-size: 1.3rem;
     color: #000000;
     transform: rotate(-30deg);
     margin-bottom: 12px;
@@ -651,7 +437,7 @@
 
 /* Hexagon Paragraph */
 .hexagon p {
-    font-size: 0.7rem;
+    font-size:0.9rem;
     color: #000000;
     transform: rotate(-30deg);
     line-height: 1.6;
@@ -665,7 +451,7 @@
 
 /* Section Heading */
 .showcase h2 {
-    font-size: 3rem;
+    font-size: 2.55rem;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 1.2px;
@@ -691,7 +477,7 @@
 }
 /* ===== Section 2: Diagonal Features ===== */
 .features {
-    padding: 150px 0;
+    padding: 100px 20px; /* box gap কমানোর জন্য padding কমানো */
     position: relative;
     overflow: hidden;
 }
@@ -716,44 +502,45 @@
 
 .section-title {
     text-align: center;
-    font-size: clamp(2rem, 5vw, 3rem);
-    margin-bottom: 80px;
+    font-size: 2.55rem;
+    margin-bottom: 50px;
     color: #000000 !important;
     position: relative;
     font-weight: 800;
     letter-spacing: 1px;
 }
 
+
 .section-title::after {
     content: '';
     position: absolute;
-    bottom: -12px;
+    bottom: -8px;
     left: 50%;
     transform: translateX(-50%);
-    width: 140px;
-    height: 4px;
+    width: 120px;
+    height: 3px;
     background: linear-gradient(90deg, rgba(189,233,211,0.8), rgba(133,211,172,0.8), rgb(242, 251, 245));
     border-radius: 2px;
 }
 
 /* Container */
 .features-container {
-    max-width: 1240px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0 15px;
 }
 
 .diagonal-grid {
     display: flex;
     flex-direction: column;
-    gap: 70px;
+    gap: 50px; /* row-gap কমানো */
 }
 
 /* Feature Row */
 .feature-row {
     display: flex;
-    align-items: center;
-    gap: 80px;
+    align-items: stretch;
+    gap: 100px; /* column-gap কমানো */
     position: relative;
     perspective: 1000px;
 }
@@ -764,44 +551,67 @@
 /* Feature Content */
 .feature-content {
     flex: 1;
-    padding: 50px;
+    padding: 100px 25px; /* padding কমানো */
     transform: skew(-4deg);
-    transition: all 0.4s ease; /* কমানো hover reaction */
+    transition: all 0.4s ease;
     background: rgba(255,255,255,0.85);
-    border-radius: 25px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    border-radius: 18px;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* icon+heading top-align */
+    min-height: 220px;
 }
 .feature-content:hover {
-    transform: skew(-4deg) translateY(-8px) rotateX(1deg); /* subtle hover */
-    box-shadow: 0 18px 40px rgba(0,0,0,0.10);
+    transform: skew(-4deg) translateY(-4px) rotateX(0.5deg);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+}
+
+/* Top Row: Icon + Heading */
+.feature-content .top-row {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* gap কমানো */
+    margin-bottom: 10px; /* h3 ও icon compact */
+    flex-shrink: 0;
 }
 
 /* Feature Icon */
 .feature-icon {
-    font-size: 4rem;
-    margin-bottom: 25px;
+    font-size: 1.8rem;
     color: #bde9d3;
+    flex-shrink: 0;
+    line-height: 1;
 }
 
-/* Feature Heading & Paragraph */
+/* Feature Heading */
 .feature-content h3 {
-    font-size: 2.2rem;
-    margin-bottom: 20px;
+    font-size: 1.8rem;
     color: #000000;
     font-weight: 700;
+    margin: 0;
+    line-height: 1;
 }
+
+/* Paragraph */
 .feature-content p {
-    font-size: 1.1rem;
+    font-size: 1rem;
     color: #000000;
-    line-height: 1.8;
+    line-height: 1.5;
+    margin-top: 6px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
 }
 
 /* Feature Visual */
 .feature-visual {
     flex: 1;
-    height: 280px; /* আগের 360px → নতুন 280px */
+    min-height: 220px;
+    height: auto;
     position: relative;
-    border-radius: 20px; /* হালকা কমানো-rounded corners */
+    border-radius: 16px;
     overflow: hidden;
     background-color: #f5f5f5;
 }
@@ -835,6 +645,306 @@
 }
 
 
+/* ===== Section 1: Modern Redesigned Hero ===== */
+.hero {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    padding: 70px 20px;
+    min-height: 100vh;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 60%;
+    height: 60%;
+    background: radial-gradient(circle, rgba(133, 211, 172, 0.35) 0%, transparent 70%);
+    transform: translate(-50%, -50%);
+    animation: heroGlow 10s ease-in-out infinite;
+    z-index: 0;
+    border-radius: 50%;
+}
+
+@keyframes heroGlow {
+    0%, 100% {
+        transform: translate(-50%, -50%) scale(1) rotate(0deg);
+        opacity: 0.6;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.3) rotate(180deg);
+        opacity: 1;
+    }
+}
+
+.hero-content {
+    max-width: 1000px;
+    padding: 40px 20px;
+    animation: heroAppear 2.5s ease-out;
+    position: relative;
+    z-index: 2;
+}
+
+@keyframes heroAppear {
+    from {
+        opacity: 0;
+        transform: translateY(40px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Hero Subtitle */
+.hero-subtitle {
+    font-size: 1rem;
+    color: #000000;
+    margin-bottom: 15px;
+    opacity: 0;
+    animation: slideInFromLeft 1.2s ease 0.3s forwards;
+    text-transform: uppercase;
+    letter-spacing: 0.35em;
+    display: inline-block;
+    font-weight: 300;
+    position: relative;
+}
+
+.hero-subtitle::before,
+.hero-subtitle::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 35px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #000000, transparent);
+    animation: linePulse 3s ease infinite;
+}
+
+.hero-subtitle::before {
+    left: -50px;
+}
+.hero-subtitle::after {
+    right: -50px;
+}
+
+@keyframes linePulse {
+    0%, 100% {
+        opacity: 0.4;
+        transform: scaleX(0.85);
+    }
+    50% {
+        opacity: 1;
+        transform: scaleX(1.2);
+    }
+}
+
+@keyframes slideInFromLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Hero Heading */
+.hero h1 {
+   font-size: 2.55rem;
+    font-weight: 800;
+    background: linear-gradient(90deg, #000000, #000000);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    line-height: 1.15;
+    margin-bottom: 25px;
+    opacity: 0;
+    animation: slideInFromRight 1.2s ease 0.6s forwards;
+    word-break: break-word;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+@keyframes slideInFromRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Hero Image Container - Adjusted */
+.hero-image-container {
+    width: 100%;
+    max-width: 1800px;
+    margin: 20px auto 30px;
+    text-align: center;
+    opacity: 0;
+    animation: fadeInUp 1.2s ease 0.8s forwards;
+    position: relative;
+}
+
+.hero-image {
+    width: 100%;
+    height: auto;
+     max-height: 500px;
+    object-fit: cover;
+    border-radius: 18px;
+    box-shadow:
+        0 15px 35px rgba(0, 0, 0, 0.1),
+        0 6px 20px rgba(133, 211, 172, 0.25);
+    transition: all 0.4s ease;
+    border: 2px solid #bde9d3;
+}
+
+.hero-image:hover {
+    transform: translateY(-5px);
+    box-shadow:
+        0 20px 45px rgba(0, 0, 0, 0.15),
+        0 10px 30px rgba(133, 211, 172, 0.35);
+}
+
+/* Hero Description - Adjusted */
+.hero-description p {
+    font-size: 0.95rem;
+    font-weight: 320;
+    color: #000000;
+    line-height: 1.7;
+    margin: 20px auto 30px;
+    max-width: 1800px;
+    text-align: center;
+    letter-spacing: 0em;
+    word-break: break-word;
+    opacity: 0;
+    animation: fadeInUp 1.2s ease 1s forwards;
+    padding: 0px;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== Hero Stats ===== */
+.hero-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 25px;
+    margin: 35px auto 40px;
+    max-width: 720px;
+}
+
+.hero-stat {
+    text-align: center;
+    padding: 20px 15px;
+    background: linear-gradient(135deg, #bde9d3, #f2fbf5);
+    border: 1px solid #85d3ac;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-weight: 400;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+}
+
+.hero-stat i {
+    font-size: 1.8rem;
+    color: #000000;
+    margin-bottom: 10px;
+    transition: color 0.3s ease;
+}
+
+.hero-stat-number {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #000000;
+    margin-bottom: 4px;
+    transition: color 0.3s ease;
+}
+
+.hero-stat-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: #000000;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: color 0.3s ease;
+}
+
+.hero-stat:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 25px rgba(1, 77, 43, 0.3);
+}
+
+.hero-stat:hover i,
+.hero-stat:hover .hero-stat-number,
+.hero-stat:hover .hero-stat-label {
+    color: #000000;
+}
+
+/* ===== CTA Buttons ===== */
+.cta-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 25px;
+}
+
+.cta-button {
+    display: inline-block;
+    padding: 16px 40px;
+    background: linear-gradient(135deg, #bde9d3, #bde9d3, #f2fbf5);
+    color: #000000;
+    text-decoration: none;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    box-shadow: 0 4px 15px rgba(47, 168, 115, 0.5);
+    border: 2px solid transparent;
+}
+
+.cta-button.secondary {
+    background: transparent;
+    border: 2px solid #85d3ac;
+    color: #000000;
+    box-shadow: 0 4px 15px rgba(133, 211, 172, 0.4);
+}
+
+.cta-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(133, 211, 172, 0.6);
+}
+
+.cta-button.secondary:hover {
+    transform: translateY(-3px);
+    background: rgba(224, 163, 255, 0.06);
+    box-shadow: 0 8px 20px rgba(224, 163, 255, 0.15);
+}
+
+
     </style>
 </head>
 <body>
@@ -863,7 +973,10 @@
     <section class="hero" id="home">
         <div class="hero-content">
             <div class="hero-subtitle">Welcome to the CleanTrack+</div>
-            <h1>SMART WASTE, ClEAN FUTURE.</h1>
+            <h1>SMART WASTE & ClEAN FUTURE</h1>
+             <div class="hero-image-container">
+                <img src="{% static 'car3.jpg' %}" alt="CleanTrack+ - Smart Waste Management System" class="hero-image">
+            </div>
 
             <div class="hero-description">
   <p>
@@ -872,10 +985,19 @@
     build cleaner cities and a greener tomorrow. Join our community to make
     a real impact every day. Track your contributions, earn rewards, and
     inspire others to take part in creating sustainable and eco-friendly
-    neighborhoods.With CleanTrack+, you can schedule waste pickups, donate usable items,
+    neighborhoods. With CleanTrack+, you can schedule waste pickups, donate usable items,
     and monitor your positive impact on the environment. Every action counts,
     whether big or small. Together, let's transform our cities, reduce waste,
     and pave the way for a cleaner, healthier, and more responsible future.
+    Be the change you wish to see—because when you act, the world follows.
+    CleanTrack+ is not just a platform; it’s a movement towards conscious living,
+    where technology meets responsibility. Start today, inspire tomorrow,
+    and let’s leave behind a legacy of green innovation for generations to come.
+    Imagine a world where every home becomes a hub of sustainability,
+    every street shines with cleanliness, and every donation brings hope to someone in need.
+    With your support, we can turn waste into opportunity, challenges into solutions,
+    and dreams of a better planet into reality. Together, let’s create
+    not just cleaner neighborhoods, but a brighter future for all.
 </p>
 
             </div>
@@ -909,19 +1031,14 @@
             </div>
         </div>
     </section>
+
 <!-- ===== Section: Mission & Vision ===== -->
 <section class="mission-vision" id="mission-vision"
          style="background: url('{% static 'truck.png' %}') center/cover no-repeat; padding:90px 20px; text-align:center; color:#fff;">
 
     <div class="section-header">
        <h2 class="section-title">Mission & Vision</h2>
-    <p>
-Dedicated to creating a cleaner and greener future through smart waste management.
-Join us in reducing waste, promoting recycling, and empowering communities to make eco-friendly choices.
-Together, we can transform cities into sustainable, thriving environments for generations to come.
-Our innovative solutions streamline waste collection, enhance resource efficiency, and reward positive environmental actions.
-Be part of a movement that cares for the planet, nurtures communities, and inspires a healthier tomorrow.
-</p>
+
 
 
     </div>
@@ -931,8 +1048,8 @@ Be part of a movement that cares for the planet, nurtures communities, and inspi
         <!-- Mission Card -->
         <div class="mv-card" style="background:rgba(255,255,255,0.9);border-radius:20px;padding:40px 28px;text-align:center;box-shadow:0 8px 25px rgba(0,0,0,0.2);">
             <i class="fas fa-bullseye" style="font-size:2.6rem;color:#2fa873;background:#fff;padding:20px;border-radius:50%;margin-bottom:20px;display:inline-block;box-shadow:0 6px 18px rgba(47,168,115,0.4);"></i>
-            <h3 style="font-size:1.5rem;color:#014d2b;margin-bottom:15px;font-weight:700;">Mission</h3>
-           <p style="font-size:1rem;color:#000000;line-height:1.7;">
+            <h3>Mission</h3>
+           <p>
     To provide smart and innovative waste tracking solutions that encourage responsible disposal,
     promote donations, and reward sustainable actions for a cleaner environment.
     Our platform empowers communities to participate actively in recycling efforts,
@@ -946,8 +1063,8 @@ Be part of a movement that cares for the planet, nurtures communities, and inspi
         <!-- Vision Card -->
         <div class="mv-card" style="background:rgba(255,255,255,0.9);border-radius:20px;padding:40px 28px;text-align:center;box-shadow:0 8px 25px rgba(0,0,0,0.2);">
             <i class="fas fa-eye" style="font-size:2.6rem;color:#2fa873;background:#fff;padding:20px;border-radius:50%;margin-bottom:20px;display:inline-block;box-shadow:0 6px 18px rgba(47,168,115,0.4);"></i>
-            <h3 style="font-size:1.5rem;color:#014d2b;margin-bottom:15px;font-weight:700;">Vision</h3>
-            <p style="font-size:1rem;color:#000000;line-height:1.7;">
+            <h3>Vision</h3>
+            <p>
     To build a future where every city is clean, communities are empowered, and waste is managed
     efficiently to protect our planet for generations to come.
     We envision a world where innovative technology drives sustainable practices,
@@ -969,10 +1086,10 @@ Be part of a movement that cares for the planet, nurtures communities, and inspi
             <div class="hexagon-inner glass">
                 <div class="hexagon-icon">📍</div> <!-- Smart Tracking -->
                 <h4>Smart Tracking</h4>
-                <p>
-    Real-time waste collection monitoring. Stay updated with live tracking of all waste pickups,
-    receive notifications for scheduled collections, and ensure your contributions are efficiently managed.
+              <p>
+  Track waste pickups in real time, get notifications, and ensure efficient management.
 </p>
+
 
             </div>
         </div>
@@ -980,10 +1097,10 @@ Be part of a movement that cares for the planet, nurtures communities, and inspi
             <div class="hexagon-inner glass">
                 <div class="hexagon-icon">🔒</div> <!-- Data Security -->
                 <h4>Data Security</h4>
-               <p>
-    Safe and encrypted user information. We use advanced encryption standards to protect your data,
-    ensuring privacy, security, and peace of mind for every user.
+              <p>
+  Your data is secure with advanced encryption, ensuring privacy and peace of mind.
 </p>
+
 
             </div>
         </div>
@@ -991,10 +1108,10 @@ Be part of a movement that cares for the planet, nurtures communities, and inspi
             <div class="hexagon-inner glass">
                 <div class="hexagon-icon">⏱️</div> <!-- Fast Pickup -->
                 <h4>Fast Pickup</h4>
-               <p>
-    Efficient scheduling and collection. Our system ensures timely pickups, optimizes routes,
-    and reduces waiting times for a seamless waste management experience.
+             <p>
+  Timely pickups and optimized routes for smooth waste management.
 </p>
+
 
             </div>
         </div>
@@ -1002,10 +1119,10 @@ Be part of a movement that cares for the planet, nurtures communities, and inspi
             <div class="hexagon-inner glass">
                 <div class="hexagon-icon">🎁</div> <!-- Reward System -->
                 <h4>Reward System</h4>
-              <p>
-    Earn points for every donation and redeem them for exciting rewards, encouraging
-    sustainable actions and active participation in waste management.
+             <p>
+  Earn and redeem points to reward sustainable actions.
 </p>
+
 
             </div>
         </div>
@@ -1013,9 +1130,8 @@ Be part of a movement that cares for the planet, nurtures communities, and inspi
             <div class="hexagon-inner glass">
                 <div class="hexagon-icon">📊</div> <!-- Tracking Status -->
                 <h4>Tracking Status</h4>
-               <p>
-    Monitor your pickup status live and receive real-time updates on the progress of
-    your waste collection, ensuring transparency and convenience.
+              <p>
+  Track your pickups live with real-time updates for full transparency.
 </p>
 
             </div>
@@ -1024,10 +1140,10 @@ Be part of a movement that cares for the planet, nurtures communities, and inspi
             <div class="hexagon-inner glass">
                 <div class="hexagon-icon">🌱</div> <!-- Community Impact -->
                 <h4>Community Impact</h4>
-             <p>
-    See how your actions help the city by tracking the positive impact of your donations
-    and contributions on community cleanliness and sustainability.
+          <p>
+  Track the positive impact of your contributions on community cleanliness and sustainability.
 </p>
+
 
             </div>
         </div>
@@ -1037,17 +1153,24 @@ Be part of a movement that cares for the planet, nurtures communities, and inspi
 <!-- Section 2: Diagonal Features -->
 <section class="features" id="features">
     <div class="features-container">
-<h2 class="section-title" style="color: #000000;">HOW IT WORKS</h2>
-
+        <h2 class="section-title" style="color: #000000;">HOW IT WORKS</h2>
 
         <div class="diagonal-grid">
 
             <!-- Feature 1 -->
             <div class="feature-row">
                 <div class="feature-content glass">
-                    <div class="feature-icon"><i class="fas fa-calendar-check"></i></div>
-                    <h3>Book a Pickup Schedule</h3>
-                   <p>Schedule your waste collection easily by choosing your preferred date and time, ensuring timely pickup without any hassle.</p>
+                    <div class="top-row">
+                        <div class="feature-icon"><i class="fas fa-calendar-check"></i></div>
+                        <h3>Book a Pickup Schedule</h3>
+                    </div>
+                   <p>
+    Schedule your waste collection easily by choosing your preferred date and time,
+    ensuring timely pickup without any hassle.
+    Receive automatic reminders before each collection so you never miss a pickup.
+    Easily manage multiple pickups for different locations or items in one place.
+    Our smart system helps you stay organized while contributing to a cleaner environment every day.
+</p>
 
                 </div>
                 <div class="feature-visual glass">
@@ -1059,27 +1182,37 @@ Be part of a movement that cares for the planet, nurtures communities, and inspi
             <!-- Feature 2 -->
             <div class="feature-row">
                 <div class="feature-content glass">
-                    <div class="feature-icon"><i class="fas fa-truck"></i></div>
-                    <h3>Track in Real-Time</h3>
+                    <div class="top-row">
+                        <div class="feature-icon"><i class="fas fa-truck"></i></div>
+                        <h3>Track in Real-Time</h3>
+                    </div>
                    <p>
-Track your scheduled waste pickups live and get instant updates on status changes.
-Receive reminders before each collection to stay prepared and organized.
-Easily reschedule or cancel pickups directly from your account.
-
+    Track your scheduled waste pickups live and get instant updates on status changes.
+    Receive reminders before each collection to stay prepared and organized.
+    Easily reschedule or cancel pickups directly from your account.
+    Keep all your pickup history in one place for easy reference and better planning.
+    Stay in control of your waste management while making a positive impact on your community.
 </p>
 
                 </div>
                 <div class="feature-visual glass">
-                    <img src="{% static 'real.png' %}" alt="Track in Real-Time">
+                    <img src="{% static 'real3.png' %}" alt="Track in Real-Time">
                 </div>
             </div>
 
             <!-- Feature 3 -->
             <div class="feature-row">
                 <div class="feature-content glass">
-                    <div class="feature-icon"><i class="fas fa-gift"></i></div>
-                    <h3>Collect Rewards</h3>
-                 <p>"Recycle with us and earn points that you can redeem for exciting rewards! Get bonus points and surprise gifts when you recycle directly through our website."</p>
+                    <div class="top-row">
+                        <div class="feature-icon"><i class="fas fa-gift"></i></div>
+                        <h3>Collect Rewards</h3>
+                    </div>
+                   <p>
+    Recycle with us and earn points that you can redeem for exciting rewards!
+    Get bonus points and surprise gifts when you recycle directly through our website.
+    Share your achievements with friends and inspire others to participate in creating a greener community.
+    The more you recycle, the more rewards you unlock, making sustainability fun and engaging.
+</p>
 
                 </div>
                 <div class="feature-visual glass">
@@ -1110,7 +1243,7 @@ Easily reschedule or cancel pickups directly from your account.
             <!-- Team Member 2 -->
             <div class="team-card">
                 <div class="team-avatar">
-                    <img src=".jpg" alt="Mehrin Rahman">
+                     <img src="{% static 'team2.jpg' %}" alt="Mehrin Rahman">
                 </div>
                 <h4 class="team-member-name">Mehrin Rahman</h4>
                 <p class="team-member-role">Frontend Developer</p>
@@ -1157,7 +1290,7 @@ Easily reschedule or cancel pickups directly from your account.
 }
 
 .team h2 {
-    font-size: 3rem;
+    font-size: 2.55rem;
     color: #0f2b1f;
     margin-bottom: 60px;
     font-weight: 800;
@@ -1251,34 +1384,34 @@ Easily reschedule or cancel pickups directly from your account.
       <!-- Testimonial 1 -->
       <div class="testimonial-card">
         <div class="testimonial-avatar">
-          <img src="images/customer1.jpg" alt="Customer 1">
+            <img src="{% static 'customer1.jpg' %}" alt="Rahim Rahman">
         </div>
         <p class="testimonial-text">
-          <span class="quote">“</span>CleanTrack+ has completely transformed our waste management process. Highly recommended!
+          <span class="quote"></span>CleanTrack+ has completely transformed our waste management process. Highly recommended!
         </p>
-        <h4 class="testimonial-name">Rahim Hossain</h4>
+        <h4 class="testimonial-name">Abu Towhid Khan</h4>
         <span class="testimonial-role">Regular user</span>
       </div>
       <!-- Testimonial 2 -->
       <div class="testimonial-card">
         <div class="testimonial-avatar">
-          <img src="images/customer2.jpg" alt="Customer 2">
+          <img src="{% static 'erin.jpg' %}" alt="Nujat Tabassum Erin">
         </div>
         <p class="testimonial-text">
-          <span class="quote">“</span>The donation tracking system is seamless and very user-friendly. Great job!
+          <span class="quote"></span>The donation tracking system is seamless and very user-friendly. Great job!
         </p>
-        <h4 class="testimonial-name">Fatima Khan</h4>
+        <h4 class="testimonial-name">Nujat Tabassum Erin</h4>
         <span class="testimonial-role">Regular User</span>
       </div>
       <!-- Testimonial 3 -->
       <div class="testimonial-card">
         <div class="testimonial-avatar">
-          <img src="images/customer3.jpg" alt="Customer 3">
+           <img src="{% static 'customer2.jpg' %}" alt="Shahrin Rahman">
         </div>
         <p class="testimonial-text">
-          <span class="quote">“</span>Amazing platform! It makes monitoring and donating so much easier and efficient.
+          <span class="quote"></span>Amazing platform! It makes monitoring and donating so much easier and efficient.
         </p>
-        <h4 class="testimonial-name">Shahriar Alam</h4>
+        <h4 class="testimonial-name">Shahrin Rahman</h4>
         <span class="testimonial-role">Regular User</span>
       </div>
     </div>
@@ -1312,7 +1445,7 @@ Easily reschedule or cancel pickups directly from your account.
 }
 
 .testimonials h2 {
-  font-size: 3.5rem;
+  font-size: 2.55rem;
   color: #000000;
   margin-bottom: 60px;
   font-weight: 800;
@@ -1385,22 +1518,18 @@ Easily reschedule or cancel pickups directly from your account.
 
 /* testimonial text */
 .testimonial-text {
-  font-size: 15px;
+  font-size: 17px;
   line-height: 1.6;
   margin-bottom: 18px;
   color: #000000;
-  font-style: italic;
+  font-style: normal;
   position: relative;
 }
-.testimonial-text .quote {
-  font-size: 2rem;
-  color: #014d2b;
-  vertical-align: top;
-}
+
 
 /* name and role */
 .testimonial-name {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
   color: #000000;
   margin-bottom: 4px;
@@ -1411,9 +1540,9 @@ Easily reschedule or cancel pickups directly from your account.
 }
 
 .testimonial-role {
-  font-size: 13px;
+  font-size: 16px;
   color: #014d2b;
-  font-weight: 500;
+  font-weight: 800;
 }
 </style>
 
