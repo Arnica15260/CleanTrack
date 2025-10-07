@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from .models import PickupRequest, RecyclingLog, ReuseDonation, Complaint, ContactMessage
+from .models import DriverComplaint
 
 User = get_user_model()
 
@@ -93,8 +94,6 @@ class ContactForm(forms.ModelForm):
         return ""
 
 
-# ---------- THE THREE FORMS BELOW ARE THE IMPORTANT FIXES ----------
-
 class RecyclingForm(forms.ModelForm):
     class Meta:
         model = RecyclingLog
@@ -137,7 +136,27 @@ class ComplaintForm(forms.ModelForm):
         model = Complaint
         fields = ["complaint_type", "subject", "description", "photo"]
         widgets = {
-            # complaint_type will render as a <select> automatically since the model has choices
-            "subject": forms.TextInput(attrs={"placeholder": "Short title"}),
-            "description": forms.Textarea(attrs={"rows": 4, "placeholder": "Describe the issue…"}),
+            "complaint_type": forms.TextInput(attrs={
+                "placeholder": "Category (e.g., Service, Billing, Pickup delay)"
+            }),
+            "subject": forms.TextInput(attrs={
+                "placeholder": "Short subject"
+            }),
+            "description": forms.Textarea(attrs={
+                "rows": 4,
+                "placeholder": "Describe the issue…"
+            }),
+        }
+        labels = {
+            "complaint_type": "Category",
+        }
+
+
+
+class DriverComplaintForm(forms.ModelForm):
+    class Meta:
+        model = DriverComplaint
+        fields = ["against_user","category","description","address","photo"]
+        widgets = {
+            "description": forms.Textarea(attrs={"rows":4}),
         }

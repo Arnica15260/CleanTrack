@@ -1,8 +1,10 @@
-# users/signals.py
-from django.db.models.signals import post_save
-from django.dispatch import receiver
+
 from .models import PickupRequest, RecyclingLog, ReuseDonation, Complaint, RewardEvent
 import math
+from django.contrib.auth import get_user_model
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+User = get_user_model()
 
 @receiver(post_save, sender=PickupRequest)
 def reward_pickup(sender, instance, created, **kwargs):
@@ -26,3 +28,7 @@ def reward_complaint(sender, instance, created, **kwargs):
     # Only award when status becomes resolved (not at creation)
     if not created and instance.status == "resolved":
         RewardEvent.objects.create(user=instance.user, source="complaint", points=10, memo="Complaint resolved")
+
+@receiver(post_save, sender=User)
+def ensure_driver_profile(sender, instance, created, **kwargs):
+    return

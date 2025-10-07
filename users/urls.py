@@ -24,30 +24,23 @@ urlpatterns = [
     path("go/<str:target>/", views.auth_gate, name="auth_gate"),
     path("reuse_market/", views.reuse_market, name="reuse_market"),
     path("reuse/accept/<int:pk>/", views.reuse_accept, name="reuse_accept"),
-
-    path("driver/", views.driver_dashboard, name="driver_dashboard"),
-    path("driver/ping/", views.driver_ping, name="driver_ping"),
-    path("driver/task/<int:pk>/start/", views.driver_task_start, name="driver_task_start"),
-    path("driver/task/<int:pk>/arrive/", views.driver_task_arrive, name="driver_task_arrive"),
-    path("driver/task/<int:pk>/complete/", views.driver_task_complete, name="driver_task_complete"),
-
-    path("tasks/assign/", views.assign_task, name="assign_task"),  # staff-only page
-
-    path("track/task/<int:pk>/", views.track_task, name="track_task"),
-    path("api/task/<int:pk>/positions/", views.task_positions_api, name="task_positions_api"),
-
-    path("api/track/latest/", views.user_track_latest, name="user_track_latest"),
-
-    path("track/api/task/<int:pk>/", views.user_track_task, name="user_track_task"),
     path("accepted/", views.accepted_list, name="accepted_list"),
     path("accepted/<int:pk>/complete/", views.accepted_mark_complete, name="accepted_mark_complete"),
     path("accepted/<int:pk>/cancel/", views.accepted_cancel, name="accepted_cancel"),
-
-
-
-
-
-
+    path("track/task/<int:pk>/", views.track_task, name="track_task"),
+    path("api/task/<int:pk>/positions/", views.task_positions_api, name="task_positions_api"),
+    path("api/track/latest/", views.user_track_latest, name="user_track_latest"),
+    path("track/api/task/<int:pk>/", views.user_track_task, name="user_track_task"),
+    path("driver/", views.driver_dashboard, name="driver_dashboard"),
+    path("driver/tasks/", views.driver_tasks, name="driver_tasks"),
+    path("driver/tasks/<int:pk>/start/", views.driver_task_start, name="driver_task_start"),
+    path("driver/tasks/<int:pk>/arrive/", views.driver_task_arrive, name="driver_task_arrive"),
+    path("driver/tasks/<int:pk>/complete/", views.driver_task_complete, name="driver_task_complete"),
+    path("driver/ping/", views.driver_ping, name="driver_ping"),
+    path("driver/profile/", views.driver_profile, name="driver_profile"),
+    path("driver/forum/", views.driver_forum, name="driver_forum"),
+    path("driver/activity/", views.driver_activity, name="driver_activity"),
+    path("driver/complaint/", views.driver_complaint, name="driver_complaint"),
 
     path(
         "password-reset/",

@@ -134,7 +134,6 @@
             <span class="pill">📦 Qty: {{ it.quantity|default:"1" }}</span>
             {% if it.category %}<span class="pill">🏷️ {{ it.category }}</span>{% endif %}
             {% if it.partner %}<span class="pill">🤝 {{ it.partner }}</span>{% endif %}
-            <a class="pill" href="{% url 'users:accepted_receipt' it.id %}" target="_blank" rel="noopener">🧾 Receipt</a>
           </div>
 
           {% if it.photo %}<div class="thumb"><img src="{{ it.photo.url }}" alt="item photo"></div>{% endif %}

@@ -1,8 +1,11 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.conf import settings
-from django.db.models import Q, F
+from django.db.models import Q, F, TextChoices
 from django.utils import timezone
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
 
 
 # -------------------- Custom User --------------------
@@ -86,22 +89,14 @@ class ContactMessage(models.Model):
 # -------------------- Recycling --------------------
 
 class RecyclingLog(TimeStamped):
-    MATERIALS = (
-        ("paper",   "Paper/Cardboard"),
-        ("plastic", "Plastics"),
-        ("metal",   "Metals"),
-        ("glass",   "Glass"),
-        ("ewaste",  "E-waste"),
-        ("battery", "Batteries"),
-        ("other",   "Other"),
-    )
+
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="recycling_logs",
     )
-    material = models.CharField(max_length=20, choices=MATERIALS)
+    material = models.CharField(max_length=20)
     weight_kg = models.DecimalField(max_digits=6, decimal_places=2)  # e.g. 12.50 kg
     note = models.CharField(max_length=255, blank=True, default="")
     photo = models.ImageField(upload_to="recycle_photos/", blank=True, null=True)
@@ -168,7 +163,6 @@ class ReuseDonation(TimeStamped):
                 name="reuse_accept_fields_null_when_pending",
                 check=~Q(status="pending") | (Q(accepted_by__isnull=True) & Q(accepted_at__isnull=True)),
             ),
-
             models.CheckConstraint(
                 name="reuse_accept_fields_set_when_accepted",
                 check=~Q(status="accepted") | (Q(accepted_by__isnull=False) & Q(accepted_at__isnull=False)),
@@ -193,7 +187,6 @@ class ReuseDonation(TimeStamped):
 
     # ------- domain helpers -------
     def accept_if_pending(self, user):
-
         from django.db import transaction
         now = timezone.now()
         with transaction.atomic():
@@ -229,31 +222,24 @@ class ReuseDonation(TimeStamped):
         self.save(update_fields=["status", "accepted_by", "accepted_at"])
 
 
-# users/models.py
+# -------------------- Complaints (general) --------------------
 
 class Complaint(TimeStamped):
-    TYPES = (
-        ("missed_pickup", "Missed Pickup"),
-        ("damage",        "Property Damage"),
-        ("billing",       "Billing Issue"),
-        ("driver",        "Driver Concern"),
-        ("other",         "Other"),
-    )
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="complaints",
+        related_name="complaints",              # <-- unique, no clash
     )
-    complaint_type = models.CharField(max_length=30, choices=TYPES)
+    complaint_type = models.CharField(max_length=30)
     subject = models.CharField(max_length=120)
     description = models.TextField()
     photo = models.ImageField(upload_to="complaint_photos/", blank=True, null=True)
     status = models.CharField(max_length=20, default="open")  # open|in_progress|resolved
 
-    # NEW (optional) links used by the driver/dispatch features:
+    # Optional links used by the driver/dispatch features:
     task = models.ForeignKey(
-        "users.DeliveryTask",           # string ref avoids import order issues
+        "users.DeliveryTask",
         on_delete=models.SET_NULL,
         null=True, blank=True,
         related_name="complaints",
@@ -262,7 +248,7 @@ class Complaint(TimeStamped):
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True, blank=True,
-        related_name="driver_complaints",
+        related_name="driver_complaints_general_link",  # distinct from DriverComplaint.driver
     )
 
     class Meta:
@@ -277,11 +263,10 @@ class Complaint(TimeStamped):
 class RewardEvent(TimeStamped):
     """Log of points earned; sum for a user = current points."""
     SOURCES = (
-        ("pickup",     "Pickup"),
+
         ("recycling",  "Recycling"),
         ("reuse",      "Reuse"),
-        ("complaint",  "Complaint Resolution"),
-        ("bonus",      "Bonus"),
+
     )
 
     user = models.ForeignKey(
@@ -300,12 +285,7 @@ class RewardEvent(TimeStamped):
         return f"{self.user} +{self.points} ({self.source})"
 
 
-# users/models.py  (append near the end)
-
-from django.core.validators import MinValueValidator, MaxValueValidator
-from django.db.models import Q, F, TextChoices
-
-# --- Driver tasking & tracking ---
+# -------------------- Driver tasking & tracking --------------------
 
 class DeliveryTask(TimeStamped):
     class Status(TextChoices):
@@ -331,11 +311,11 @@ class DeliveryTask(TimeStamped):
         related_name="tasks",
     )
 
-    # Assignment
+    # Assignment (driver)
     assigned_to = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
-        related_name="driver_tasks",
+        related_name="assigned_delivery_tasks",   # <-- changed to avoid clash
         help_text="Driver user",
     )
 
@@ -384,7 +364,6 @@ class DriverLocation(models.Model):
 
 
 class LocationPing(TimeStamped):
-    """Optional history of pings (keep if you want trails on the map)."""
     driver = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="location_pings")
     task   = models.ForeignKey(DeliveryTask, on_delete=models.SET_NULL, null=True, blank=True, related_name="pings")
     lat    = models.DecimalField(max_digits=9, decimal_places=6)
@@ -395,7 +374,6 @@ class LocationPing(TimeStamped):
 
 
 class DriverPointEvent(TimeStamped):
-    """Score ledger for drivers."""
     driver = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="driver_points")
     task   = models.ForeignKey(DeliveryTask, on_delete=models.SET_NULL, null=True, blank=True, related_name="point_events")
     points = models.IntegerField(default=0)
@@ -408,13 +386,6 @@ class DriverPointEvent(TimeStamped):
         return f"{self.driver} {'+' if self.points >= 0 else ''}{self.points} ({self.reason})"
 
 
-
-
-
-# users/models.py (append bottom)
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-
 @receiver(post_save, sender=Complaint)
 def penalize_driver_on_complaint(sender, instance: Complaint, created, **kwargs):
     if not created:
@@ -422,6 +393,27 @@ def penalize_driver_on_complaint(sender, instance: Complaint, created, **kwargs)
     if instance.driver_id:
         DriverPointEvent.objects.create(driver=instance.driver, task=instance.task, points=-5, reason="complaint")
 
+class DriverActivity(models.Model):
+    driver = models.ForeignKey(User, on_delete=models.CASCADE, related_name="driver_activities")
+    kind = models.CharField(max_length=40, default="event")
+    title = models.CharField(max_length=160)
+    when = models.DateTimeField(auto_now_add=True)
+    row = models.CharField(max_length=16, default="info")  # css color key
+
+    class Meta:
+        ordering = ["-when"]
 
 
+class DriverComplaint(models.Model):
+    driver = models.ForeignKey(User, on_delete=models.CASCADE, related_name="driver_complaint")  # unique name
+    against_user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="complained_by_driver")
+    category = models.CharField(max_length=80, default="Service")
+    description = models.TextField()
+    address = models.CharField(max_length=200, blank=True)
+    status = models.CharField(max_length=20, default="open")
+    when_dt = models.DateTimeField(auto_now_add=True)
+    photo = models.ImageField(upload_to="driver_complaint/", blank=True)
+
+    class Meta:
+        ordering = ["-when_dt"]
 

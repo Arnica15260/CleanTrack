@@ -284,5 +284,74 @@
       }
     })();
   </script>
+{# ---------- TOASTS (floating messages) ---------- #}
+<style>
+  .toast-stack{
+    position:fixed; top:20px; right:20px; z-index:9999;
+    display:flex; flex-direction:column; gap:10px; pointer-events:none;
+  }
+  .toast{
+    min-width:280px; max-width:420px; padding:12px 14px;
+    border-radius:14px; background:#fff; color:#0f172a;
+    box-shadow:0 12px 30px rgba(0,0,0,.12), inset 0 0 0 1px #e6f3ed;
+    display:flex; gap:10px; align-items:flex-start; pointer-events:auto;
+    transform:translateY(-10px); opacity:0; transition:transform .25s ease,opacity .25s ease;
+  }
+  .toast.show{ transform:none; opacity:1; }
+  .toast .icon{width:28px; height:28px; border-radius:9px; display:grid; place-items:center; font-size:16px}
+  .toast .body{flex:1; line-height:1.35}
+  .toast .title{font-weight:900; margin-bottom:2px}
+  .toast .close{border:0;background:transparent;font-size:18px;line-height:1;cursor:pointer;color:#475569}
+  /* variants */
+  .toast.success{ box-shadow:0 12px 30px rgba(22,163,74,.15), inset 0 0 0 1px #c7f0d3 }
+  .toast.success .icon{background:#ecfdf5; border:1px solid #b8f3db}
+  .toast.info{ box-shadow:0 12px 30px rgba(14,165,160,.15), inset 0 0 0 1px #bdebea }
+  .toast.info .icon{background:#f0fdfd; border:1px solid #bdebea}
+  .toast.warning{ box-shadow:0 12px 30px rgba(245,158,11,.15), inset 0 0 0 1px #fbd4a8 }
+  .toast.warning .icon{background:#fff7ed; border:1px solid #fde6c3}
+  .toast.error{ box-shadow:0 12px 30px rgba(225,29,72,.15), inset 0 0 0 1px #fec7d2 }
+  .toast.error .icon{background:#fff1f2; border:1px solid #ffd3db}
+</style>
+
+{% if messages %}
+<div id="toast-stack" class="toast-stack">
+  {% for m in messages %}
+    {% with t=m.tags %}
+    <div class="toast {% if 'success' in t %}success{% elif 'warning' in t %}warning{% elif 'error' in t %}error{% else %}info{% endif %}">
+      <div class="icon">
+        {% if 'success' in t %}✅{% elif 'warning' in t %}⚠️{% elif 'error' in t %}⛔{% else %}ℹ️{% endif %}
+      </div>
+      <div class="body">
+        <div class="title">
+          {% if 'success' in t %}Success{% elif 'warning' in t %}Warning{% elif 'error' in t %}Error{% else %}Notice{% endif %}
+        </div>
+        <div>{{ m|safe }}</div>
+      </div>
+      <button class="close" aria-label="Close">&times;</button>
+    </div>
+    {% endwith %}
+  {% endfor %}
+</div>
+<script>
+  (function(){
+    const stack = document.getElementById('toast-stack');
+    if(!stack) return;
+    // animate in
+    requestAnimationFrame(()=> stack.querySelectorAll('.toast').forEach(t=>t.classList.add('show')));
+    // close handlers + auto-dismiss
+    stack.addEventListener('click', (e)=>{
+      const btn = e.target.closest('.close'); if(!btn) return;
+      const t = btn.closest('.toast'); if(!t) return; t.classList.remove('show');
+      setTimeout(()=>t.remove(), 220);
+    });
+    stack.querySelectorAll('.toast').forEach((t,i)=>{
+      const ms = 4200 + i*700; // staggered lifetime
+      setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(),220); }, ms);
+    });
+  })();
+</script>
+{% endif %}
+{# ---------- /TOASTS ---------- #}
+
 </body>
 </html>

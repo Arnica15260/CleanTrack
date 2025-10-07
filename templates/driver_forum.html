@@ -1,0 +1,49 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Driver Forum — CleanTrack+</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root{--ink:#0f172a;--muted:#566471;--brand:#0f7a4d;--ghost:#eafff5}
+    body{margin:0;font-family:Manrope,system-ui;background:#f8fffb;color:var(--ink)}
+    .wrap{max-width:980px;margin:24px auto;padding:0 16px}
+    .card{background:#fff;border:1px solid #e3efe9;border-radius:18px;padding:14px 16px;margin:10px 0}
+    h1{margin:14px 0 6px}
+    .sub{color:var(--muted);margin-bottom:12px}
+    .row{display:flex;gap:10px;align-items:center}
+    .avatar{width:40px;height:40px;border-radius:12px;background:var(--ghost);display:grid;place-items:center;font-weight:900;color:#0a4b3a}
+    .name{font-weight:900}
+    .muted{color:var(--muted);font-size:13px}
+    a{color:#0a4b3a;text-decoration:none}
+    .badge{display:inline-flex;gap:8px;align-items:center;background:#f3fff9;border:1px solid #cdeee2;color:#0c4b3a;padding:6px 10px;border-radius:999px;font-weight:800;font-size:12px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h1>Driver Forum</h1>
+      <a class="badge" href="{% url 'users:driver_dashboard' %}">← Dashboard</a>
+    </div>
+    <div class="sub">List of drivers in your organization.</div>
+
+    {% if drivers %}
+      {% for d in drivers %}
+        <div class="card">
+          <div class="row">
+            <div class="avatar">{{ d.username|slice:":1"|upper }}</div>
+            <div>
+              <div class="name">{{ d.get_full_name|default:d.username }}</div>
+              <div class="muted">{{ d.email|default:"—" }}</div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="card">No other drivers found.</div>
+    {% endif %}
+  </div>
+</body>
+</html>

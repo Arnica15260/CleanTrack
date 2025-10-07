@@ -1,0 +1,247 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Driver Tasks — CleanTrack+</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    :root{
+      --brand:#0f7a4d; --brand2:#0ea5a0;
+      --ink:#0f172a; --muted:#566471;
+      --glass:#ffffffcc; --glass-b:#ffffffa6;
+      --ghost:#eafff5; --shadow:0 14px 36px rgba(0,0,0,.09);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family:Manrope,system-ui,Segoe UI,Roboto,Arial;
+      color:var(--ink); background:#f8fffb; line-height:1.55;
+      display:flex; flex-direction:column; min-height:100vh;
+    }
+
+    /* Ambient blobs */
+    .bg{position:fixed; inset:0; z-index:-2; background:linear-gradient(180deg,#f4fff9 0%,#ecfff6 50%,#f9fffe 100%)}
+    .bg span{position:absolute; width:46vmax; height:46vmax; border-radius:50%;
+      background:
+        radial-gradient(35% 35% at 30% 30%,#dcfff4,transparent 70%),
+        radial-gradient(35% 35% at 70% 70%,#bff3e3,transparent 70%);
+      filter:blur(28px); mix-blend-mode:multiply;
+      animation:float 18s var(--d,0s) ease-in-out infinite alternate}
+    .bg span:nth-child(1){top:-10vmax; left:-10vmax}
+    .bg span:nth-child(2){top:12vmax; right:-12vmax; --d:-3s}
+    .bg span:nth-child(3){bottom:-12vmax; left:25vmax; --d:-6s}
+    .bg span:nth-child(4){bottom:-8vmax; right:-8vmax; --d:-9s}
+    @keyframes float{0%{transform:translate(0,0)}50%{transform:translate(3vmax,-2vmax)}100%{transform:translate(-2vmax,2vmax)}}
+
+    .glass{background:var(--glass); backdrop-filter:blur(14px) saturate(1.15);
+           -webkit-backdrop-filter:blur(14px) saturate(1.15);
+           border:1px solid var(--glass-b); box-shadow:var(--shadow)}
+
+    /* top bar */
+    .topbar{position:sticky; top:0; z-index:50; margin:18px; border-radius:999px;
+            padding:10px 16px; display:flex; align-items:center; justify-content:space-between}
+    .brand{display:flex; align-items:center; gap:10px; color:#fff; padding:10px 16px; border-radius:999px; font-weight:900;
+           background:linear-gradient(120deg,#0f7a4d,#0ea5a0,#0f7a4d); background-size:200% 100%; animation:logoFlow 6s linear infinite}
+    @keyframes logoFlow{to{background-position:200% 50%}}
+    .home-btn{display:inline-flex; gap:8px; align-items:center; text-decoration:none; background:var(--ghost);
+              border:1px solid #c6f6e5; color:#084c3c; padding:10px 14px; border-radius:999px; font-weight:800}
+
+    .wrap{max-width:1100px; margin:8px auto 28px; padding:0 18px; width:100%; display:grid; gap:16px}
+
+    .card{border-radius:20px; padding:18px; background:#fff; position:relative; overflow:hidden}
+    .card h2{margin:0 0 10px; font-size:22px}
+    .sub{color:var(--muted)}
+    .list{display:grid; gap:10px}
+
+    .badge{display:inline-flex; gap:8px; align-items:center; background:#f3fff9; border:1px solid #cdeee2;
+           color:#0c4b3a; padding:6px 10px; border-radius:999px; font-weight:800; font-size:12px}
+
+    .row{display:grid; grid-template-columns:1fr auto auto; gap:10px; align-items:center; padding:12px;
+         background:#fff; border:1px solid #d7efe6; border-radius:14px; cursor:pointer;
+         transition:box-shadow .2s,border-color .2s,background .2s}
+    .row.ok{border-color:#b7ebc9;background:#f6fffa;box-shadow:0 0 0 1px #b7ebc955 inset,0 10px 24px rgba(22,163,74,.07)}
+    .row.warn{border-color:#fbd4a8;background:#fff9f3;box-shadow:0 0 0 1px #fbd4a855 inset,0 10px 24px rgba(245,158,11,.08)}
+    .row.info{border-color:#b9efe3;background:#f3fffc;box-shadow:0 0 0 1px #b9efe355 inset,0 10px 24px rgba(14,165,160,.08)}
+    .row.bad{border-color:#fec7d2;background:#fff6f8;box-shadow:0 0 0 1px #fec7d255 inset,0 10px 24px rgba(225,29,72,.08)}
+    .title-sm{font-weight:800}
+    .sub-sm{font-size:13px; color:var(--muted)}
+
+    .reveal{max-height:0; overflow:hidden; opacity:0; transition:max-height .25s ease,opacity .25s ease;
+            padding:0 6px}
+    .reveal.open{max-height:360px; opacity:1; margin-bottom:6px}
+    .reveal .kv{display:grid; grid-template-columns:130px 1fr; gap:8px; margin:10px 6px 2px}
+    .reveal .k{font-weight:900; color:#0b4a3a}
+
+    form{display:inline}
+    .btn{border:0; border-radius:10px; padding:8px 12px; background:#0ea57a; color:#fff; font-weight:800; cursor:pointer}
+    .btn.secondary{background:#eef2f7; color:#263444}
+
+    /* two-column like dashboard; keep items aligned to the top to avoid visual stacking quirks */
+    .grid{display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start}
+    @media (max-width:900px){ .grid{grid-template-columns:1fr} }
+
+    .reveal-card{opacity:0; transform:translateY(14px) scale(.985)}
+    .reveal-card.in{opacity:1; transform:none; transition:opacity .5s, transform .5s; transition-delay:var(--d,0ms)}
+  </style>
+</head>
+<body>
+  <div class="bg"><span></span><span></span><span></span><span></span></div>
+
+  <header class="topbar glass">
+    <div class="brand">⚡ CleanTrack+</div>
+    <div style="display:flex; gap:10px">
+      <a class="home-btn" href="{% url 'home' %}">Home</a>
+      <a class="home-btn" href="{% url 'users:logout' %}">Logout</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- Header -->
+    <section class="reveal-card glass card" data-anim>
+      <h1 style="margin:0">Driver Tasks</h1>
+      <div class="sub" style="margin-top:6px">Tap any task to see full details or use the action buttons on the right.</div>
+    </section>
+
+    <!-- OPEN + COMPLETED -->
+    <section class="grid">
+      <!-- OPEN -->
+      <article class="card glass reveal-card" data-anim>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <h2 style="margin:0">Open</h2>
+          <span class="badge">Active / Assigned</span>
+        </div>
+
+        {% if open_tasks %}
+          <div class="list">
+            {% for t in open_tasks %}
+              {% with s=t.status %}
+                {% if s == 'assigned' %}
+                  {% with rc='info' %}{% endwith %}
+                {% elif s == 'enroute' or s == 'arrived' %}
+                  {% with rc='warn' %}{% endwith %}
+                {% elif s == 'cancelled' %}
+                  {% with rc='bad' %}{% endwith %}
+                {% else %}
+                  {% with rc='info' %}{% endwith %}
+                {% endif %}
+              {% endwith %}
+
+              <div class="row {{ rc|default:'info' }} js-toggle">
+                <div>
+                  <div class="title-sm">📦 {{ t.address|default:"Task" }}</div>
+                  <div class="sub-sm">
+                    {{ t.get_status_display|default:t.status }}
+                    {% if t.window_start %} · {{ t.window_start|date:"M j, g:i a" }}{% endif %}
+                    {% if t.window_end %} — {{ t.window_end|date:"g:i a" }}{% endif %}
+                  </div>
+                </div>
+                <div class="badge">{{ t.get_status_display|default:t.status }}</div>
+                <div>
+                  {% if t.status == "assigned" %}
+                    <form method="post" action="{% url 'users:driver_task_start' t.id %}">{% csrf_token %}<button class="btn">Start</button></form>
+                  {% elif t.status == "enroute" %}
+                    <form method="post" action="{% url 'users:driver_task_arrive' t.id %}">{% csrf_token %}<button class="btn">Arrived</button></form>
+                  {% elif t.status == "arrived" %}
+                    <form method="post" action="{% url 'users:driver_task_complete' t.id %}">{% csrf_token %}<button class="btn">Complete</button></form>
+                  {% else %}
+                    <button class="btn secondary" disabled>In progress</button>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="reveal">
+                {% if t.notes %}<div class="kv"><div class="k">Notes:</div><div>{{ t.notes }}</div></div>{% endif %}
+                {% if t.pickup_request %}<div class="kv"><div class="k">Pickup:</div><div>#{{ t.pickup_request_id }}</div></div>{% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="sub">No open tasks.</div>
+        {% endif %}
+      </article>
+
+      <!-- COMPLETED -->
+      <article class="card glass reveal-card" data-anim>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <h2 style="margin:0">Completed</h2>
+          <span class="badge">History</span>
+        </div>
+
+        {% if completed %}
+          <div class="list">
+            {% for t in completed %}
+              <div class="row ok js-toggle">
+                <div>
+                  <div class="title-sm">✅ {{ t.address|default:"Task" }}</div>
+                  <div class="sub-sm">
+                    {% if t.completed_at %}{{ t.completed_at|date:"M j, g:i a" }}{% else %}{{ t.created|date:"M j, g:i a" }}{% endif %}
+                  </div>
+                </div>
+                <div class="badge">Completed</div>
+                <div></div>
+              </div>
+              <div class="reveal">
+                {% if t.notes %}<div class="kv"><div class="k">Notes:</div><div>{{ t.notes }}</div></div>{% endif %}
+                {% if t.proof_photo %}<div class="kv"><div class="k">Photo:</div><div><a href="{{ t.proof_photo.url }}" target="_blank" rel="noopener">Open</a></div></div>{% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="sub">No completed tasks yet.</div>
+        {% endif %}
+      </article>
+    </section>
+
+    <!-- CANCELLED -->
+    <section class="card glass reveal-card" data-anim style="margin-top:2px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <h2 style="margin:0">Cancelled</h2>
+        <span class="badge">Archive</span>
+      </div>
+
+      {% if cancelled %}
+        <div class="list">
+          {% for t in cancelled %}
+            <div class="row bad js-toggle">
+              <div>
+                <div class="title-sm">🛑 {{ t.address|default:"Task" }}</div>
+                <div class="sub-sm">{{ t.created|date:"M j, g:i a" }}</div>
+              </div>
+              <div class="badge">Cancelled</div>
+              <div></div>
+            </div>
+            <div class="reveal">
+              {% if t.notes %}<div class="kv"><div class="k">Notes:</div><div>{{ t.notes }}</div></div>{% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="sub">No cancelled tasks.</div>
+      {% endif %}
+    </section>
+  </main>
+
+  <script>
+    // Staggered reveal animation
+    (function(){
+      const cards=[...document.querySelectorAll('[data-anim]')];
+      cards.forEach((el,i)=> el.style.setProperty('--d', `${i*90}ms`));
+      const io=new IntersectionObserver((entries)=>{
+        entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }});
+      },{threshold:.08});
+      cards.forEach(el=>io.observe(el));
+    })();
+
+    // Expand rows on click
+    document.addEventListener('click', (e)=>{
+      const row = e.target.closest('.row.js-toggle'); if(!row) return;
+      const panel = row.nextElementSibling;
+      if(panel && panel.classList.contains('reveal')) panel.classList.toggle('open');
+    });
+  </script>
+</body>
+</html>

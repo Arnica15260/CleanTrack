@@ -2,9 +2,11 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
 from .models import User
-from .models import PickupRequest
 from .models import ContactMessage
 from .models import PickupRequest, RecyclingLog, ReuseDonation, Complaint, RewardEvent
+from django.contrib import admin
+from .models import DeliveryTask, DriverLocation, LocationPing, DriverPointEvent
+from .models import  DriverActivity, DriverComplaint
 
 class UserAdmin(BaseUserAdmin):
     list_display = ("username", "email", "role", "is_staff", "is_active")
@@ -33,17 +35,12 @@ class PickupRequestAdmin(admin.ModelAdmin):
     search_fields = ("user__username", "user__email", "address", "notes")
 
 
-
 @admin.register(ContactMessage)
 class ContactMessageAdmin(admin.ModelAdmin):
     list_display = ("name", "email", "subject", "created_at", "is_resolved")
     list_filter = ("is_resolved", "created_at")
     search_fields = ("name", "email", "subject", "message")
     readonly_fields = ("name", "email", "subject", "message", "created_at")
-
-
-
-
 
 
 @admin.register(RecyclingLog)
@@ -70,10 +67,6 @@ class RewardAdmin(admin.ModelAdmin):
     list_filter = ("source",)
     search_fields = ("user__username","memo")
 
-# users/admin.py
-from django.contrib import admin
-from .models import DeliveryTask, DriverLocation, LocationPing, DriverPointEvent
-
 @admin.register(DeliveryTask)
 class DeliveryTaskAdmin(admin.ModelAdmin):
     list_display = ("id", "customer", "assigned_to", "address", "status", "window_start", "completed_at")
@@ -95,3 +88,8 @@ class LocationPingAdmin(admin.ModelAdmin):
 class DriverPointEventAdmin(admin.ModelAdmin):
     list_display = ("driver", "task", "points", "reason", "created")
     list_filter  = ("driver", "reason")
+
+
+
+admin.site.register(DriverActivity)
+admin.site.register(DriverComplaint)

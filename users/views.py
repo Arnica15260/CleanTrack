@@ -1,41 +1,42 @@
-# users/views.py
 from datetime import date as dt_date, datetime, timedelta, timezone as py_tz
 from zoneinfo import ZoneInfo
-
-from django.apps import apps
 from django.conf import settings
-from django.contrib import messages
 from django.contrib.auth import get_user_model, logout
-from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.views import LoginView
 from django.core.mail import EmailMultiAlternatives
 from django.core.paginator import Paginator
 from django.db import models
-from django.db.models import Sum, Q
-from django.http import JsonResponse, HttpResponseForbidden, Http404, HttpResponse
-from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
 from django.urls import reverse, NoReverseMatch
-from django.utils import timezone
-from django.utils.dateparse import parse_date
 from django.views.decorators.http import require_POST
-
-from asgiref.sync import async_to_sync
-from channels.layers import get_channel_layer
-
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, get_object_or_404
-from django.http import JsonResponse
-from django.utils import timezone
-from django.apps import apps
+from .models import ReuseDonation
 from .forms import (
     RegisterForm, LoginEmailOrUsernameForm, PickupRequestForm, ContactForm,
-    RecyclingForm, ReuseForm, ComplaintForm
+    RecyclingForm, ReuseForm, ComplaintForm,
 )
 from .tokens import account_activation_token
 from .models import (
-    ContactMessage, PickupRequest, ReuseDonation,
-    DeliveryTask, DriverLocation, LocationPing, DriverPointEvent
+  PickupRequest,
+    Complaint)
+
+import json
+
+from django.apps import apps
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.db.models import Sum
+from django.http import HttpResponseForbidden, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
+
+from .forms import DriverComplaintForm
+from .models import (
+    DeliveryTask,
+    DriverActivity,
+    DriverComplaint,
+    DriverLocation,
+    LocationPing,
+    DriverPointEvent,
 )
 
 User = get_user_model()
@@ -246,21 +247,62 @@ def signup_admin(request):
 
 @login_required
 def page_complaint(request):
-    if 'ComplaintForm' not in globals() or ComplaintForm is None:
-        messages.error(request, "Complaint form is not available yet.")
-        return redirect("users:dashboard")
+    """
+    Regular user complaint page:
+      - Shows the form
+      - Shows complaint history for this user (most recent first)
+    """
     if request.method == "POST":
         form = ComplaintForm(request.POST, request.FILES)
         if form.is_valid():
-            obj = form.save(commit=False); obj.user = request.user; obj.save()
+            obj = form.save(commit=False)
+            obj.user = request.user
+            obj.save()
             messages.success(request, "Complaint submitted. We’ll review it shortly.")
-            return redirect("users:complaint")
+            # Redirect back to the same page so it shows up in history immediately
+            return redirect("users:complaint")   # make sure your urls.py names this pattern 'complaint'
     else:
         form = ComplaintForm()
-    return render(request, "complaint.html", {"form": form})
+
+    items = (
+        Complaint.objects
+        .filter(user=request.user)
+        .order_by("-created")[:10]
+    )
+
+    return render(request, "complaint.html", {"form": form, "items": items})
 
 
-# =========================  Dashboard  =========================
+# =========================  Dashboard  =========================\
+
+@login_required
+def profile_view(request):
+    return render(request, "profile.html")
+
+
+# =========================  Auth Gate  =========================
+def auth_gate(request, target):
+    target_map = {
+        "schedule": "users:schedule",
+        "recycling": "users:recycling",
+        "reuse": "users:reuse",
+        "track": "users:track",
+        "complaint": "users:complaint",
+        "profile": "users:profile",
+    }
+    if not request.user.is_authenticated:
+        messages.info(request, "Please create a free account to access this feature.")
+        try:
+            return redirect("users:signup")
+        except NoReverseMatch:
+            return redirect("users:login")
+    dest = target_map.get(target)
+    if dest:
+        return redirect(dest)
+    messages.error(request, "Unknown destination.")
+    return redirect("users:dashboard")
+
+
 @login_required
 def dashboard(request):
     # Admins straight to Django Admin
@@ -401,15 +443,8 @@ def dashboard(request):
 
         # Recent activity — include accepted reuse items
         recent_activity = []
-        for p in pickups[:5]:
-            recent_activity.append({
-                "title": f"Pickup — {p.address or 'Address'}",
-                "when": p.when_dt,
-                "kind": p.status or "scheduled",
-                "photo": getattr(p, "photo", None),
-                "row": p.row_class,
-            })
-        for e in (recycling_events[:3] if recycling_events else []):
+
+        for e in (recycling_events[:5] if recycling_events else []):
             recent_activity.append({
                 "title": f"Recycling — {getattr(e, 'material', 'Recycling')}",
                 "when": _to_dhaka(getattr(e, "created", None)),
@@ -417,16 +452,9 @@ def dashboard(request):
                 "photo": getattr(e, "photo", None),
                 "row": _status_class(getattr(e, "status", None)),
             })
-        for c in (complaints[:2] if complaints else []):
-            recent_activity.append({
-                "title": f"Complaint — {c.category}",
-                "when": c.when_dt,
-                "kind": getattr(c, "status", "open"),
-                "photo": getattr(c, "photo", None),
-                "row": c.row_class,
-            })
+
         # Add up to 2 accepted reuse entries to the feed
-        for a in (reuse_taken[:2] if reuse_taken else []):
+        for a in (reuse_taken[:10] if reuse_taken else []):
             recent_activity.append({
                 "title": f"Accepted reuse — {a.item_name or a.category}",
                 "when": _to_dhaka(getattr(a, "accepted_at", None) or getattr(a, "created", None)),
@@ -554,12 +582,7 @@ def _status_badge_hint(status: str):
 
 @login_required
 def page_track(request):
-    """
-    Regular user's Track page.
-    - Shows recent tasks.
-    - If ?q=<id> is provided but invalid or not found, show a clear error message.
-    - Only show pickup photo when a specific, valid id is searched and a photo exists.
-    """
+
     DeliveryTask_m, DriverLocation_m, _ = _get_delivery_models()
 
     items, task, active_id = [], None, None
@@ -640,10 +663,6 @@ def page_track(request):
         "error_text": error_text,   # <-- handy if you also want to show a custom banner
     })
 
-
-
-# --- JSON: latest task for this user ----------------------------------------
-
 @login_required
 def user_track_latest(request):
     DeliveryTask_m, DriverLocation_m, _ = _get_delivery_models()
@@ -684,7 +703,6 @@ def user_track_latest(request):
     })
 
 
-# --- JSON: specific task for this user --------------------------------------
 
 @login_required
 def user_track_task(request, pk: int):
@@ -726,32 +744,6 @@ def user_track_task(request, pk: int):
         } if loc else None),
     })
 
-@login_required
-def profile_view(request):
-    return render(request, "profile.html")
-
-
-# =========================  Auth Gate  =========================
-def auth_gate(request, target):
-    target_map = {
-        "schedule": "users:schedule",
-        "recycling": "users:recycling",
-        "reuse": "users:reuse",
-        "track": "users:track",
-        "complaint": "users:complaint",
-        "profile": "users:profile",
-    }
-    if not request.user.is_authenticated:
-        messages.info(request, "Please create a free account to access this feature.")
-        try:
-            return redirect("users:signup")
-        except NoReverseMatch:
-            return redirect("users:login")
-    dest = target_map.get(target)
-    if dest:
-        return redirect(dest)
-    messages.error(request, "Unknown destination.")
-    return redirect("users:dashboard")
 
 
 # =========================  Contact  =========================
@@ -873,256 +865,6 @@ def reuse_market(request):
     return render(request, "users/reuse_market.html", {"items": items})
 
 
-# =========================  Driver area  =========================
-def is_driver(u):
-    return u.is_authenticated and getattr(u, "role", "") == "driver"
-
-
-def is_staff(u):
-    return u.is_authenticated and (u.is_staff or u.is_superuser)
-
-
-@login_required
-def driver_dashboard(request):
-    if getattr(request.user, "role", "") != "driver":
-        return redirect("users:dashboard")
-
-    DeliveryTask_m = apps.get_model("users", "DeliveryTask", require_ready=False)
-    Complaint_m = apps.get_model("users", "Complaint", require_ready=False)
-    DriverPointEvent_m = apps.get_model("users", "DriverPointEvent", require_ready=False)
-
-    active, history = [], []
-    if DeliveryTask_m:
-        active = (
-            DeliveryTask_m.objects.filter(assigned_to=request.user)
-            .exclude(status__in=["completed", "cancelled"])
-            .order_by("-created")[:20]
-        )
-        history = (
-            DeliveryTask_m.objects.filter(
-                assigned_to=request.user, status="completed"
-            ).order_by("-completed_at")[:20]
-        )
-
-    recent_activity = []
-    for t in active[:5]:
-        recent_activity.append(
-            {"title": f"Task — {t.address}", "when": t.created, "kind": t.status}
-        )
-    for t in history[:5]:
-        recent_activity.append(
-            {"title": f"Completed — {t.address}", "when": t.completed_at, "kind": "completed"}
-        )
-    recent_activity.sort(key=lambda x: x["when"] or 0, reverse=True)
-
-    complaints = []
-    if Complaint_m and Complaint_m.objects.filter(driver=request.user).exists():
-        complaints = Complaint_m.objects.filter(driver=request.user).order_by("-created")[
-            :20
-        ]
-
-    points = 0
-    if DriverPointEvent_m:
-        points = (
-            DriverPointEvent_m.objects.filter(driver=request.user)
-            .aggregate(total=models.Sum("points"))
-            .get("total")
-            or 0
-        )
-
-    drivers = User.objects.filter(role="driver").order_by("first_name", "username")
-
-    return render(
-        request,
-        "driver.html",
-        {
-            "active": active,
-            "history": history,
-            "recent_activity": recent_activity,
-            "complaints": complaints,
-            "points": points,
-            "drivers": drivers,
-        },
-    )
-
-
-def _get_task_for_driver_or_404(user, pk):
-    try:
-        return DeliveryTask.objects.select_related("customer").get(
-            pk=pk, assigned_to=user
-        )
-    except DeliveryTask.DoesNotExist:
-        raise Http404
-
-
-@login_required
-@user_passes_test(is_driver)
-def driver_task_start(request, pk):
-    if request.method != "POST":
-        return HttpResponseForbidden()
-    t = _get_task_for_driver_or_404(request.user, pk)
-    t.status = DeliveryTask.Status.ENROUTE
-    t.started_at = timezone.now()
-    t.save(update_fields=["status", "started_at"])
-    messages.success(request, "Marked as En Route.")
-    return redirect("users:driver_dashboard")
-
-
-@login_required
-@user_passes_test(is_driver)
-def driver_task_arrive(request, pk):
-    if request.method != "POST":
-        return HttpResponseForbidden()
-    t = _get_task_for_driver_or_404(request.user, pk)
-    t.status = DeliveryTask.Status.ARRIVED
-    t.arrived_at = timezone.now()
-    t.save(update_fields=["status", "arrived_at"])
-    messages.success(request, "Marked as Arrived.")
-    return redirect("users:driver_dashboard")
-
-
-@login_required
-@user_passes_test(is_driver)
-def driver_task_complete(request, pk):
-    if request.method != "POST":
-        return HttpResponseForbidden()
-    t = _get_task_for_driver_or_404(request.user, pk)
-    t.status = DeliveryTask.Status.COMPLETED
-    t.completed_at = timezone.now()
-    t.save(update_fields=["status", "completed_at"])
-    t.award_points(request.user, 10, reason="delivery")
-    messages.success(request, "Great job! Task completed and points added.")
-    return redirect("users:driver_dashboard")
-
-
-@login_required
-@user_passes_test(is_driver)
-def driver_ping(request):
-    """Driver app/web calls this with lat,lng (+optional task_id)."""
-    if request.method != "POST":
-        return JsonResponse({"ok": False, "err": "POST required"}, status=405)
-
-    try:
-        lat = float(request.POST.get("lat"))
-        lng = float(request.POST.get("lng"))
-    except (TypeError, ValueError):
-        return JsonResponse({"ok": False, "err": "invalid lat/lng"}, status=400)
-
-    task_id = request.POST.get("task_id")
-    task = None
-    if task_id:
-        try:
-            task = DeliveryTask.objects.get(pk=int(task_id), assigned_to=request.user)
-        except DeliveryTask.DoesNotExist:
-            task = None  # ignore silently
-
-    loc, _ = DriverLocation.objects.get_or_create(driver=request.user)
-    loc.lat = lat
-    loc.lng = lng
-    loc.last_seen = timezone.now()
-    loc.save()
-
-    LocationPing.objects.create(driver=request.user, task=task, lat=lat, lng=lng)
-
-    if task:
-        layer = get_channel_layer()
-        async_to_sync(layer.group_send)(
-            f"task_{task.pk}",
-            {
-                "type": "pos.update",
-                "lat": lat,
-                "lng": lng,
-                "driver": request.user.pk,
-                "ts": timezone.now().isoformat(),
-            },
-        )
-
-    return JsonResponse({"ok": True})
-
-
-# ------- Assign page (staff) -------
-from django import forms
-
-
-class AssignTaskForm(forms.ModelForm):
-    class Meta:
-        model = DeliveryTask
-        fields = (
-            "customer",
-            "pickup_request",
-            "assigned_to",
-            "address",
-            "window_start",
-            "window_end",
-            "notes",
-        )
-
-
-@login_required
-@user_passes_test(is_staff)
-def assign_task(request):
-    if request.method == "POST":
-        form = AssignTaskForm(request.POST)
-        if form.is_valid():
-            t = form.save(commit=False)
-            t.status = DeliveryTask.Status.ASSIGNED
-            t.save()
-            messages.success(request, "Task assigned.")
-            return redirect("users:assign_task")
-    else:
-        form = AssignTaskForm()
-    return render(request, "assign_task.html", {"form": form})
-
-
-# ------- Task-specific public tracking (already in your app) -------
-@login_required
-def track_task(request, pk):
-    t = get_object_or_404(
-        DeliveryTask.objects.select_related("customer", "assigned_to"), pk=pk
-    )
-    if not (
-        request.user.is_staff
-        or request.user.is_superuser
-        or request.user == t.customer
-        or request.user == t.assigned_to
-    ):
-        return HttpResponseForbidden("Not allowed")
-
-    last = DriverLocation.objects.filter(driver=t.assigned_to).first()
-    return render(
-        request,
-        "track_task.html",
-        {"task": t, "last_lat": getattr(last, "lat", None), "last_lng": getattr(last, "lng", None)},
-    )
-
-
-@login_required
-def task_positions_api(request, pk):
-    t = get_object_or_404(DeliveryTask, pk=pk)
-    if not (
-        request.user.is_staff
-        or request.user.is_superuser
-        or request.user == t.customer
-        or request.user == t.assigned_to
-    ):
-        return HttpResponseForbidden()
-
-    p = (
-        LocationPing.objects.filter(driver=t.assigned_to, task=t)
-        .order_by("-created")
-        .first()
-    )
-    if not p:
-        return JsonResponse({"ok": True, "pos": None})
-    return JsonResponse(
-        {
-            "ok": True,
-            "pos": {"lat": float(p.lat), "lng": float(p.lng), "ts": p.created.isoformat()},
-        }
-    )
-
-from .models import ReuseDonation  # fields used below: accepted_by, accepted_at, created, user, item_name, category, quantity, partner, description/note, photo, status
-
 
 @login_required
 def accepted_list(request):
@@ -1188,4 +930,258 @@ def accepted_cancel(request, pk: int):
     messages.success(request, "Acceptance cancelled. The item is available again.")
     return redirect("users:accepted_list")
 
+
+def is_driver(u):
+    return u.is_authenticated and getattr(u, "role", "") == "driver"
+
+def is_staff_user(u):
+    return u.is_authenticated and (u.is_staff or u.is_superuser)
+
+# ---------------- Dashboard ----------------
+
+@login_required
+@user_passes_test(is_driver)
+def driver_dashboard(request):
+
+    recent_tasks = (
+        DeliveryTask.objects
+        .filter(assigned_to=request.user)
+        .exclude(status__in=[DeliveryTask.Status.COMPLETED, DeliveryTask.Status.CANCELLED])
+        .order_by("-created")[:20]
+    )
+
+    # Completed tasks
+    completed = (
+        DeliveryTask.objects
+        .filter(assigned_to=request.user, status=DeliveryTask.Status.COMPLETED)
+        .order_by("-completed_at", "-created")[:20]
+    )
+
+    # Points history and total
+    rewards = (
+        DriverPointEvent.objects
+        .filter(driver=request.user)
+        .order_by("-created")[:20]
+    )
+    reward_total = (
+        DriverPointEvent.objects
+        .filter(driver=request.user)
+        .aggregate(total=Sum("points"))
+        .get("total") or 0
+    )
+
+    # Driver's own complaints
+    complaints = (
+        DriverComplaint.objects
+        .filter(driver=request.user)
+        .order_by("-when_dt")[:20]
+    )
+
+    # Recent activity (10)
+    activity = (
+        DriverActivity.objects
+        .filter(driver=request.user)
+        .order_by("-when", "-id")[:10]
+    )
+
+    return render(
+        request,
+        "driver.html",
+        {
+            "recent_tasks": recent_tasks,   # used by "Recent tasks" card
+            "completed": completed,         # used by "Completed tasks" card
+            "rewards": rewards,             # used by "Rewards" list
+            "reward_total": reward_total,   # ring fill
+            "complaints": complaints,       # complaint history
+            "activity": activity,           # recent activity card
+        },
+    )
+
+
+@login_required
+@user_passes_test(is_driver)
+def driver_tasks(request):
+    """Full list of the driver’s tasks split by section."""
+    qs = DeliveryTask.objects.filter(assigned_to=request.user).order_by("-created")
+    open_tasks = qs.exclude(status__in=[DeliveryTask.Status.COMPLETED, DeliveryTask.Status.CANCELLED])[:100]
+    completed = qs.filter(status=DeliveryTask.Status.COMPLETED)[:100]
+    cancelled = qs.filter(status=DeliveryTask.Status.CANCELLED)[:100]
+    return render(
+        request,
+        "driver_tasks.html",
+        {"open_tasks": open_tasks, "completed": completed, "cancelled": cancelled},
+    )
+
+# ---------------- Task state actions ----------------
+
+def _get_task_for_driver_or_404(user, pk: int) -> DeliveryTask:
+    return get_object_or_404(
+        DeliveryTask.objects.select_related("customer"),
+        pk=pk,
+        assigned_to=user,
+    )
+
+@login_required
+@user_passes_test(is_driver)
+def driver_task_start(request, pk: int):
+    if request.method != "POST":
+        return HttpResponseForbidden()
+    t = _get_task_for_driver_or_404(request.user, pk)
+    t.status = DeliveryTask.Status.ENROUTE
+    t.started_at = timezone.now()
+    t.save(update_fields=["status", "started_at"])
+    messages.success(request, "Marked as En Route.")
+    return redirect("users:driver_tasks")
+
+@login_required
+@user_passes_test(is_driver)
+def driver_task_arrive(request, pk: int):
+    if request.method != "POST":
+        return HttpResponseForbidden()
+    t = _get_task_for_driver_or_404(request.user, pk)
+    t.status = DeliveryTask.Status.ARRIVED
+    t.arrived_at = timezone.now()
+    t.save(update_fields=["status", "arrived_at"])
+    messages.success(request, "Marked as Arrived.")
+    return redirect("users:driver_tasks")
+
+@login_required
+@user_passes_test(is_driver)
+def driver_task_complete(request, pk: int):
+    if request.method != "POST":
+        return HttpResponseForbidden()
+    t = _get_task_for_driver_or_404(request.user, pk)
+    t.status = DeliveryTask.Status.COMPLETED
+    t.completed_at = timezone.now()
+    t.save(update_fields=["status", "completed_at"])
+
+    # Award points (safe if already has helper)
+    try:
+        t.award_points(request.user, 10, reason="delivery")
+    except Exception:
+        pass
+
+    messages.success(request, "Great job! Task completed and points added.")
+    return redirect("users:driver_tasks")
+
+# ---------------- Live location ping (accepts JSON or form) ----------------
+
+@login_required
+@user_passes_test(is_driver)
+def driver_ping(request):
+    """Accept JSON {lat, lng, task_id?} OR form-encoded POST."""
+    if request.method != "POST":
+        return JsonResponse({"ok": False, "err": "POST required"}, status=405)
+
+    lat = lng = task_id = None
+    if request.content_type and "application/json" in request.content_type:
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+        except Exception:
+            return JsonResponse({"ok": False, "err": "invalid JSON"}, status=400)
+        lat, lng, task_id = data.get("lat"), data.get("lng"), data.get("task_id")
+    else:
+        lat, lng, task_id = request.POST.get("lat"), request.POST.get("lng"), request.POST.get("task_id")
+
+    try:
+        lat = float(lat)
+        lng = float(lng)
+    except (TypeError, ValueError):
+        return JsonResponse({"ok": False, "err": "invalid lat/lng"}, status=400)
+
+    task = None
+    if task_id:
+        try:
+            task = DeliveryTask.objects.get(pk=int(task_id), assigned_to=request.user)
+        except DeliveryTask.DoesNotExist:
+            task = None  # ignore
+
+    loc, _ = DriverLocation.objects.get_or_create(driver=request.user)
+    loc.lat = lat
+    loc.lng = lng
+    loc.last_seen = timezone.now()
+    loc.save(update_fields=["lat", "lng", "last_seen"])
+
+    LocationPing.objects.create(driver=request.user, task=task, lat=lat, lng=lng)
+    return JsonResponse({"ok": True})
+
+# ---------------- Profile / Forum / Activity / Complaint ----------------
+
+@login_required
+@user_passes_test(is_driver)
+def driver_profile(request):
+    return render(request, "driver_profile.html", {"driver": request.user})
+
+@login_required
+@user_passes_test(is_driver)
+def driver_forum(request):
+    drivers = User.objects.filter(role="driver").order_by("first_name", "username")
+    return render(request, "driver_forum.html", {"drivers": drivers})
+
+@login_required
+@user_passes_test(is_driver)
+def driver_activity(request):
+    items = DriverActivity.objects.filter(driver=request.user).order_by("-when", "-id")[:50]
+    return render(request, "driver_activity.html", {"items": items})
+
+@login_required
+@user_passes_test(is_driver)
+def driver_complaint(request):
+    if request.method == "POST":
+        form = DriverComplaintForm(request.POST, request.FILES)
+        if form.is_valid():
+            obj = form.save(commit=False)
+            obj.driver = request.user
+            obj.save()
+            messages.success(request, "Complaint submitted.")
+            return redirect("users:driver_complaint")
+    else:
+        form = DriverComplaintForm()
+    return render(request, "driver_complaint.html", {"form": form})
+
+@login_required
+def track_task(request, pk):
+    t = get_object_or_404(
+        DeliveryTask.objects.select_related("customer", "assigned_to"), pk=pk
+    )
+    if not (
+        request.user.is_staff
+        or request.user.is_superuser
+        or request.user == t.customer
+        or request.user == t.assigned_to
+    ):
+        return HttpResponseForbidden("Not allowed")
+
+    last = DriverLocation.objects.filter(driver=t.assigned_to).first()
+    return render(
+        request,
+        "track_task.html",
+        {"task": t, "last_lat": getattr(last, "lat", None), "last_lng": getattr(last, "lng", None)},
+    )
+
+
+@login_required
+def task_positions_api(request, pk):
+    t = get_object_or_404(DeliveryTask, pk=pk)
+    if not (
+        request.user.is_staff
+        or request.user.is_superuser
+        or request.user == t.customer
+        or request.user == t.assigned_to
+    ):
+        return HttpResponseForbidden()
+
+    p = (
+        LocationPing.objects.filter(driver=t.assigned_to, task=t)
+        .order_by("-created")
+        .first()
+    )
+    if not p:
+        return JsonResponse({"ok": True, "pos": None})
+    return JsonResponse(
+        {
+            "ok": True,
+            "pos": {"lat": float(p.lat), "lng": float(p.lng), "ts": p.created.isoformat()},
+        }
+    )
 

@@ -6,4 +6,4 @@ class UsersConfig(AppConfig):
     verbose_name = "Users & Accounts"
 
     def ready(self):
-        from . import signals  # noqa
+        from . import signals

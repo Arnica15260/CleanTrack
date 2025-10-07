@@ -1,0 +1,46 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Driver Activity — CleanTrack+</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root{--ink:#0f172a;--muted:#566471}
+    body{margin:0;font-family:Manrope,system-ui;background:#f8fffb;color:var(--ink)}
+    .wrap{max-width:960px;margin:24px auto;padding:0 16px}
+    .badge{display:inline-flex;gap:8px;align-items:center;background:#f3fff9;border:1px solid #cdeee2;color:#0c4b3a;padding:6px 10px;border-radius:999px;font-weight:800;font-size:12px;text-decoration:none}
+    .card{background:#fff;border:1px solid #e3efe9;border-radius:16px;padding:12px 14px;margin:8px 0;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+    .title{font-weight:900}
+    .sub{color:var(--muted);font-size:13px}
+    .pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;border:1px solid #e6f3ed;background:#f8fffb;padding:4px 10px;font-size:12px;font-weight:800}
+    .row-ok{border-color:#b7ebc9;background:#f6fffa}
+    .row-warn{border-color:#fbd4a8;background:#fff9f3}
+    .row-info{border-color:#b9efe3;background:#f3fffc}
+    .row-bad{border-color:#fec7d2;background:#fff6f8}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h1>Recent Activity</h1>
+      <a class="badge" href="{% url 'users:driver_dashboard' %}">← Dashboard</a>
+    </div>
+
+    {% if items %}
+      {% for a in items %}
+        <div class="card row-{{ a.row|default:'info' }}">
+          <div>
+            <div class="title">{{ a.title|default:"Activity" }}</div>
+            <div class="sub">{{ a.when|date:"M j, g:i a" }}</div>
+          </div>
+          <div class="pill">{{ a.kind|default:"event" }}</div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="card">No activity yet.</div>
+    {% endif %}
+  </div>
+</body>
+</html>

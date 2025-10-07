@@ -109,11 +109,11 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Auth (custom user + redirects)
 # ------------------------------------------------------------------------------
 AUTH_USER_MODEL = "users.User"
-AUTHENTICATION_BACKENDS = ["django.contrib.auth.backends.ModelBackend"]  # required for admin
+AUTHENTICATION_BACKENDS = ["django.contrib.auth.backends.ModelBackend"]
 
 LOGIN_URL = "users:login"
 LOGIN_REDIRECT_URL = "users:dashboard"
-LOGOUT_REDIRECT_URL = "users:login"  # handy for dev
+LOGOUT_REDIRECT_URL = "users:login"
 
 # ------------------------------------------------------------------------------
 # Email — Mailtrap (dev/testing)
@@ -122,8 +122,8 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.mailtrap.io"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = "3a28674f8cf997"      # replace with your env var in production
-EMAIL_HOST_PASSWORD = "cd760d4c7558b8"  # replace with your env var in production
+EMAIL_HOST_USER = "3a28674f8cf997"
+EMAIL_HOST_PASSWORD = "cd760d4c7558b8"
 DEFAULT_FROM_EMAIL = "noreply@cleantrack.test"
 EMAIL_TIMEOUT = 20
 
@@ -141,7 +141,6 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 ASGI_APPLICATION = "CleanTrack.asgi.application"
 
-# Dev: in-memory layer is OK. For production use RedisChannelLayer
 CHANNEL_LAYERS = {
     "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}
 }

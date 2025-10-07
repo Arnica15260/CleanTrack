@@ -1,0 +1,211 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Driver Profile — CleanTrack+</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script>document.documentElement.classList.add('js')</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+      --brand:#0f7a4d; --brand2:#0ea5a0; --ink:#0f172a; --muted:#566471;
+      --glass:#ffffffcc; --glass-b:#ffffffa6; --ghost:#eafff5;
+      --shadow:0 14px 36px rgba(0,0,0,.09);
+      --ok:#16a34a; --info:#0ea5a0;
+      --line:#d7efe6; --ring:#9fe7d1;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family:Manrope,system-ui,Segoe UI,Roboto,Arial;
+      color:var(--ink); background:#f8fffb;
+    }
+
+    /* background */
+    .bg{position:fixed; inset:0; z-index:-2;
+      background:linear-gradient(180deg,#f4fff9 0%,#ecfff6 50%,#f9fffe 100%);
+    }
+
+    /* header */
+    .topbar{display:flex;justify-content:space-between;align-items:center;margin:18px}
+    .brand{display:flex;align-items:center;gap:10px;color:#fff;padding:10px 16px;border-radius:999px;font-weight:900;
+           background:linear-gradient(120deg,var(--brand),var(--brand2),var(--brand));
+           background-size:200% 100%; animation:flow 6s linear infinite; box-shadow:var(--shadow)}
+    .bolt{width:26px;height:26px;border-radius:10px;background:#ffffff22;display:grid;place-items:center}
+    @keyframes flow{to{background-position:200% 50%}}
+    .home-btn{display:inline-flex;gap:8px;align-items:center;text-decoration:none;background:var(--ghost);
+              border:1px solid #c6f6e5;color:#084c3c;padding:10px 14px;border-radius:999px;font-weight:800}
+
+    /* layout */
+    .wrap{max-width:1100px;margin:22px auto;padding:0 16px;display:grid;grid-template-columns:360px 1fr;gap:16px}
+    @media (max-width:960px){ .wrap{grid-template-columns:1fr} }
+
+    /* cards */
+    .card{background:var(--glass);backdrop-filter:blur(14px) saturate(1.15);-webkit-backdrop-filter:blur(14px) saturate(1.15);
+          border:1px solid var(--glass-b);box-shadow:var(--shadow);border-radius:22px;padding:18px;position:relative}
+    .card .title{font-size:22px;font-weight:900;margin:0 0 8px}
+
+    /* left mint tile */
+    .frame{
+      position:relative; padding:12px; border-radius:28px; overflow:hidden; border:1px solid #cdeee3;
+      background:
+        radial-gradient(120% 90% at 15% 10%, #f2fffb 0%, transparent 60%),
+        radial-gradient(120% 90% at 85% 90%, #e8fff6 0%, transparent 60%),
+        linear-gradient(180deg,#ddf9ee 0%, #e9fff8 100%);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.7), 0 18px 40px rgba(10,120,90,.10);
+      background-size:180% 180%; animation:tileBreathe 14s ease-in-out infinite;
+    }
+    @keyframes tileBreathe{0%{background-position:0% 0%}50%{background-position:100% 100%}100%{background-position:0% 0%}}
+    .frame::before{
+      content:""; position:absolute; inset:-40%;
+      background:
+        radial-gradient(40% 35% at 30% 30%, rgba(14,165,160,.08), transparent 60%),
+        radial-gradient(35% 40% at 70% 70%, rgba(16,185,129,.07), transparent 60%);
+      filter:blur(6px); animation:drift 22s ease-in-out infinite alternate; pointer-events:none;
+    }
+    @keyframes drift{from{transform:translate3d(-3%,-2%,0)} to{transform:translate3d(3%,2%,0)}}
+
+    .profile-card{position:relative; border-radius:20px; background:#fff; border:1px solid var(--line); padding:18px;
+                  box-shadow:0 10px 26px rgba(8,112,85,.07)}
+    .id-row{display:flex; gap:14px; align-items:center}
+    .avatar{
+      width:84px;height:84px;border-radius:20px;display:grid;place-items:center;font-weight:900;font-size:34px;
+      color:#0a5235; background:linear-gradient(135deg,#dff8ed,#e8fffb); border:1px solid #cdeee2;
+    }
+    .fullname{font-size:26px;font-weight:900;margin:0}
+    .muted{color:var(--muted)}
+    .chip{display:inline-flex;gap:8px;align-items:center;padding:6px 10px;border-radius:999px;border:1px solid #cdeee2;background:#f3fff9;font-weight:800;font-size:12px;color:#0c4b3a}
+    .chip.ok{background:#e9f9ee;border-color:#b7ebc9;color:#065f46}
+    .chip.info{background:#effdf9;border-color:#b9efe3;color:#0b4a3a}
+
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    @media (max-width:720px){ .two{grid-template-columns:1fr} }
+    .grid{display:grid;grid-template-columns:1fr;gap:12px}
+    .row{display:flex;gap:10px;align-items:center;padding:12px;border-radius:14px;background:#fff;border:1px solid var(--line)}
+    .row:hover{box-shadow:0 10px 28px rgba(15,122,77,.08)}
+    .k{font-weight:900;color:#0a4b3a;width:160px}
+    .v{color:#0b3b31;word-break:break-word}
+
+    .js .reveal{opacity:0; transform:translateY(10px) scale(.985)}
+    .js .reveal.in{opacity:1; transform:none; transition:opacity .45s ease, transform .45s ease; transition-delay:var(--d,0ms)}
+
+    /* ---------- Attractive form boxes (auto-applied; no extra files) ---------- */
+    form.ct-form{display:grid;gap:14px}
+    .ct-form.grid-2{grid-template-columns:1fr 1fr}
+    @media (max-width:720px){ .ct-form.grid-2{grid-template-columns:1fr} }
+    .ct-row{display:grid;gap:8px}
+    .ct-label{font-weight:900;color:#0a4b3a}
+    .ct-hint{font-size:12.5px;color:var(--muted)}
+
+    .ct-input,.ct-select,.ct-textarea,.ct-file{
+      width:100%; font:inherit; color:#0b3b31; background:#fff;
+      border:1px solid var(--line); border-radius:14px; padding:12px 14px; outline:none;
+      transition:border-color .15s ease, box-shadow .15s ease, background .15s ease;
+    }
+    .ct-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%230a4b3a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; padding-right:38px}
+    .ct-textarea{min-height:130px;resize:vertical}
+    .ct-input:focus,.ct-select:focus,.ct-file:focus,.ct-textarea:focus{border-color:var(--ring); box-shadow:0 0 0 4px #e9fdf7}
+
+    /* error list (Django default) */
+    ul.errorlist{margin:0;padding:0;list-style:none}
+    ul.errorlist li{margin-top:4px;font-size:12.5px;color:#b91c1c;background:#fff6f8;border:1px solid #fec7d2;padding:6px 10px;border-radius:10px}
+  </style>
+</head>
+<body>
+  <div class="bg"></div>
+
+  <!-- header -->
+  <header class="topbar reveal" data-anim>
+    <div class="brand"><div class="bolt">⚡</div>CleanTrack+</div>
+    <div style="display:flex; gap:10px;">
+      <a class="home-btn" href="{% url 'users:driver_dashboard' %}"> Driver dashboard</a>
+      <a class="home-btn" href="{% url 'home' %}"> Home</a>
+      <a class="home-btn" href="{% url 'users:logout' %}"> Logout</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- LEFT: identity block -->
+    <section class="frame reveal" data-anim style="--d:60ms">
+      <div class="profile-card">
+        <div class="id-row">
+          <div class="avatar">{{ request.user.first_name|default:request.user.username|slice:":1"|upper }}</div>
+          <div>
+            <h1 class="fullname">{{ request.user.get_full_name|default:request.user.username }}</h1>
+            <div class="muted">Driver · Joined {{ request.user.date_joined|date:"F Y" }}</div>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px">
+          <span class="chip info">👤 {{ request.user.role|default:"Driver"|title }}</span>
+          {% if request.user.is_active %}
+            <span class="chip ok">✅ Verified</span>
+          {% else %}
+            <span class="chip">⏳ Not verified</span>
+          {% endif %}
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT: account details -->
+    <section class="card reveal" data-anim style="--d:120ms">
+      <h2 class="title">Account details</h2>
+      <div class="two">
+        <div class="grid">
+          <div class="row"><div class="k">Username</div><div class="v">{{ request.user.username }}</div></div>
+          <div class="row"><div class="k">Email</div><div class="v">{{ request.user.email|default:"—" }}</div></div>
+          <div class="row"><div class="k">Phone</div><div class="v">{{ request.user.phone_number|default:"—" }}</div></div>
+          <div class="row"><div class="k">Last login</div><div class="v">{{ request.user.last_login|date:"M j, Y g:i a"|default:"—" }}</div></div>
+        </div>
+        <div class="grid">
+          <div class="row"><div class="k">Role</div><div class="v">{{ request.user.role|default:"Driver"|title }}</div></div>
+          <div class="row"><div class="k">Status</div><div class="v">{% if request.user.is_active %}Active{% else %}Inactive{% endif %}</div></div>
+          <div class="row"><div class="k">Joined</div><div class="v">{{ request.user.date_joined|date:"M j, Y" }}</div></div>
+          <div class="row"><div class="k">Contact</div><div class="v">{{ request.user.email|default:"—" }}</div></div>
+        </div>
+      </div>
+
+
+    </section>
+  </main>
+
+  <script>
+    // reveal
+    (function(){
+      const items=[...document.querySelectorAll('[data-anim]')];
+      if(!items.length) return;
+      items.forEach((el,i)=>{ if(!el.style.getPropertyValue('--d')) el.style.setProperty('--d', `${i*70}ms`) });
+      const io=new IntersectionObserver((entries)=>{
+        entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+      },{threshold:.08});
+      items.forEach(el=>io.observe(el));
+    })();
+
+    // Auto-apply attractive styles to any form controls on this page (no extra files)
+    (function(){
+      document.querySelectorAll('form').forEach(form=>{
+        // If you want the responsive 2-col layout, add "ct-form grid-2" to the form tag in the template.
+        if(!form.classList.contains('ct-form')) form.classList.add('ct-form');
+        form.querySelectorAll('input,select,textarea').forEach(el=>{
+          const tag = el.tagName.toLowerCase();
+          if(tag==='select') el.classList.add('ct-select');
+          else if(tag==='textarea') el.classList.add('ct-textarea');
+          else if(el.type==='file') el.classList.add('ct-file');
+          else el.classList.add('ct-input');
+          // Upgrade labels right before the input (typical Django form.as_p/as_div patterns)
+          const label = form.querySelector(`label[for="${el.id}"]`);
+          if(label) label.classList.add('ct-label');
+        });
+        // Style rows if you wrap each field group in a container (recommended)
+        form.querySelectorAll('p, .row, .form-row, .form-group, div').forEach(w=>{
+          // be gentle—only add when it contains a control
+          if(w.querySelector('input,select,textarea')) w.classList.add('ct-row');
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
