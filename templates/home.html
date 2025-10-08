@@ -1567,19 +1567,21 @@
     </div>
 
     <!-- Contact Form -->
-    <div class="contact-form glass">
-      <div class="form-group">
-        <input type="text" placeholder=" (Name)" required>
-      </div>
-      <div class="form-group">
-        <input type="email" placeholder=" (Email)" required>
-      </div>
+    <!-- Contact Form (Home) -->
+<form class="contact-form glass" method="post" action="{% url 'users:home_contact_submit' %}">
+  {% csrf_token %}
+  <div class="form-group">
+    <input type="text" name="name" placeholder="Your Name" required>
+  </div>
+  <div class="form-group">
+    <input type="email" name="email" placeholder="Email" required>
+  </div>
+  <div class="form-group">
+    <textarea rows="5" name="message" placeholder="Message" required></textarea>
+  </div>
+  <button type="submit" class="submit-btn">Send</button>
+</form>
 
-      <div class="form-group">
-        <textarea rows="5" placeholder=" (Message)" required></textarea>
-      </div>
-      <button type="submit" class="submit-btn">Send</button>
-    </div>
 
   </div>
 </section>
@@ -1602,6 +1604,7 @@
         </div>
     </footer>
 <script src="{% static '/templatemo-neural-scripts.js' %}"></script>
+
 
 </body>
 </html>

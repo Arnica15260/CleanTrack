@@ -42,6 +42,8 @@ urlpatterns = [
     path("driver/activity/", views.driver_activity, name="driver_activity"),
     path("driver/complaint/", views.driver_complaint, name="driver_complaint"),
 
+    path("contact/submit/", views.home_contact_submit, name="home_contact_submit"),
+
     path(
         "password-reset/",
         auth_views.PasswordResetView.as_view(

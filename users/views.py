@@ -1185,3 +1185,13 @@ def task_positions_api(request, pk):
         }
     )
 
+@require_POST
+def home_contact_submit(request):
+
+    form = ContactForm(request.POST)
+    if form.is_valid():
+        form.save()
+        messages.success(request, "Thanks! Your message has been sent.")
+    else:
+        messages.error(request, "Please fix the errors and try again.")
+    return redirect("home")
