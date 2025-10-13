@@ -26,6 +26,10 @@
     <div style="display:flex;justify-content:space-between;align-items:center">
       <h1>Recent Activity</h1>
       <a class="badge" href="{% url 'users:driver_dashboard' %}">← Dashboard</a>
+         <a class="home-btn" href="{% url 'home' %}">Home</a>
+         <a class="home-btn" href="{% url 'users:about' %}">About</a>
+         <a class="home-btn" href="{% url 'contact' %}">Contact</a>
+         <a class="home-btn" href="{% url 'users:logout' %}">Logout</a>
     </div>
 
     {% if items %}

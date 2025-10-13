@@ -19,7 +19,7 @@
 
     /* ====== Animated background ====== */
     body{
-      margin:0; min-height:100dvh; display:grid; place-items:center; padding:28px;
+      margin:0; min-height:100dvh; display:grid; place-items:center; padding:10px 18px;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
       color:var(--ink);
       background:
@@ -42,39 +42,6 @@
       50%{ transform: translate3d(0,-1.2%,0) scale(1.02); }
       100%{ transform: translate3d(0,1.2%,0) scale(0.98); }
     }
-
-    /* Top badges */
-    .brand-chip{
-      /* moved to LEFT */
-      position:fixed; top:14px; left:14px;
-      background:linear-gradient(135deg, var(--brand-600), var(--brand-500));
-      color:#fff; padding:10px 16px; border-radius:999px; font-weight:700; letter-spacing:.2px;
-      box-shadow:0 10px 30px rgba(7,72,49,.25); overflow:hidden; z-index:20;
-    }
-    .brand-chip::after{
-      content:""; position:absolute; inset:0;
-      background:linear-gradient(100deg, transparent 0%, rgba(255,255,255,.35) 35%, transparent 70%);
-      transform: translateX(-120%); filter: blur(2px);
-      animation: shimmer 3.2s ease-in-out infinite;
-    }
-    @keyframes shimmer{ 0%{transform:translateX(-120%)} 60%{transform:translateX(120%)} 100%{transform:translateX(120%)} }
-
-    .top-right{
-      position:fixed; top:14px; right:14px; z-index:20; display:flex; gap:10px;
-    }
-    .home-btn{
-      display:inline-flex; align-items:center; gap:8px;
-      padding:10px 14px; border-radius:999px; text-decoration:none;
-      color:var(--brand-700); font-weight:800; letter-spacing:.2px;
-      background:linear-gradient(135deg, rgba(255,255,255,.9), rgba(244,251,247,.9));
-      border:1px solid var(--card-stroke);
-      box-shadow:0 10px 30px rgba(7,72,49,.18);
-      backdrop-filter: blur(10px) saturate(115%);
-      -webkit-backdrop-filter: blur(10px) saturate(115%);
-      transition: transform .06s, box-shadow .25s, opacity .2s;
-    }
-    .home-btn:hover{ transform:translateY(-1px); }
-    .home-btn svg{ width:18px; height:18px; }
 
     /* ====== Glass card with glow ring & parallax tilt ====== */
     .card-wrap{ perspective:1200px; width:min(92vw, 760px); }
@@ -176,23 +143,52 @@
     @media (prefers-reduced-motion: reduce){
       * { animation-duration:.001ms !important; animation-iteration-count:1 !important; transition:none !important; }
     }
+
+    /* ===================== NAVBAR styles (same as contact page) ===================== */
+    .topbar{
+      position:sticky; top:0; margin:20px; border-radius:999px; padding:12px 18px;
+      display:flex; align-items:center; justify-content:space-between;
+      background:#ffffffcc; backdrop-filter:blur(14px) saturate(1.2); -webkit-backdrop-filter:blur(14px) saturate(1.2);
+      border:1px solid #ffffffa6; box-shadow:0 14px 36px rgba(0,0,0,.08);
+      z-index: 20;
+
+    }
+    .topbar{ box-sizing:border-box; width:100%; }
+
+    .logo-pill{
+      display:inline-flex; gap:10px; align-items:center; color:#fff; border-radius:999px; padding:12px 20px; font-weight:800;
+      background:linear-gradient(120deg,#0f7a4d, #0ea5a0, #0f7a4d);
+      background-size:200% 100%; animation:logoFlow 6s linear infinite;
+      box-shadow:0 14px 30px rgba(15,122,77,.25), 0 0 0 1px #0f7a4d22 inset; font-size:20px;
+      text-decoration:none;
+    }
+    @keyframes logoFlow{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+    .bolt{background:#ffffff22; width:28px; height:28px; border-radius:10px; display:grid; place-items:center; font-size:18px}
+    .nav-actions{display:flex; gap:12px}
+    .nav-btn{
+      display:inline-flex; gap:8px; align-items:center; text-decoration:none;
+      background:#eafff5; border:1px solid #c6f6e5; color:#084c3c;
+      padding:10px 16px; border-radius:999px; font-weight:800; font-size:16px;
+    }
+    .nav-btn:hover{filter:brightness(.96)}
   </style>
 </head>
 <body>
   <div class="bg-blur" aria-hidden="true"></div>
 
-  <!-- Top badges -->
-  <div class="brand-chip">⚡ CleanTrack+</div>
-  <div class="top-right">
-    <!-- If you have a named URL for home, replace href="/" with: {% url 'home' %} -->
-    <a href="/" class="home-btn" data-ripple aria-label="Go to homepage">
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M3 11.5 12 4l9 7.5" stroke="#0f5f42" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M5 10.5V20h5v-5h4v5h5v-9.5" stroke="#2fa873" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      Home
+  <!-- ================ Contact-style NAVBAR (only change) ================ -->
+  <header class="topbar">
+    <a class="logo-pill" href="{% url 'home' %}" aria-label="CleanTrack+">
+      <div class="bolt">⚡</div><span>CleanTrack+</span>
     </a>
-  </div>
+    <nav class="nav-actions">
+      <a class="nav-btn" href="{% url 'home' %}">Home</a>
+      <a class="nav-btn" href="{% url 'users:about' %}">About</a>
+      <a class="nav-btn" href="{% url 'contact' %}">Contact</a>
+      <a class="nav-btn" href="{% url 'users:login' %}">Login</a>
+    </nav>
+  </header>
+  <!-- ==================================================================== -->
 
   <div class="card-wrap" id="tilt-wrap">
     <div class="glow" aria-hidden="true"></div>
@@ -310,74 +306,72 @@
       wrap.removeEventListener('mouseleave', resetTilt);
     }
   </script>
-{# ---------- TOASTS (floating messages) ---------- #}
-<style>
-  .toast-stack{
-    position:fixed; top:20px; right:20px; z-index:9999;
-    display:flex; flex-direction:column; gap:10px; pointer-events:none;
-  }
-  .toast{
-    min-width:280px; max-width:420px; padding:12px 14px;
-    border-radius:14px; background:#fff; color:#0f172a;
-    box-shadow:0 12px 30px rgba(0,0,0,.12), inset 0 0 0 1px #e6f3ed;
-    display:flex; gap:10px; align-items:flex-start; pointer-events:auto;
-    transform:translateY(-10px); opacity:0; transition:transform .25s ease,opacity .25s ease;
-  }
-  .toast.show{ transform:none; opacity:1; }
-  .toast .icon{width:28px; height:28px; border-radius:9px; display:grid; place-items:center; font-size:16px}
-  .toast .body{flex:1; line-height:1.35}
-  .toast .title{font-weight:900; margin-bottom:2px}
-  .toast .close{border:0;background:transparent;font-size:18px;line-height:1;cursor:pointer;color:#475569}
-  /* variants */
-  .toast.success{ box-shadow:0 12px 30px rgba(22,163,74,.15), inset 0 0 0 1px #c7f0d3 }
-  .toast.success .icon{background:#ecfdf5; border:1px solid #b8f3db}
-  .toast.info{ box-shadow:0 12px 30px rgba(14,165,160,.15), inset 0 0 0 1px #bdebea }
-  .toast.info .icon{background:#f0fdfd; border:1px solid #bdebea}
-  .toast.warning{ box-shadow:0 12px 30px rgba(245,158,11,.15), inset 0 0 0 1px #fbd4a8 }
-  .toast.warning .icon{background:#fff7ed; border:1px solid #fde6c3}
-  .toast.error{ box-shadow:0 12px 30px rgba(225,29,72,.15), inset 0 0 0 1px #fec7d2 }
-  .toast.error .icon{background:#fff1f2; border:1px solid #ffd3db}
-</style>
 
-{% if messages %}
-<div id="toast-stack" class="toast-stack">
-  {% for m in messages %}
-    {% with t=m.tags %}
-    <div class="toast {% if 'success' in t %}success{% elif 'warning' in t %}warning{% elif 'error' in t %}error{% else %}info{% endif %}">
-      <div class="icon">
-        {% if 'success' in t %}✅{% elif 'warning' in t %}⚠️{% elif 'error' in t %}⛔{% else %}ℹ️{% endif %}
-      </div>
-      <div class="body">
-        <div class="title">
-          {% if 'success' in t %}Success{% elif 'warning' in t %}Warning{% elif 'error' in t %}Error{% else %}Notice{% endif %}
+  {# ---------- TOASTS (floating messages) ---------- #}
+  <style>
+    .toast-stack{
+      position:fixed; top:20px; right:20px; z-index:9999;
+      display:flex; flex-direction:column; gap:10px; pointer-events:none;
+    }
+    .toast{
+      min-width:280px; max-width:420px; padding:12px 14px;
+      border-radius:14px; background:#fff; color:#0f172a;
+      box-shadow:0 12px 30px rgba(0,0,0,.12), inset 0 0 0 1px #e6f3ed;
+      display:flex; gap:10px; align-items:flex-start; pointer-events:auto;
+      transform:translateY(-10px); opacity:0; transition:transform .25s ease,opacity .25s ease;
+    }
+    .toast.show{ transform:none; opacity:1; }
+    .toast .icon{width:28px; height:28px; border-radius:9px; display:grid; place-items:center; font-size:16px}
+    .toast .body{flex:1; line-height:1.35}
+    .toast .title{font-weight:900; margin-bottom:2px}
+    .toast .close{border:0;background:transparent;font-size:18px;line-height:1;cursor:pointer;color:#475569}
+    /* variants */
+    .toast.success{ box-shadow:0 12px 30px rgba(22,163,74,.15), inset 0 0 0 1px #c7f0d3 }
+    .toast.success .icon{background:#ecfdf5; border:1px solid #b8f3db}
+    .toast.info{ box-shadow:0 12px 30px rgba(14,165,160,.15), inset 0 0 0 1px #bdebea }
+    .toast.info .icon{background:#f0fdfd; border:1px solid #bdebea}
+    .toast.warning{ box-shadow:0 12px 30px rgba(245,158,11,.15), inset 0 0 0 1px #fbd4a8 }
+    .toast.warning .icon{background:#fff7ed; border:1px solid #fde6c3}
+    .toast.error{ box-shadow:0 12px 30px rgba(225,29,72,.15), inset 0 0 0 1px #fec7d2 }
+    .toast.error .icon{background:#fff1f2; border:1px solid #ffd3db}
+  </style>
+
+  {% if messages %}
+  <div id="toast-stack" class="toast-stack">
+    {% for m in messages %}
+      {% with t=m.tags %}
+      <div class="toast {% if 'success' in t %}success{% elif 'warning' in t %}warning{% elif 'error' in t %}error{% else %}info{% endif %}">
+        <div class="icon">
+          {% if 'success' in t %}✅{% elif 'warning' in t %}⚠️{% elif 'error' in t %}⛔{% else %}ℹ️{% endif %}
         </div>
-        <div>{{ m|safe }}</div>
+        <div class="body">
+          <div class="title">
+            {% if 'success' in t %}Success{% elif 'warning' in t %}Warning{% elif 'error' in t %}Error{% else %}Notice{% endif %}
+          </div>
+          <div>{{ m|safe }}</div>
+        </div>
+        <button class="close" aria-label="Close">&times;</button>
       </div>
-      <button class="close" aria-label="Close">&times;</button>
-    </div>
-    {% endwith %}
-  {% endfor %}
-</div>
-<script>
-  (function(){
-    const stack = document.getElementById('toast-stack');
-    if(!stack) return;
-    // animate in
-    requestAnimationFrame(()=> stack.querySelectorAll('.toast').forEach(t=>t.classList.add('show')));
-    // close handlers + auto-dismiss
-    stack.addEventListener('click', (e)=>{
-      const btn = e.target.closest('.close'); if(!btn) return;
-      const t = btn.closest('.toast'); if(!t) return; t.classList.remove('show');
-      setTimeout(()=>t.remove(), 220);
-    });
-    stack.querySelectorAll('.toast').forEach((t,i)=>{
-      const ms = 4200 + i*700; // staggered lifetime
-      setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(),220); }, ms);
-    });
-  })();
-</script>
-{% endif %}
-{# ---------- /TOASTS ---------- #}
+      {% endwith %}
+    {% endfor %}
+  </div>
+  <script>
+    (function(){
+      const stack = document.getElementById('toast-stack');
+      if(!stack) return;
+      requestAnimationFrame(()=> stack.querySelectorAll('.toast').forEach(t=>t.classList.add('show')));
+      stack.addEventListener('click', (e)=>{
+        const btn = e.target.closest('.close'); if(!btn) return;
+        const t = btn.closest('.toast'); if(!t) return; t.classList.remove('show');
+        setTimeout(()=>t.remove(), 220);
+      });
+      stack.querySelectorAll('.toast').forEach((t,i)=>{
+        const ms = 4200 + i*700;
+        setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(),220); }, ms);
+      });
+    })();
+  </script>
+  {% endif %}
 
 </body>
 </html>

@@ -157,7 +157,7 @@ def _decorate_rewards(events):
 class RoleLoginView(LoginView):
     template_name = "login.html"
     authentication_form = LoginEmailOrUsernameForm
-    redirect_authenticated_user = False
+    redirect_authenticated_user =True
 
     def get_success_url(self):
         u = self.request.user
@@ -227,7 +227,7 @@ def activate(request, uidb64, token):
 def logout_view(request):
     logout(request)
     messages.info(request, "You have been logged out.")
-    return redirect("users:login")
+    return redirect("home")
 
 
 @login_required

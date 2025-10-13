@@ -959,11 +959,18 @@
 
             <!-- Desktop nav links -->
             <ul class="nav-links">
-                <li><a href="{% url 'users:about' %}">About</a></li>
-                <li><a href="{% url 'contact' %}">Contact</a></li>
-                <li><a href="{% url 'users:register' %}">Signup</a></li>
-                <li><a href="{% url 'users:login' %}">Login</a></li>
-            </ul>
+                <ul class="nav-links">
+                   <li><a href="{% url 'users:about' %}">About</a></li>
+                   <li><a href="{% url 'contact' %}">Contact</a></li>
+
+                  {% if request.user.is_authenticated %}
+                  <li><a href="{% url 'users:register' %}">Dashboard</a></li>
+                      <li><a href="{% url 'users:logout' %}">Logout</a></li>
+                  {% else %}
+                  <li><a href="{% url 'users:signup' %}">Signup</a></li>
+                  <li><a href="{% url 'users:login' %}">Login</a></li>
+                  {% endif %}
+                </ul>
         </nav>
     </header>
 </body>

@@ -110,13 +110,16 @@
   <div class="bg"><span></span><span></span><span></span><span></span></div>
 
   <header class="topbar glass">
-    <div class="brand"><div class="bolt">⚡</div>CleanTrack+</div>
-    {% url 'home' as home_url %}
-    <a class="home-btn" href="{{ home_url|default:'/' }}" rel="noopener"> Home</a>
+  <div class="brand"><div class="bolt">⚡</div>CleanTrack+</div>
 
+  <nav class="top-right" style="position:static;display:flex;gap:10px;margin-left:auto">
+    <a class="home-btn" href="{{ home_url|default:'/' }}" rel="noopener">Home</a>
+      <a class="home-btn" href="{{ about_url|default:'/' }}" rel="noopener">About</a>
+      <a class="home-btn" href="{{ contact_url|default:'/' }}" rel="noopener">Contact</a>
+      <a class="home-btn" href="{{ logout_url|default:'/' }}" rel="noopener">Logout</a>
 
-
-  </header>
+  </nav>
+</header>
 
   <div class="layout">
     <!-- SIDEBAR (independent scroll) -->
