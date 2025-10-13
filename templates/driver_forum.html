@@ -2,48 +2,221 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8"/>
   <title>Driver Forum — CleanTrack+</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+
   <style>
-    :root{--ink:#0f172a;--muted:#566471;--brand:#0f7a4d;--ghost:#eafff5}
-    body{margin:0;font-family:Manrope,system-ui;background:#f8fffb;color:var(--ink)}
-    .wrap{max-width:980px;margin:24px auto;padding:0 16px}
-    .card{background:#fff;border:1px solid #e3efe9;border-radius:18px;padding:14px 16px;margin:10px 0}
-    h1{margin:14px 0 6px}
-    .sub{color:var(--muted);margin-bottom:12px}
-    .row{display:flex;gap:10px;align-items:center}
-    .avatar{width:40px;height:40px;border-radius:12px;background:var(--ghost);display:grid;place-items:center;font-weight:900;color:#0a4b3a}
+    :root{
+      --brand:#0f7a4d; --brand2:#0ea5a0;
+      --ink:#0f172a; --muted:#566471;
+      --ghost:#eafff5; --panel:#ffffff;
+      --ring:#d7efe6; --shadow:0 22px 50px rgba(3,38,25,.12);
+      --ok:#16a34a; --warn:#f59e0b;
+    }
+
+    html,body{margin:0}
+    body{
+      font-family: Manrope, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+      color: var(--ink);
+      background:
+        radial-gradient(1000px 400px at -10% -20%, #e9fff5 0%, rgba(233,255,245,0) 60%),
+        radial-gradient(900px 380px at 110% -10%, #e9fff5 0%, rgba(233,255,245,0) 60%),
+        #f8fffb;
+      min-height: 100vh;
+    }
+
+    .shell{max-width:1060px;margin:28px auto;padding:0 16px}
+
+    /* ===== NAVBAR (like screenshot) ===== */
+    .navbar{
+      display:flex;align-items:center;justify-content:space-between;
+      background:#ffffff;
+      border:1px solid var(--ring);
+      border-radius:32px;
+      padding:10px 12px;
+      box-shadow:0 30px 60px rgba(15,122,77,.10);
+    }
+    .brand-pill{
+      display:inline-flex;align-items:center;gap:10px;
+      color:#fff;font-weight:900;letter-spacing:.2px;
+      padding:12px 18px;border-radius:28px;
+      background: linear-gradient(135deg, #11b792 0%, #0f7a4d 70%);
+      box-shadow: 0 12px 26px rgba(15,122,77,.35) inset, 0 6px 16px rgba(15,122,77,.22);
+    }
+    .brand-pill .bolt{font-size:16px}
+    .nav-actions{display:flex;gap:12px;align-items:center}
+    .nav-btn{
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:10px 16px;border-radius:999px;
+      font-weight:800;color:#0b5a3a;text-decoration:none;
+      background:#f4fffa;border:1px solid #cfeee2;
+      transition: transform .12s ease, box-shadow .12s ease, background .2s ease;
+    }
+    .nav-btn:hover{transform:translateY(-1px);box-shadow:0 10px 22px rgba(0,0,0,.06)}
+    /* ===== end navbar ===== */
+
+    /* Header card */
+    .hero{
+      margin-top:18px;
+      background: linear-gradient(180deg, #ffffff, #effcf6);
+      border:1px solid var(--ring); border-radius:22px; padding:22px 20px;
+      box-shadow: var(--shadow);
+    }
+    .hero h1{margin:6px 0 8px;font-size:32px}
+    .sub{color:var(--muted); margin-top:2px}
+
+    .pills{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 2px}
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      background:#f3fff9; border:1px solid #cdeee2; color:#0c4b3a;
+      padding:8px 12px; border-radius:999px; font-weight:800; font-size:12px;
+      box-shadow:0 8px 18px rgba(15,122,77,.06);
+      animation: pop .4s cubic-bezier(.2,.9,.2,1) both;
+    }
+    @keyframes pop{0%{transform:translateY(6px) scale(.98); opacity:0}100%{transform:none; opacity:1}}
+
+    /* Search bar */
+    .bar{
+      display:flex;gap:10px;align-items:center;margin:14px 0 4px;
+      background:#fff;border:1px solid var(--ring);border-radius:16px;padding:8px 10px;
+    }
+    .bar input{
+      flex:1;border:0;outline:0;font-size:14px;background:transparent;color:var(--ink)
+    }
+    .chip{font-size:12px;padding:6px 10px;border:1px solid var(--ring);border-radius:999px;background:#fff;text-decoration:none;color:#0a4b3a}
+
+    /* Grid + cards */
+    .grid{display:grid;grid-template-columns:repeat( auto-fill, minmax(260px,1fr) ); gap:14px; margin-top:12px}
+    .card{
+      background: var(--panel); border:1px solid var(--ring);
+      border-radius:20px; padding:14px;
+      box-shadow: var(--shadow);
+      transition: transform .18s ease, box-shadow .18s ease, border-color .2s ease;
+      opacity:0; transform: translateY(10px) scale(.98);
+    }
+    .card.show{opacity:1; transform:none}
+    .card:hover{transform: translateY(-4px); border-color:#bfe7d9; box-shadow:0 22px 50px rgba(15,122,77,.12)}
+    .row{display:flex;gap:12px;align-items:center}
+
+    .avatar{
+      width:46px;height:46px;border-radius:14px;display:grid;place-items:center;
+      font-weight:900;color:#fff;
+      background: radial-gradient(75% 100% at 20% 20%, #20d39a 0%, #0f7a4d 60%, #0b5a3a 100%);
+      box-shadow:0 8px 18px rgba(15,122,77,.26);
+      user-select:none
+    }
     .name{font-weight:900}
     .muted{color:var(--muted);font-size:13px}
-    a{color:#0a4b3a;text-decoration:none}
-    .badge{display:inline-flex;gap:8px;align-items:center;background:#f3fff9;border:1px solid #cdeee2;color:#0c4b3a;padding:6px 10px;border-radius:999px;font-weight:800;font-size:12px}
+    .tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .tag{font-size:11px;font-weight:800;border:1px solid #cdeee2;background:#f3fff9;color:#0c4b3a;border-radius:999px;padding:6px 8px}
+
+    .ribbon{
+      margin-left:auto;font-size:12px;font-weight:800;border-radius:999px;padding:6px 10px;
+      border:1px solid #d9f5e8;background:#eafff5;color:#0b5a3a
+    }
+
+    .empty{
+      padding:18px;background:#fff;border:1px dashed #cdeee2;border-radius:16px;text-align:center;color:var(--muted)
+    }
+
+    .stat{font-weight:900}
+    .sep{height:1px;background:#e7f3ee;margin:14px -2px}
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <h1>Driver Forum</h1>
-      <a class="badge" href="{% url 'users:driver_dashboard' %}">← Dashboard</a>
-    </div>
-    <div class="sub">List of drivers in your organization.</div>
+  <div class="shell">
 
+    <!-- NAVBAR -->
+    <nav class="navbar">
+      <div class="brand-pill">
+        <span class="bolt">⚡</span>
+        <span>CleanTrack+</span>
+      </div>
+      <div class="nav-actions">
+        <a class="nav-btn" href="{% url 'users:driver_dashboard' %}">Dashboard</a>
+        <a class="nav-btn" href="{% url 'home' %}">Home</a>
+        <a class="nav-btn" href="{% url 'users:logout' %}">Logout</a>
+      </div>
+    </nav>
+
+    <!-- Header / metrics -->
+    <section class="hero">
+      <h1>Driver Forum</h1>
+      <div class="sub">A live directory of all drivers in your organization. Browse, search, and connect.</div>
+
+      <div class="pills">
+        <div class="pill">👤 <span class="stat">{{ total }}</span>&nbsp;drivers</div>
+        <div class="pill">✅ Active today&nbsp;<span class="stat">{{ active_today }}</span></div>
+        <div class="pill">✨ New (7d)&nbsp;<span class="stat">{{ new_week }}</span></div>
+      </div>
+
+      <form class="bar" method="get" action=".">
+        <input type="text" name="q" value="{{ q }}" placeholder="Search name, username, or email…"/>
+        {% if q %}
+          <a class="chip" href="{% url 'users:driver_forum' %}">Clear</a>
+        {% endif %}
+        <button class="nav-btn" type="submit">Search</button>
+      </form>
+    </section>
+
+    <!-- Listing -->
     {% if drivers %}
-      {% for d in drivers %}
-        <div class="card">
-          <div class="row">
-            <div class="avatar">{{ d.username|slice:":1"|upper }}</div>
-            <div>
-              <div class="name">{{ d.get_full_name|default:d.username }}</div>
-              <div class="muted">{{ d.email|default:"—" }}</div>
+      <div class="grid" id="driverGrid">
+        {% for d in drivers %}
+          {% with full=d.get_full_name|default:d.username %}
+          <article class="card reveal" data-name="{{ full|lower }} {{ d.username|lower }} {{ d.email|default:''|lower }}">
+            <div class="row">
+              <div class="avatar">{{ full|slice:":1"|upper }}</div>
+              <div>
+                <div class="row" style="gap:10px;align-items:center">
+                  <div class="name">{{ full }}</div>
+                  {% if d.last_login and d.last_login.date == today %}
+                    <span class="ribbon">Active</span>
+                  {% endif %}
+                </div>
+                <div class="muted">{{ d.email|default:"—" }}</div>
+                <div class="tags">
+                  <span class="tag">@{{ d.username }}</span>
+                  <span class="tag">Joined: {{ d.date_joined|date:"M j, Y" }}</span>
+                  {% if d.last_login %}<span class="tag">Last login: {{ d.last_login|date:"M j, g:i a" }}</span>{% endif %}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      {% endfor %}
+            <div class="sep"></div>
+            <div class="row" style="justify-content:flex-end;gap:8px">
+            </div>
+          </article>
+          {% endwith %}
+        {% endfor %}
+      </div>
     {% else %}
-      <div class="card">No other drivers found.</div>
+      <div class="empty">No other drivers found.</div>
     {% endif %}
   </div>
+
+  <script>
+    // Reveal-on-scroll animation
+    const observer = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting){ e.target.classList.add('show'); observer.unobserve(e.target) }
+      })
+    }, {threshold: .08});
+    document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+
+    // Client-side live filter (works on top of server-side ?q=)
+    const qInput = document.querySelector('input[name="q"]');
+    const grid = document.getElementById('driverGrid');
+    if (qInput && grid){
+      qInput.addEventListener('input', ()=>{
+        const v = qInput.value.trim().toLowerCase();
+        grid.querySelectorAll('.card').forEach(card=>{
+          const hay = card.getAttribute('data-name') || '';
+          card.style.display = hay.includes(v) ? '' : 'none';
+        });
+      });
+    }
+  </script>
 </body>
 </html>

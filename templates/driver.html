@@ -8,13 +8,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet" />
-
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 
   <style>
     :root{--brand:#0f7a4d;--brand2:#0ea5a0;--ink:#0f172a;--muted:#566471;--glass:#ffffffcc;--glass-b:#ffffffa6;--ghost:#eafff5;--shadow:0 14px 36px rgba(0,0,0,.09);--ok:#16a34a;--warn:#f59e0b;--info:#0ea5a0;--bad:#e11d48}
     *{box-sizing:border-box} html,body{height:100%}
     body{margin:0;font-family:Manrope,system-ui,Segoe UI,Roboto,Arial;background:#f8fffb;color:var(--ink);display:flex;flex-direction:column;min-height:100vh}
+
     .bg{position:fixed;inset:0;z-index:-2;background:linear-gradient(180deg,#f4fff9 0%,#ecfff6 50%,#f9fffe 100%)}
     .bg span{position:absolute;width:46vmax;height:46vmax;border-radius:50%;
       background:radial-gradient(35% 35% at 30% 30%,#dcfff4,transparent 70%),
@@ -25,11 +25,15 @@
     .bg span:nth-child(3){bottom:-12vmax;left:25vmax;--d:-6s}
     .bg span:nth-child(4){bottom:-8vmax;right:-8vmax;--d:-9s}
     @keyframes float{0%{transform:translate(0,0)}50%{transform:translate(3vmax,-2vmax)}100%{transform:translate(-2vmax,2vmax)}}
+
     .glass{background:var(--glass);backdrop-filter:blur(14px) saturate(1.15);-webkit-backdrop-filter:blur(14px) saturate(1.15);border:1px solid var(--glass-b);box-shadow:var(--shadow)}
+
+    /* Navbar (rounded brand left, rounded links right) */
     .topbar{position:sticky;top:0;z-index:50;margin:18px;border-radius:999px;padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
-    .brand{display:flex;align-items:center;gap:10px;color:#fff;padding:10px 16px;border-radius:999px;font-weight:900;background:linear-gradient(120deg,var(--brand),var(--brand2),var(--brand));background-size:200% 100%;animation:logoFlow 6s linear infinite}
+    .brand{display:inline-flex;align-items:center;gap:10px;color:#fff;padding:10px 16px;border-radius:999px;font-weight:900;background:linear-gradient(120deg,var(--brand),var(--brand2),var(--brand));background-size:200% 100%;animation:logoFlow 6s linear infinite}
     @keyframes logoFlow{to{background-position:200% 50%}}
     .home-btn{display:inline-flex;gap:8px;align-items:center;text-decoration:none;background:var(--ghost);border:1px solid #c6f6e5;color:#084c3c;padding:10px 14px;border-radius:999px;font-weight:800}
+
     .layout{display:grid;grid-template-columns:260px 1fr;gap:16px;padding:0 18px 28px;flex:1;min-height:0;overflow:hidden}
     @media (max-width:1100px){.layout{grid-template-columns:1fr}.sidebar{display:none}}
     .sidebar{border-radius:22px;padding:10px;overflow:auto}
@@ -41,12 +45,15 @@
     .nav a:hover{background:#effdf7}
     .nav a.active{background:linear-gradient(120deg,var(--brand),var(--brand2));color:#fff}
     .ico{width:22px;height:22px;display:grid;place-items:center}
+
     .main{display:grid;gap:16px;overflow:auto;padding-right:2px}
     .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
     @media (max-width:900px){.grid2{grid-template-columns:1fr}}
+
     .card{border-radius:20px;padding:18px;background:#fff;position:relative}
     .card h2{margin:0 0 10px;font-size:22px}
     .list{display:grid;gap:10px}
+
     .row{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:12px;border-radius:14px;background:#fff;border:1px solid #d7efe6;cursor:pointer;transition:box-shadow .2s,border-color .2s,background .2s}
     .row.ok{border-color:#b7ebc9;background:#f6fffa;box-shadow:0 0 0 1px #b7ebc955 inset,0 10px 24px rgba(22,163,74,.07)}
     .row.warn{border-color:#fbd4a8;background:#fff9f3;box-shadow:0 0 0 1px #fbd4a855 inset,0 10px 24px rgba(245,158,11,.08)}
@@ -55,12 +62,15 @@
     .title-sm{font-weight:800}
     .sub-sm{font-size:13px;color:var(--muted)}
     .badge{display:inline-flex;gap:8px;align-items:center;background:#f3fff9;border:1px solid #cdeee2;color:#0c4b3a;padding:6px 10px;border-radius:999px;font-weight:800;font-size:12px}
+
     .reveal{max-height:0;overflow:hidden;opacity:0;transition:max-height .25s ease,opacity .25s ease}
     .reveal.open{max-height:360px;opacity:1}
-    .reveal .kv{display:grid;grid-template-columns:110px 1fr;gap:8px;margin:10px 6px 2px}
+    .reveal .kv{display:grid;grid-template-columns:120px 1fr;gap:8px;margin:10px 6px 2px}
     .reveal .kv .k{font-weight:900;color:#0b4a3a}
+
     .reveal-card{opacity:0;transform:translateY(14px) scale(.985)}
     .reveal-card.in{opacity:1;transform:none;transition:opacity .5s ease,transform .5s ease;transition-delay:var(--d,0ms)}
+
     .ring{--p:0;width:100px;height:100px;border-radius:50%;background:conic-gradient(#84cc16 calc(var(--p)*1%), #e6f5ee 0);display:grid;place-items:center}
     .ring .inner{width:74px;height:74px;border-radius:50%;background:#fff;display:grid;place-items:center;box-shadow:inset 0 0 0 1px #e6efe9}
   </style>
@@ -68,6 +78,7 @@
 <body>
   <div class="bg"><span></span><span></span><span></span><span></span></div>
 
+  <!-- NAVBAR -->
   <header class="topbar glass">
     <div class="brand">⚡ CleanTrack+</div>
     <div style="display:flex;gap:10px">
@@ -78,6 +89,7 @@
   </header>
 
   <div class="layout">
+    <!-- SIDEBAR -->
     <aside class="sidebar glass">
       <div class="logo-row">🚚 <span>Driver</span></div>
       <div class="profile">
@@ -93,34 +105,40 @@
         <a href="{% url 'users:driver_profile' %}"><span class="ico">🧑‍✈️</span>Profile</a>
         <a href="{% url 'users:driver_tasks' %}"><span class="ico">🗓️</span>Tasks</a>
         <a href="{% url 'users:driver_forum' %}"><span class="ico">👥</span>Driver forum</a>
-        <a href="{% url 'users:driver_activity' %}"><span class="ico">📈</span>Activity</a>
         <a href="{% url 'users:driver_complaint' %}"><span class="ico">📝</span>Complaints</a>
       </nav>
     </aside>
 
+    <!-- MAIN -->
     <main class="main">
 
-      <!-- Row 1 -->
+      <!-- ROW 1: Live + Rewards -->
       <section class="grid2">
-        <!-- Live -->
+        <!-- Live location -->
         <article id="live" class="card glass reveal-card" data-anim>
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
             <h2 style="margin:0">Live location</h2>
-            <div id="liveState" style="display:inline-flex;align-items:center;gap:8px;font-weight:800;background:#f6faf8;border:1px solid #d9eee6;padding:8px 12px;border-radius:999px;">
-              <span id="stateDot" style="width:10px;height:10px;border-radius:50%;background:#a3a3a3;box-shadow:0 0 0 3px #efefef inset;display:inline-block"></span>
+
+            <div id="liveState"
+                 style="display:inline-flex;align-items:center;gap:8px;font-weight:800;background:#f6faf8;border:1px solid #d9eee6;padding:8px 12px;border-radius:999px;">
+              <span id="stateDot"
+                    style="width:10px;height:10px;border-radius:50%;background:#a3a3a3;box-shadow:0 0 0 3px #efefef inset;display:inline-block"></span>
               <span id="stateText" class="sub-sm" style="font-weight:800;color:#334155">offline</span>
             </div>
           </div>
 
           <div style="display:flex;gap:10px;align-items:center;margin:0 0 10px">
             <div class="sub-sm" style="font-weight:800;color:#0b3b31">Active task</div>
-            <select id="activeTask" class="home-btn" style="background:#fff;border-radius:12px;border:1px solid #d7efe6;padding:8px 12px;color:#063c31">
+            <select id="activeTask"
+                    class="home-btn"
+                    style="background:#fff;border-radius:12px;border:1px solid #d7efe6;padding:8px 12px;color:#063c31">
               <option value="">— none —</option>
               {% for t in active %}
                 <option value="{{ t.id }}">{{ t.address|default:'Task'|truncatechars:28 }}</option>
               {% endfor %}
             </select>
-            <button id="btnGo" class="home-btn" style="background:#0ea57a;color:#fff;border-color:#0ea57a">Go online</button>
+
+            <button id="btnGo"  class="home-btn" style="background:#0ea57a;color:#fff;border-color:#0ea57a">Go online</button>
             <button id="btnStop" class="home-btn" style="background:#eef2f7;border-color:#d7e0ea;color:#263444">Stop</button>
           </div>
 
@@ -136,29 +154,40 @@
           </div>
 
           <div style="display:flex; gap:16px; align-items:center; margin:6px 0 12px">
-            <div class="ring" id="ring" style="--p:0">
+            <!-- server-computed ring_pct -->
+            <div class="ring" style="--p:{{ ring_pct|default:0 }}">
               <div class="inner">
                 <div style="text-align:center">
-                  <div style="font-size:22px;font-weight:900">{{ points|default_if_none:"0" }}</div>
+                  <div style="font-size:22px;font-weight:900">{{ points|default:0 }}</div>
                   <div class="sub-sm">pts</div>
                 </div>
               </div>
             </div>
-            <div class="sub-sm">Keep completing tasks to earn points.</div>
+            <div class="sub-sm">Click any entry to see what caused the points.</div>
           </div>
 
           <div class="list">
-            {% if rewards %}
+            {% if rewards|length %}
               {% for r in rewards %}
                 <div class="row {% if r.points >= 0 %}ok{% else %}bad{% endif %} js-toggle">
                   <div>
-                    <div class="title-sm">🏅 {{ r.reason|default:"Reward"|capfirst }}</div>
+                    <div class="title-sm">
+                      {% if r.points >= 0 %}🏅 Earned{% else %}⚠️ Penalty{% endif %}
+                      — {{ r.reason|default:"reward"|capfirst }}
+                    </div>
                     <div class="sub-sm">{{ r.created|date:"M j, g:i a" }}</div>
                   </div>
                   <div></div>
                   <div class="badge">{% if r.points >= 0 %}+{% endif %}{{ r.points }}</div>
                 </div>
                 <div class="reveal">
+                  <div class="kv"><div class="k">Reason:</div><div>{{ r.reason|default:"—"|capfirst }}</div></div>
+                  {% if r.task %}
+                    <div class="kv"><div class="k">Task:</div>
+                      <div>#{{ r.task.id }} · {{ r.task.address|default:"—" }}</div>
+                    </div>
+                  {% endif %}
+                  <div class="kv"><div class="k">When:</div><div>{{ r.created|date:"M j, g:i a" }}</div></div>
                   <div class="kv"><div class="k">Points:</div><div>{% if r.points >= 0 %}+{% endif %}{{ r.points }}</div></div>
                 </div>
               {% endfor %}
@@ -169,9 +198,9 @@
         </article>
       </section>
 
-      <!-- Row 2 -->
+      <!-- ROW 2: Assigned + Completed -->
       <section class="grid2">
-        <!-- Assigned -->
+        <!-- Assigned tasks -->
         <article class="card glass reveal-card" data-anim>
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
             <h2 style="margin:0">Assigned tasks</h2>
@@ -181,17 +210,17 @@
             {% if active %}
               {% for t in active %}
                 {% with s=t.status|lower %}
-                <div class="row {% if s == 'accepted' or s == 'enroute' or s == 'arrived' %}info{% elif s == 'cancelled' %}bad{% else %}warn{% endif %} js-toggle">
-                  <div>
-                    <div class="title-sm">📦 {{ t.address|default:"Task" }}</div>
-                    <div class="sub-sm">
-                      {% if t.window_start %}{{ t.window_start|date:"M j, g:i a" }}{% else %}{{ t.created|date:"M j, g:i a" }}{% endif %}
-                      · {{ t.address|default:"—" }}
+                  <div class="row {% if s == 'accepted' or s == 'enroute' or s == 'arrived' or s == 'assigned' or s == 'pending' %}info{% elif s == 'cancelled' %}bad{% else %}warn{% endif %} js-toggle">
+                    <div>
+                      <div class="title-sm">📦 {{ t.address|default:"Task" }}</div>
+                      <div class="sub-sm">
+                        {% if t.window_start %}{{ t.window_start|date:"M j, g:i a" }}{% else %}{{ t.created|date:"M j, g:i a" }}{% endif %}
+                        · {{ t.address|default:"—" }}
+                      </div>
                     </div>
+                    <div></div>
+                    <div class="badge">{{ t.get_status_display|default:t.status }}</div>
                   </div>
-                  <div></div>
-                  <div class="badge">{{ t.get_status_display|default:t.status }}</div>
-                </div>
                 {% endwith %}
                 <div class="reveal">
                   {% if t.notes %}<div class="kv"><div class="k">Notes:</div><div>{{ t.notes }}</div></div>{% endif %}
@@ -204,7 +233,7 @@
           </div>
         </article>
 
-        <!-- Completed -->
+        <!-- Completed tasks -->
         <article class="card glass reveal-card" data-anim>
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
             <h2 style="margin:0">Completed tasks</h2>
@@ -222,11 +251,12 @@
                     </div>
                   </div>
                   <div></div>
-                  <div class="badge">{{ t.get_status_display|default:t.status }}</div>
+                  <div class="badge">Completed</div>
                 </div>
                 <div class="reveal">
                   {% if t.notes %}<div class="kv"><div class="k">Notes:</div><div>{{ t.notes }}</div></div>{% endif %}
                   {% if t.proof_photo %}<div class="kv"><div class="k">Photo:</div><div><a href="{{ t.proof_photo.url }}" target="_blank" rel="noopener">Open</a></div></div>{% endif %}
+                  {% if t.points_awarded %}<div class="kv"><div class="k">Points earned:</div><div>+{{ t.points_awarded }}</div></div>{% endif %}
                 </div>
               {% endfor %}
             {% else %}
@@ -236,7 +266,7 @@
         </article>
       </section>
 
-      <!-- Row 3 -->
+      <!-- ROW 3: Complaints + Activity -->
       <section class="grid2">
         <!-- Complaints -->
         <article class="card glass reveal-card" data-anim>
@@ -248,14 +278,16 @@
             {% if complaints %}
               {% for c in complaints %}
                 {% with s=c.status|lower %}
-                <div class="row {% if s == 'resolved' or s == 'accepted' or s == 'closed' %}ok{% elif s == 'rejected' or s == 'denied' %}bad{% else %}warn{% endif %} js-toggle">
-                  <div>
-                    <div class="title-sm">📝 {{ c.category|default:"General" }}</div>
-                    <div class="sub-sm">{{ c.when_dt|date:"M j, g:i a" }} · {{ c.address|default:"—" }}</div>
+                  <div class="row {% if s == 'resolved' or s == 'accepted' or s == 'closed' %}ok{% elif s == 'rejected' or s == 'denied' %}bad{% else %}warn{% endif %} js-toggle">
+                    <div>
+                      <div class="title-sm">📝 {{ c.category|default:"General" }}</div>
+                      <div class="sub-sm">
+                        {% if c.when_dt %}{{ c.when_dt|date:"M j, g:i a" }}{% else %}—{% endif %} · {{ c.address|default:"—" }}
+                      </div>
+                    </div>
+                    <div></div>
+                    <div class="badge">{{ c.status|default:"open" }}</div>
                   </div>
-                  <div></div>
-                  <div class="badge">{{ c.status|default:"open" }}</div>
-                </div>
                 {% endwith %}
                 <div class="reveal">
                   <div class="kv"><div class="k">Details:</div><div>{{ c.description|default:"—" }}</div></div>
@@ -272,7 +304,7 @@
         <article class="card glass reveal-card" data-anim>
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
             <h2 style="margin:0">Recent activity</h2>
-            <a class="badge" href="{% url 'users:driver_activity' %}">Latest 50</a>
+            <a class="badge" href="{% url 'users:driver_tasks' %}">Latest 10</a>
           </div>
           <div class="list">
             {% if recent_activity %}
@@ -300,14 +332,14 @@
   {% url 'users:driver_ping' as DRIVER_PING_URL %}
 
   <script>
-    // Expand/collapse
+    // Toggle expand panels
     document.addEventListener('click', (e)=>{
       const row = e.target.closest('.row.js-toggle'); if(!row) return;
       const panel = row.nextElementSibling;
       if(panel && panel.classList.contains('reveal')) panel.classList.toggle('open');
     });
 
-    // Live location
+    // LIVE BOX: map + online/offline + ping every 10s
     (function(){
       const pingUrl = "{{ DRIVER_PING_URL|default:'' }}";
       const mapEl   = document.getElementById('driverMap'); if(!mapEl || !window.L) return;
@@ -377,15 +409,7 @@
       btnStop.addEventListener('click',stop);
     })();
 
-    // Rewards ring (400pt cap sample)
-    (function(){
-      const ring=document.getElementById('ring'); if(!ring) return;
-      const pts=Number('{{ points|default_if_none:"0" }}')||0;
-      const pct=Math.max(0,Math.min(100,Math.round((pts/400)*100)));
-      ring.style.setProperty('--p',pct);
-    })();
-
-    // parallax + card reveal
+    // Parallax bg + staggered card reveal
     (function(){
       const spans=document.querySelectorAll('.bg span'); if(spans.length){
         let w=innerWidth,h=innerHeight;
@@ -399,7 +423,7 @@
     })();
   </script>
 
-  <!-- Toasts for Django messages -->
+  <!-- Toasts (Django messages) -->
   <style>
     .toast-stack{position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;pointer-events:none}
     .toast{min-width:280px;max-width:420px;padding:12px 14px;border-radius:14px;background:#fff;color:#0f172a;box-shadow:0 12px 30px rgba(0,0,0,.12),inset 0 0 0 1px #e6f3ed;display:flex;gap:10px;align-items:flex-start;pointer-events:auto;transform:translateY(-10px);opacity:0;transition:transform .25s ease,opacity .25s ease}

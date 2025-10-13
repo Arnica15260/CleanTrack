@@ -109,6 +109,18 @@ class RecyclingLog(TimeStamped):
 
 
 # -------------------- Reuse / Donation --------------------
+from django.conf import settings
+from django.db import models
+from django.db.models import Q, F
+from django.utils import timezone
+
+class TimeStamped(models.Model):
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        abstract = True
+
 
 class ReuseDonation(TimeStamped):
 
@@ -179,7 +191,13 @@ class ReuseDonation(TimeStamped):
 
     @property
     def description(self):
-        return self.note
+        # Single source of truth for what we display as description
+        return self.note or ""
+
+    @description.setter
+    def description(self, value):
+        # Allow assignment to .description; store in .note
+        self.note = (value or "").strip()
 
     @property
     def is_available(self):
@@ -373,17 +391,39 @@ class LocationPing(TimeStamped):
         ordering = ("-created",)
 
 
-class DriverPointEvent(TimeStamped):
-    driver = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="driver_points")
-    task   = models.ForeignKey(DeliveryTask, on_delete=models.SET_NULL, null=True, blank=True, related_name="point_events")
+
+
+class DriverPointEvent(models.Model):
+    driver = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="driver_point_events",
+    )
+    # positive for rewards, negative for penalties
     points = models.IntegerField(default=0)
-    reason = models.CharField(max_length=80, default="delivery")
+
+    # short machine-ish reason code; keep it simple
+    reason = models.CharField(max_length=40, default="delivery")
+
+    # optional link to the task that caused the change
+    task = models.ForeignKey(
+        "users.DeliveryTask",
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name="point_events",
+    )
+
+    # optional free text (details that your template can show when the row expands)
+    note = models.TextField(blank=True)
+
+    created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ("-created",)
+        ordering = ["-created"]
 
     def __str__(self):
-        return f"{self.driver} {'+' if self.points >= 0 else ''}{self.points} ({self.reason})"
+        sign = "+" if self.points >= 0 else ""
+        return f"{self.driver} {sign}{self.points} [{self.reason}]"
 
 
 @receiver(post_save, sender=Complaint)

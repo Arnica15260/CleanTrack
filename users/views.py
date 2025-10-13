@@ -6,8 +6,10 @@ from django.contrib.auth.views import LoginView
 from django.core.mail import EmailMultiAlternatives
 from django.core.paginator import Paginator
 from django.db import models
+from django.db.models.functions import Coalesce
 from django.template.loader import render_to_string
 from django.urls import reverse, NoReverseMatch
+from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 from .models import ReuseDonation
 from .forms import (
@@ -27,7 +29,8 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Sum
 from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.utils import timezone
+from django.utils import timezone, cache
+from django.core.cache import cache
 
 from .forms import DriverComplaintForm
 from .models import (
@@ -937,67 +940,115 @@ def is_driver(u):
 def is_staff_user(u):
     return u.is_authenticated and (u.is_staff or u.is_superuser)
 
-# ---------------- Dashboard ----------------
+
+
+
+
+from datetime import datetime, timezone as py_tz
 
 @login_required
 @user_passes_test(is_driver)
+@never_cache
 def driver_dashboard(request):
+    user = request.user
 
-    recent_tasks = (
+    # ---------------- Active / recent tasks ----------------
+    active = (
         DeliveryTask.objects
-        .filter(assigned_to=request.user)
+        .filter(assigned_to=user)
         .exclude(status__in=[DeliveryTask.Status.COMPLETED, DeliveryTask.Status.CANCELLED])
-        .order_by("-created")[:20]
+        .order_by("-created")[:10]
     )
 
-    # Completed tasks
-    completed = (
+    # ---------------- Completed tasks ----------------
+    history = (
         DeliveryTask.objects
-        .filter(assigned_to=request.user, status=DeliveryTask.Status.COMPLETED)
-        .order_by("-completed_at", "-created")[:20]
+        .filter(assigned_to=user, status=DeliveryTask.Status.COMPLETED)
+        .order_by("-completed_at", "-created")[:10]
     )
 
-    # Points history and total
-    rewards = (
+    # ---------------- Rewards (list + total) ----------------
+    rewards_qs = (
         DriverPointEvent.objects
-        .filter(driver=request.user)
-        .order_by("-created")[:20]
+        .filter(driver=user)
+        .select_related("task")
+        .order_by("-created")[:10]
     )
-    reward_total = (
+    rewards = list(rewards_qs)
+
+    points = (
         DriverPointEvent.objects
-        .filter(driver=request.user)
-        .aggregate(total=Sum("points"))
+        .filter(driver=user)
+        .aggregate(total=Coalesce(Sum("points"), 0))
         .get("total") or 0
     )
 
-    # Driver's own complaints
-    complaints = (
-        DriverComplaint.objects
-        .filter(driver=request.user)
-        .order_by("-when_dt")[:20]
+    # ---- Progress ring — server-compute the % so CSS can read it ----
+    MAX_POINTS = 400  # tweak for your UX
+    pct = round((points / MAX_POINTS) * 100) if MAX_POINTS else 0
+    pct = max(0, min(100, pct))
+    ring_pct = 0 if points == 0 else max(8, pct)  # small visual floor
+
+    # ---------------- Complaints ----------------
+    complaints = DriverComplaint.objects.filter(driver=user).order_by("-when_dt")[:10]
+
+    # ---------------- Recent activity (merged feed) ----------------
+    feed = []
+
+    # 1) Active/assigned/open tasks
+    for t in active[:10]:
+        feed.append({
+            "title": f"Task — {getattr(t, 'address', '') or 'Address N/A'}",
+            "when": _to_dhaka(getattr(t, "created", None) or getattr(t, "started_at", None)),
+            "kind": getattr(t, "status", "assigned"),
+            "row":  _status_class(getattr(t, "status", None)),
+            "note": getattr(t, "notes", "") or "",
+        })
+
+    # 2) Recently completed tasks
+    for t in history[:10]:
+        feed.append({
+            "title": f"Completed — {getattr(t, 'address', '') or 'Address N/A'}",
+            "when": _to_dhaka(getattr(t, "completed_at", None) or getattr(t, "updated", None) or getattr(t, "created", None)),
+            "kind": "completed",
+            "row":  "ok",
+            "note": getattr(t, "notes", "") or "",
+        })
+
+    # 3) DriverActivity rows (kept as-is)
+    da_qs = DriverActivity.objects.filter(driver=user).order_by("-when", "-id")[:10]
+    for a in da_qs:
+        feed.append({
+            "title": getattr(a, "title", None) or "Activity",
+            "when":  _to_dhaka(getattr(a, "when", None)),
+            "kind":  getattr(a, "kind", None) or getattr(a, "action", None) or "event",
+            "row":   _status_class(getattr(a, "status", None)),
+            "note":  getattr(a, "note", "") or "",
+        })
+
+    # Sort newest first; allow None safely
+    feed.sort(
+        key=lambda x: x["when"] or datetime.min.replace(tzinfo=py_tz.utc),
+        reverse=True,
     )
 
-    # Recent activity (10)
-    activity = (
-        DriverActivity.objects
-        .filter(driver=request.user)
-        .order_by("-when", "-id")[:10]
-    )
+    # Optional cap so the card stays tight (adjust or remove if you truly want "all")
+    recent_activity = feed[:10]
 
-    return render(
-        request,
-        "driver.html",
-        {
-            "recent_tasks": recent_tasks,   # used by "Recent tasks" card
-            "completed": completed,         # used by "Completed tasks" card
-            "rewards": rewards,             # used by "Rewards" list
-            "reward_total": reward_total,   # ring fill
-            "complaints": complaints,       # complaint history
-            "activity": activity,           # recent activity card
-        },
-    )
+    ctx = {
+        "active": active,
+        "history": history,
+        "rewards": rewards,
+        "points": points,
+        "ring_pct": ring_pct,
+        "complaints": complaints,
+        "recent_activity": recent_activity,
+    }
 
-
+    resp = render(request, "driver.html", ctx)
+    resp["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    resp["Pragma"] = "no-cache"
+    return resp
 @login_required
 @user_passes_test(is_driver)
 def driver_tasks(request):
@@ -1044,25 +1095,28 @@ def driver_task_arrive(request, pk: int):
     t.save(update_fields=["status", "arrived_at"])
     messages.success(request, "Marked as Arrived.")
     return redirect("users:driver_tasks")
+from django.db import transaction
 
 @login_required
 @user_passes_test(is_driver)
 def driver_task_complete(request, pk: int):
     if request.method != "POST":
         return HttpResponseForbidden()
-    t = _get_task_for_driver_or_404(request.user, pk)
-    t.status = DeliveryTask.Status.COMPLETED
-    t.completed_at = timezone.now()
-    t.save(update_fields=["status", "completed_at"])
 
-    # Award points (safe if already has helper)
-    try:
-        t.award_points(request.user, 10, reason="delivery")
-    except Exception:
-        pass
+    t = _get_task_for_driver_or_404(request.user, pk)
+    with transaction.atomic():
+        t.status = DeliveryTask.Status.COMPLETED
+        t.completed_at = timezone.now()
+        t.save(update_fields=["status", "completed_at"])
+
+        # Create points in the same transaction
+        try:
+            t.award_points(request.user, 10, reason="delivery")
+        except Exception:
+            pass
 
     messages.success(request, "Great job! Task completed and points added.")
-    return redirect("users:driver_tasks")
+    return redirect("users:driver_tasks")  # or 'users:driver_dashboard' if you want to land on the ring
 
 # ---------------- Live location ping (accepts JSON or form) ----------------
 
@@ -1112,11 +1166,44 @@ def driver_ping(request):
 def driver_profile(request):
     return render(request, "driver_profile.html", {"driver": request.user})
 
+# users/views.py
+from datetime import timedelta
+from django.utils import timezone
+from django.db.models import Q
+
 @login_required
 @user_passes_test(is_driver)
 def driver_forum(request):
-    drivers = User.objects.filter(role="driver").order_by("first_name", "username")
-    return render(request, "driver_forum.html", {"drivers": drivers})
+    q = request.GET.get("q", "").strip()
+
+    qs = User.objects.filter(role="driver")
+    if q:
+        qs = qs.filter(
+            Q(first_name__icontains=q) |
+            Q(last_name__icontains=q)  |
+            Q(username__icontains=q)   |
+            Q(email__icontains=q)
+        )
+
+    qs = qs.order_by("first_name", "username")
+
+    today = timezone.now().date()
+    total = qs.count()
+    active_today = qs.filter(last_login__date=today).count()
+    new_week = qs.filter(date_joined__gte=today - timedelta(days=7)).count()
+
+    return render(
+        request,
+        "driver_forum.html",
+        {
+            "drivers": qs,
+            "q": q,
+            "total": total,
+            "active_today": active_today,
+            "new_week": new_week,
+            "today": today,
+        },
+    )
 
 @login_required
 @user_passes_test(is_driver)
@@ -1195,3 +1282,75 @@ def home_contact_submit(request):
     else:
         messages.error(request, "Please fix the errors and try again.")
     return redirect("home")
+
+# users/views.py
+from django.db import models
+from django.db.models import Sum, Value
+from django.db.models.functions import Coalesce
+from django.apps import apps
+
+def _sum_numeric(qs, field_name: str) -> float:
+    """
+    Sum a numeric field and return a float, handling DecimalField/FloatField correctly.
+    """
+    model = qs.model
+    try:
+        f = model._meta.get_field(field_name)
+    except Exception:
+        return 0.0
+
+    if isinstance(f, models.DecimalField):
+        total = qs.aggregate(
+            total=Coalesce(
+                Sum(field_name),
+                Value(0),  # INT value keeps it Decimal
+                output_field=models.DecimalField(max_digits=f.max_digits, decimal_places=f.decimal_places),
+            )
+        ).get("total")
+        return float(total or 0)
+    else:
+        total = qs.aggregate(
+            total=Coalesce(
+                Sum(field_name),
+                Value(0.0),
+                output_field=models.FloatField(),
+            )
+        ).get("total")
+        return float(total or 0.0)
+def get_achievement_stats():
+    key = "achievements:v2"
+    cached = cache.get(key)
+    if cached is not None:
+        return cached
+
+    residents = User.objects.filter(role="regular").count()
+    pickups = DeliveryTask.objects.filter(status=DeliveryTask.Status.COMPLETED).count()
+
+    # Waste tracked (kg): prefer RecyclingLog.weight_kg; fall back to DeliveryTask.weight_kg if it exists
+    waste_kg = 0.0
+    RecyclingLog = apps.get_model("users", "RecyclingLog", require_ready=False)
+    if RecyclingLog and any(f.name == "weight_kg" for f in RecyclingLog._meta.get_fields()):
+        waste_kg = _sum_numeric(RecyclingLog.objects.all(), "weight_kg")
+    elif any(f.name == "weight_kg" for f in DeliveryTask._meta.get_fields()):
+        waste_kg = _sum_numeric(
+            DeliveryTask.objects.filter(status=DeliveryTask.Status.COMPLETED), "weight_kg"
+        )
+
+    complaints_resolved = Complaint.objects.filter(
+        models.Q(status__iexact="resolved") |
+        models.Q(status__iexact="closed")   |
+        models.Q(status__iexact="accepted")
+    ).count()
+
+    stats = {
+        "residents": residents,
+        "pickups": pickups,
+        "waste_kg": waste_kg,         # float → safe for templates/JS
+        "complaints": complaints_resolved,
+    }
+    cache.set(key, stats, 60)
+    return stats
+
+def about_view(request):
+    stats = get_achievement_stats()
+    return render(request, "about.html", {"stats": stats})

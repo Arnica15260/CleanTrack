@@ -590,29 +590,43 @@
       </div>
     </section>
 
-    <!-- Achievements Section -->
-    <section class="glass content-section fade-in">
-      <h2 class="section-title">Achievements</h2>
+  <section class="glass content-section fade-in">
+  <h2 class="section-title">Achievements</h2>
 
-      <div class="achievements-grid">
-        <div class="achievement-card">
-          <div class="achievement-number">200+</div>
-          <div class="achievement-label">Residents Signed Up</div>
-        </div>
-        <div class="achievement-card">
-          <div class="achievement-number">500+</div>
-          <div class="achievement-label">Pickups Completed</div>
-        </div>
-        <div class="achievement-card">
-          <div class="achievement-number">1,000+ kg</div>
-          <div class="achievement-label">Waste Tracked</div>
-        </div>
-        <div class="achievement-card">
-          <div class="achievement-number">50+</div>
-          <div class="achievement-label">Complaints Resolved</div>
-        </div>
-      </div>
-    </section>
+  <div class="achievements-grid">
+    <div class="achievement-card">
+      <div class="achievement-number"
+           data-count="{{ stats.residents|default:0 }}"
+           data-plus="+">0</div>
+      <div class="achievement-label">Residents Signed Up</div>
+    </div>
+
+    <div class="achievement-card">
+      <div class="achievement-number"
+           data-count="{{ stats.pickups|default:0 }}"
+           data-plus="+">0</div>
+      <div class="achievement-label">Pickups Completed</div>
+    </div>
+
+    <div class="achievement-card">
+    <div class="achievement-number"
+         data-count="{{ stats.waste_kg|default:0 }}"
+         data-suffix=" kg" data-decimals="0"
+         data-plus="+">0</div>
+
+      <div class="achievement-label">Waste Tracked</div>
+    </div>
+
+    <div class="achievement-card">
+      <div class="achievement-number"
+           data-count="{{ stats.complaints|default:0 }}"
+           data-plus="+">0</div>
+      <div class="achievement-label">Complaints Resolved</div>
+    </div>
+  </div>
+</section>
+
+
 
     <!-- Timeline Section -->
     <section class="glass content-section fade-in">
@@ -719,3 +733,46 @@
   </div>
 </body>
 </html>
+
+<script>
+  // Count-up animation when the section comes into view
+  (function(){
+    const els = document.querySelectorAll(".achievement-number");
+    if(!els.length) return;
+
+    function animate(el){
+      const target   = parseFloat(el.dataset.count || "0");
+      const decimals = parseInt(el.dataset.decimals || "0", 10);
+      const suffix   = el.dataset.suffix || "";
+      const prefix   = el.dataset.prefix || "";
+      const showPlus = !!el.dataset.plus;
+      const duration = 1200;
+      const start    = performance.now();
+
+      function step(now){
+        const p   = Math.min(1, (now - start) / duration);
+        const val = target * p;
+        el.textContent = prefix +
+          val.toLocaleString(undefined, {
+            minimumFractionDigits: decimals,
+            maximumFractionDigits: decimals
+          }) +
+          (p === 1 && showPlus ? "+" : "") +
+          suffix;
+        if(p < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+
+    const io = new IntersectionObserver((entries, obs)=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){
+          animate(entry.target);
+          obs.unobserve(entry.target);
+        }
+      });
+    }, {threshold: 0.3});
+
+    els.forEach(el => io.observe(el));
+  })();
+</script>

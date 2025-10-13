@@ -44,6 +44,7 @@ urlpatterns = [
 
     path("contact/submit/", views.home_contact_submit, name="home_contact_submit"),
 
+    path("about/",views.about_view, name="about"),
     path(
         "password-reset/",
         auth_views.PasswordResetView.as_view(
