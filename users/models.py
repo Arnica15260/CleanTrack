@@ -5,8 +5,16 @@ from django.db.models import Q, F, TextChoices
 from django.utils import timezone
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.core.exceptions import ValidationError  # <-- added
 
-
+# ---------- tiny date validator ----------
+def validate_not_past_date(value):
+    """
+    Ensure a date is today or in the future.
+    Works with USE_TZ on/off by comparing to local date.
+    """
+    if value and value < timezone.localdate():
+        raise ValidationError("Please choose today or a future date.")
 
 # -------------------- Custom User --------------------
 
@@ -53,10 +61,12 @@ class PickupRequest(models.Model):
         on_delete=models.CASCADE,
         related_name="pickup_requests",
     )
-    waste_type = models.CharField(max_length=16, choices=WASTE_TYPES, default="regular")
-    date = models.DateField()
-    time = models.TimeField()
-    address = models.CharField(max_length=255)
+    # required by default (blank=False). Keep your defaults.
+    waste_type = models.CharField(max_length=16, choices=WASTE_TYPES, default="regular", blank=False)
+    # enforce present/future only
+    date = models.DateField(blank=False, validators=[validate_not_past_date])  # <-- added validator
+    time = models.TimeField(blank=False)
+    address = models.CharField(max_length=255, blank=False)
     notes = models.TextField(blank=True)
     photo = models.ImageField(upload_to="pickup_photos/", blank=True, null=True)
     status = models.CharField(max_length=16, choices=STATUS, default="pending")
@@ -68,14 +78,20 @@ class PickupRequest(models.Model):
     def __str__(self):
         return f"{self.user} • {self.waste_type} • {self.date} {self.time}"
 
+    # extra safety: model-level guard if someone skips form validation
+    def clean(self):
+        super().clean()
+        if self.date and self.date < timezone.localdate():
+            raise ValidationError({"date": "Date cannot be in the past."})
+
 
 # -------------------- Contact --------------------
 
 class ContactMessage(models.Model):
     name = models.CharField(max_length=120)
-    email = models.EmailField()
+    email = models.EmailField(blank=False)
     subject = models.CharField(max_length=200, blank=True)
-    message = models.TextField()
+    message = models.TextField(blank=False)
     created_at = models.DateTimeField(auto_now_add=True)
     is_resolved = models.BooleanField(default=False)
 
@@ -90,14 +106,13 @@ class ContactMessage(models.Model):
 
 class RecyclingLog(TimeStamped):
 
-
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="recycling_logs",
     )
     material = models.CharField(max_length=20)
-    weight_kg = models.DecimalField(max_digits=6, decimal_places=2)  # e.g. 12.50 kg
+    weight_kg = models.DecimalField(max_digits=6, decimal_places=2, blank=False)  # e.g. 12.50 kg
     note = models.CharField(max_length=255, blank=True, default="")
     photo = models.ImageField(upload_to="recycle_photos/", blank=True, null=True)
 
@@ -281,10 +296,8 @@ class Complaint(TimeStamped):
 class RewardEvent(TimeStamped):
     """Log of points earned; sum for a user = current points."""
     SOURCES = (
-
         ("recycling",  "Recycling"),
         ("reuse",      "Reuse"),
-
     )
 
     user = models.ForeignKey(
@@ -333,7 +346,7 @@ class DeliveryTask(TimeStamped):
     assigned_to = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
-        related_name="assigned_delivery_tasks",   # <-- changed to avoid clash
+        related_name="assigned_delivery_tasks",   # <-- avoid clash
         help_text="Driver user",
     )
 
@@ -361,7 +374,6 @@ class DeliveryTask(TimeStamped):
         who = getattr(self.assigned_to, "username", "driver")
         return f"Task to {self.address} for {self.customer} → {who} [{self.status}]"
 
-    # simple helpers used by views
     def award_points(self, driver, pts: int, reason="delivery"):
         DriverPointEvent.objects.create(driver=driver, task=self, points=pts, reason=reason)
         self.points_awarded = (self.points_awarded or 0) + pts
@@ -389,8 +401,6 @@ class LocationPing(TimeStamped):
 
     class Meta:
         ordering = ("-created",)
-
-
 
 
 class DriverPointEvent(models.Model):
@@ -433,6 +443,7 @@ def penalize_driver_on_complaint(sender, instance: Complaint, created, **kwargs)
     if instance.driver_id:
         DriverPointEvent.objects.create(driver=instance.driver, task=instance.task, points=-5, reason="complaint")
 
+
 class DriverActivity(models.Model):
     driver = models.ForeignKey(User, on_delete=models.CASCADE, related_name="driver_activities")
     kind = models.CharField(max_length=40, default="event")
@@ -456,4 +467,3 @@ class DriverComplaint(models.Model):
 
     class Meta:
         ordering = ["-when_dt"]
-

@@ -159,11 +159,21 @@ class RoleLoginView(LoginView):
     authentication_form = LoginEmailOrUsernameForm
     redirect_authenticated_user =True
 
+    def form_valid(self, form):
+        resp = super().form_valid(form)
+        u = self.request.user
+        messages.success(self.request, f"Welcome back, {u.get_short_name() or u.username}!")
+        return resp
+
     def get_success_url(self):
         u = self.request.user
         if u.is_superuser or (getattr(u, "role", "") == "admin" and u.is_staff):
             return "/admin/"
         return reverse("users:dashboard")
+
+
+
+
 
 
 def signup_view(request):
@@ -223,10 +233,12 @@ def activate(request, uidb64, token):
     return render(request, "activation_invalid.html", status=400)
 
 
-@login_required
+
+
+
 def logout_view(request):
     logout(request)
-    messages.info(request, "You have been logged out.")
+    messages.success(request, "You’ve been logged out. See you soon!")
     return redirect("home")
 
 

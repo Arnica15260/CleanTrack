@@ -1,6 +1,8 @@
 from django import forms
 from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.utils import timezone
+
 from .models import PickupRequest, RecyclingLog, ReuseDonation, Complaint, ContactMessage
 from .models import DriverComplaint
 
@@ -67,6 +69,19 @@ class PickupRequestForm(forms.ModelForm):
             "notes": forms.Textarea(attrs={"id": "id_notes", "rows": 4, "placeholder": "Any special instructions?"}),
         }
 
+    # NEW: set HTML min (blocks past dates in native pickers)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        today_iso = timezone.localdate().isoformat()
+        self.fields["date"].widget.attrs.setdefault("min", today_iso)
+
+    # NEW: server-side guard (works even if JS/HTML is bypassed)
+    def clean_date(self):
+        d = self.cleaned_data.get("date")
+        if d and d < timezone.localdate():
+            raise forms.ValidationError("Please choose today or a future date.")
+        return d
+
     def clean_waste_type(self):
         val = self.cleaned_data.get("waste_type") or self.data.get("waste_type")
         # fall back safely if not in choices
@@ -97,7 +112,7 @@ class ContactForm(forms.ModelForm):
 class RecyclingForm(forms.ModelForm):
     class Meta:
         model = RecyclingLog
-        fields = ["material", "weight_kg", "note", "photo"]  # matches dashboard use
+        fields = ["material", "weight_kg", "note", "photo"]
         widgets = {
             "material": forms.TextInput(attrs={"placeholder": "e.g., Mixed paper, Plastic #1-2"}),
             "weight_kg": forms.NumberInput(attrs={"step": "0.01", "min": "0", "placeholder": "0.00"}),
@@ -150,7 +165,6 @@ class ComplaintForm(forms.ModelForm):
         labels = {
             "complaint_type": "Category",
         }
-
 
 
 class DriverComplaintForm(forms.ModelForm):
