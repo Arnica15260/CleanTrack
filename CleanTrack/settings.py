@@ -11,18 +11,29 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ------------------------------------------------------------------------------
-# Security / Debug  (dev defaults)
+# Security / Debug
 # ------------------------------------------------------------------------------
 SECRET_KEY = os.getenv(
     "DJANGO_SECRET_KEY",
     "django-insecure-9$2lryx8!id@=40bnra#fg9vhoz^yym4t5zeeb)^#kzb9)0j2%",  # dev fallback
 )
-DEBUG = True
+# DEBUG controlled by env; default ON so repo works out of the box after clone.
+DEBUG = os.getenv("DEBUG", "1") == "1"
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
-CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:8000", "http://localhost:8000"]
+# Hosts / CSRF: relaxed in DEBUG so any local device/port works
+if DEBUG:
+    ALLOWED_HOSTS = ["*"]
+    CSRF_TRUSTED_ORIGINS = [
+        "http://localhost",
+        "http://127.0.0.1",
+        "https://localhost",
+        "https://127.0.0.1",
+    ]
+else:
+    ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+    CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:8000", "http://localhost:8000"]
 
-# Dev cookies (don’t use these in production)
+# Dev cookies (don’t use these exact values in production)
 SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
 SESSION_COOKIE_SAMESITE = "Lax"
@@ -86,7 +97,10 @@ DATABASES = {
 # ------------------------------------------------------------------------------
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator", "OPTIONS": {"min_length": 8}},
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {"min_length": 8},
+    },
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
@@ -100,10 +114,18 @@ USE_I18N = True
 USE_TZ = True
 
 # ------------------------------------------------------------------------------
-# Static
+# Static & Media
 # ------------------------------------------------------------------------------
 STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
 # ------------------------------------------------------------------------------
 # Auth (custom user + redirects)
@@ -116,31 +138,32 @@ LOGIN_REDIRECT_URL = "users:dashboard"
 LOGOUT_REDIRECT_URL = "users:login"
 
 # ------------------------------------------------------------------------------
-# Email — Mailtrap (dev/testing)
+# Email
+# - In DEBUG: console backend prints emails to terminal (no external setup).
+# - In non-DEBUG: use your existing Mailtrap SMTP settings.
 # ------------------------------------------------------------------------------
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.mailtrap.io"
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = "3a28674f8cf997"
-EMAIL_HOST_PASSWORD = "cd760d4c7558b8"
+if DEBUG:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+    EMAIL_HOST = ""
+    EMAIL_PORT = 0
+    EMAIL_USE_TLS = False
+    EMAIL_HOST_USER = ""
+    EMAIL_HOST_PASSWORD = ""
+else:
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_HOST = "smtp.mailtrap.io"
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = "3a28674f8cf997"
+    EMAIL_HOST_PASSWORD = "cd760d4c7558b8"
+
 DEFAULT_FROM_EMAIL = "noreply@cleantrack.test"
 EMAIL_TIMEOUT = 20
 
-
-
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
-
-STATIC_ROOT = BASE_DIR / "staticfiles"
-
-MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
-
-
+# ------------------------------------------------------------------------------
+# ASGI / Channels
+# ------------------------------------------------------------------------------
 ASGI_APPLICATION = "CleanTrack.asgi.application"
-
 CHANNEL_LAYERS = {
     "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}
 }

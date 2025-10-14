@@ -116,6 +116,7 @@
     <a class="home-btn" href="{{ home_url|default:'/' }}" rel="noopener">Home</a>
       <a class="home-btn" href="{{ about_url|default:'/' }}" rel="noopener">About</a>
       <a class="home-btn" href="{{ contact_url|default:'/' }}" rel="noopener">Contact</a>
+       <a  class="home-btn" href="{% url 'users:logout' %}">Logout</a>
 
 
   </nav>
