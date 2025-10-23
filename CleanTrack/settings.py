@@ -142,20 +142,14 @@ LOGOUT_REDIRECT_URL = "users:login"
 # - In DEBUG: console backend prints emails to terminal (no external setup).
 # - In non-DEBUG: use your existing Mailtrap SMTP settings.
 # ------------------------------------------------------------------------------
-if DEBUG:
-    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-    EMAIL_HOST = ""
-    EMAIL_PORT = 0
-    EMAIL_USE_TLS = False
-    EMAIL_HOST_USER = ""
-    EMAIL_HOST_PASSWORD = ""
-else:
-    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-    EMAIL_HOST = "smtp.mailtrap.io"
-    EMAIL_PORT = 587
-    EMAIL_USE_TLS = True
-    EMAIL_HOST_USER = "3a28674f8cf997"
-    EMAIL_HOST_PASSWORD = "cd760d4c7558b8"
+
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.mailtrap.io"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "3a28674f8cf997"
+EMAIL_HOST_PASSWORD = "cd760d4c7558b8"
 
 DEFAULT_FROM_EMAIL = "noreply@cleantrack.test"
 EMAIL_TIMEOUT = 20

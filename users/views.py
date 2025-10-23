@@ -22,6 +22,7 @@ from .models import (
     Complaint)
 
 import json
+from datetime import datetime, timezone as py_tz
 
 from django.apps import apps
 from django.contrib import messages
@@ -1046,7 +1047,7 @@ def is_staff_user(u):
 
 
 
-from datetime import datetime, timezone as py_tz
+
 
 @login_required
 @user_passes_test(is_driver)

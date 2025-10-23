@@ -951,28 +951,36 @@
     <!-- Background -->
     <div class="neural-background"></div>
 
-    <!-- Header/Navbar -->
-    <header class="header">
-        <nav class="nav-container">
-            <!-- Logo -->
-            <a href="/" class="logo" aria-label="Home">⚡ <span>CleanTrack+</span></a>
+<!-- Header/Navbar -->
+<header class="header">
+  <nav class="nav-container">
+    <!-- Logo -->
+    <a href="{% url 'home' %}" class="logo" aria-label="Home">⚡ <span>CleanTrack+</span></a>
 
-            <!-- Desktop nav links -->
-            <ul class="nav-links">
-                <ul class="nav-links">
-                   <li><a href="{% url 'users:about' %}">About</a></li>
-                   <li><a href="{% url 'contact' %}">Contact</a></li>
+    <!-- Desktop nav links -->
+    <ul class="nav-links">
+      <li><a href="{% url 'users:about' %}">About</a></li>
+      <li><a href="{% url 'users:contact' %}">Contact</a></li>
 
-                  {% if request.user.is_authenticated %}
-                  <li><a href="{% url 'users:dashboard' %}">Dashboard</a></li>
-                      <li><a href="{% url 'users:logout' %}">Logout</a></li>
-                  {% else %}
-                  <li><a href="{% url 'users:signup' %}">Signup</a></li>
-                  <li><a href="{% url 'users:login' %}">Login</a></li>
-                  {% endif %}
-                </ul>
-        </nav>
-    </header>
+      {% if request.user.is_authenticated %}
+        {% if request.user.is_staff or request.user.is_superuser %}
+          <!-- Admins: show Admin, not Dashboard -->
+          <li><a href="/admin/">Admin</a></li>
+        {% else %}
+          <!-- Regular/Driver: show Dashboard -->
+          <li><a href="{% url 'users:dashboard' %}">Dashboard</a></li>
+        {% endif %}
+        <li><a href="{% url 'users:logout' %}">Logout</a></li>
+      {% else %}
+        <li><a href="{% url 'users:signup' %}">Signup</a></li>
+        <li><a href="{% url 'users:login' %}">Login</a></li>
+      {% endif %}
+    </ul>
+  </nav>
+</header>
+
+
+
 </body>
 </html>
 
