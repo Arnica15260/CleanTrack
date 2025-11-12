@@ -9,7 +9,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home, name='home'),
 
-
     path('contact/', contact_view, name='contact'),
 
     path('users/', include(('users.urls', 'users'), namespace='users')),

@@ -1,17 +1,23 @@
 from datetime import date as dt_date, datetime, timedelta, timezone as py_tz
 from zoneinfo import ZoneInfo
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth import get_user_model, logout
 from django.contrib.auth.views import LoginView
 from django.core.mail import EmailMultiAlternatives
 from django.core.paginator import Paginator
-from django.db import models
-from django.db.models.functions import Coalesce
 from django.template.loader import render_to_string
 from django.urls import reverse, NoReverseMatch
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 from .models import ReuseDonation
+import json
+from datetime import datetime, timezone as py_tz
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.http import HttpResponseForbidden, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone, cache
+from django.core.cache import cache
 from .forms import (
     RegisterForm, LoginEmailOrUsernameForm, PickupRequestForm, ContactForm,
     RecyclingForm, ReuseForm, ComplaintForm,
@@ -20,18 +26,6 @@ from .tokens import account_activation_token
 from .models import (
   PickupRequest,
     Complaint)
-
-import json
-from datetime import datetime, timezone as py_tz
-
-from django.apps import apps
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.db.models import Sum
-from django.http import HttpResponseForbidden, JsonResponse
-from django.shortcuts import get_object_or_404, redirect, render
-from django.utils import timezone, cache
-from django.core.cache import cache
 
 from .forms import DriverComplaintForm
 from .models import (
@@ -45,8 +39,6 @@ from .models import (
 
 User = get_user_model()
 
-
-# -------- timezone helper (Django 5.x friendly) --------
 def _to_dhaka(dt):
     if not dt:
         return None
@@ -153,29 +145,6 @@ def _decorate_rewards(events):
         out.append(r)
     return out
 
-
-# =========================  Auth  =========================
-# class RoleLoginView(LoginView):
-#     template_name = "login.html"
-#     authentication_form = LoginEmailOrUsernameForm
-#     redirect_authenticated_user =True
-#
-#     def form_valid(self, form):
-#         resp = super().form_valid(form)
-#         u = self.request.user
-#         messages.success(self.request, f"Welcome back, {u.get_short_name() or u.username}!")
-#         return resp
-#
-#     def get_success_url(self):
-#         u = self.request.user
-#         if u.is_superuser or (getattr(u, "role", "") == "admin" and u.is_staff):
-#             return "/admin/"
-#         return reverse("users:dashboard")
-
-
-from django.contrib import messages
-from django.urls import reverse
-
 class RoleLoginView(LoginView):
     template_name = "login.html"
     authentication_form = LoginEmailOrUsernameForm
@@ -198,50 +167,6 @@ class RoleLoginView(LoginView):
         if u.is_superuser or (getattr(u, "role", "") == "admin" and u.is_staff):
             return "/admin/"
         return reverse("users:dashboard")
-
-
-
-
-# def signup_view(request):
-#     if request.method == "POST":
-#         form = RegisterForm(request.POST)
-#         if form.is_valid():
-#             user = form.save(commit=False)
-#             user.is_active = False
-#             user.save()
-#             from django.utils.encoding import force_bytes
-#             from django.utils.http import urlsafe_base64_encode
-#
-#             uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
-#             token = account_activation_token.make_token(user)
-#             path = reverse("users:activate", kwargs={"uidb64": uidb64, "token": token})
-#             activate_url = (
-#                 f"{settings.SITE_DOMAIN}{path}"
-#                 if getattr(settings, "SITE_DOMAIN", None)
-#                 else request.build_absolute_uri(path)
-#             )
-#             ctx = {"user": user, "activate_url": activate_url}
-#             msg = EmailMultiAlternatives(
-#                 "Activate your CleanTrack account",
-#                 render_to_string("users/activation_email.txt", ctx),
-#                 settings.DEFAULT_FROM_EMAIL,
-#                 [user.email],
-#             )
-#             msg.attach_alternative(
-#                 render_to_string("users/activation_email.html", ctx), "text/html"
-#             )
-#             msg.send()
-#             messages.success(
-#                 request,
-#                 "We emailed you an activation link. Please verify to log in.",
-#             )
-#             return redirect("users:login")
-#     else:
-#         form = RegisterForm()
-#     return render(request, "register.html", {"form": form})
-
-
-
 
 
 def signup_view(request):
@@ -297,10 +222,6 @@ def activate(request, uidb64, token):
         messages.success(request, "Email verified — you can log in now.")
         return redirect("users:login")
     return render(request, "activation_invalid.html", status=400)
-
-
-
-
 
 def logout_view(request):
     logout(request)
@@ -620,12 +541,6 @@ def page_reuse(request):
     return render(request, "reuse.html", {"form": form})
 
 
-# --- helpers for track page ---------------------------------------------------
-
-# users/views.py
-
-# --- delivery helpers --------------------------------------------------------
-
 def _get_delivery_models():
     DeliveryTask   = apps.get_model("users", "DeliveryTask",   require_ready=False)
     DriverLocation = apps.get_model("users", "DriverLocation", require_ready=False)
@@ -826,23 +741,6 @@ def user_track_task(request, pk: int):
     })
 
 
-
-# =========================  Contact  =========================
-# def contact_view(request):
-#     if request.method == "POST":
-#         form = ContactForm(request.POST)
-#         if form.is_valid():
-#             form.save()
-#             messages.success(
-#                 request, "Thanks! We received your message and will reply soon."
-#             )
-#             return redirect("users:contact")
-#         return render(
-#             request,
-#             "contact.html",
-#             {"form": form, "errors": form.errors, "data": request.POST},
-#         )
-#     return render(request, "contact.html", {"form": ContactForm(), "errors": {}, "data": {}})
 
 def contact_view(request):
     if request.method == "POST":
@@ -1454,9 +1352,6 @@ def get_achievement_stats():
     cache.set(key, stats, 60)
     return stats
 
-# def about_view(request):
-#     stats = get_achievement_stats()
-#     return render(request, "about.html", {"stats": stats})
 def about_view(request):
     stats = get_achievement_stats()
     return render(request, "about.html", {"stats": stats, **_navbar_ctx(request)})

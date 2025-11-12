@@ -25,7 +25,7 @@ TYPE_DELAY = 0.004
 RETRY_STALE_MAX = 2
 
 
-SS_DIR = Path("Selenium_test/screens")
+SS_DIR = Path("../Selenium_test/screens")
 SS_DIR.mkdir(parents=True, exist_ok=True)
 
 def ss(name: str):

@@ -11,10 +11,10 @@ from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
 
 
-BASE          = " http://127.0.0.1:8000/"
+BASE          = "http://127.0.0.1:8000/"
 LOGIN_URL     = f"{BASE}/users/login/"
 DASHBOARD_URL = f"{BASE}/users/dashboard/"
-REUSE_URL     = f"{BASE}/users/reuse/"
+RECYCLING_URL = f"{BASE}/users/recycling/"
 LOGOUT_URL    = f"{BASE}/users/logout/"
 
 
@@ -27,11 +27,12 @@ TYPE_DELAY      = 0.035
 HILITE_MS       = 250
 RETRY_STALE_MAX = 2
 
-SS_DIR = Path("Selenium_test/screens"); SS_DIR.mkdir(parents=True, exist_ok=True)
-ASSET_PHOTO = (Path.cwd() / "Selenium_test" / "assets" / "reuse_sample.jpg")  # optional image
+SS_DIR = Path("../Selenium_test/screens"); SS_DIR.mkdir(parents=True, exist_ok=True)
+ASSET_PHOTO = (Path.cwd() / "Selenium_test" / "assets" / "recycle_sample.jpg")  # optional
+
 
 def pause(*args, **kwargs):
-    """pause() | pause(1.2) | pause("msg") | pause(1.2, "msg") | pause(sec=..., msg="...")"""
+
     sec = kwargs.get("sec", STEP_PAUSE)
     msg = kwargs.get("msg")
     if args:
@@ -70,6 +71,7 @@ def highlight(el):
     driver.execute_script("arguments[0].setAttribute('style', arguments[1]);", el, original)
 
 def click_one(by, locator, desc=""):
+    """Try one locator with retry on staleness."""
     for attempt in range(1, RETRY_STALE_MAX + 2):
         try:
             el = WebDriverWait(driver, WAIT).until(EC.element_to_be_clickable((by, locator)))
@@ -84,6 +86,7 @@ def click_one(by, locator, desc=""):
     return False
 
 def click_any(locators, desc="", fallback_url=None):
+
     for by, loc in locators:
         if click_one(by, loc, desc): return True
     if fallback_url:
@@ -93,6 +96,7 @@ def click_any(locators, desc="", fallback_url=None):
     return False
 
 def wait_toast_success():
+
     sels = [
         (By.CSS_SELECTOR, "#toast-stack .toast.success"),
         (By.CSS_SELECTOR, ".toast-stack .toast.success"),
@@ -107,6 +111,7 @@ def wait_toast_success():
     return False
 
 def wait_logged_out():
+
     def _has_username():
         try:
             WebDriverWait(driver, 3).until(EC.visibility_of_element_located((By.NAME, "username"))); return True
@@ -124,13 +129,17 @@ def wait_logged_out():
             return False
     def _no_logout_links():
         try:
+
             WebDriverWait(driver, 3).until_not(EC.presence_of_element_located((By.XPATH, "//a[contains(@href,'/users/logout/')]")))
             return True
         except TimeoutException:
             return False
 
+
     if _url_login() or _has_username() or _has_login_link() or _no_logout_links():
         return True
+
+
     driver.get(LOGIN_URL); pause(0.5)
     return _url_login() or _has_username() or _has_login_link() or _no_logout_links()
 
@@ -139,6 +148,7 @@ driver = webdriver.Chrome()
 driver.set_window_size(1280, 900)
 
 try:
+
     driver.get(LOGIN_URL); pause("➡️ Login page loaded")
     u = WebDriverWait(driver, WAIT).until(EC.visibility_of_element_located((By.NAME, "username")))
     print("⌨️ Typing username…"); type_slow(u, USERNAME); pause(0.25)
@@ -155,42 +165,46 @@ try:
 
     click_any(
         [
-            (By.XPATH, "//aside//a[contains(@href,'/users/reuse/')]"),
-            (By.XPATH, "//a[contains(@href,'/users/reuse/')]"),
+            (By.XPATH, "//aside//a[contains(@href,'/users/recycling/')]"),
+            (By.XPATH, "//a[contains(@href,'/users/recycling/')]"),
         ],
-        desc="Reuse / Donate",
-        fallback_url=REUSE_URL,
+        desc="Recycling",
+        fallback_url=RECYCLING_URL,
     )
-    WebDriverWait(driver, WAIT).until(EC.url_contains("/users/reuse/"))
-    print("🎁 Reuse/Donate page open"); pause()
+    WebDriverWait(driver, WAIT).until(EC.url_contains("/users/recycling/"))
+    print("♻️ Recycling page open"); pause()
 
 
     try:
-        cat = WebDriverWait(driver, WAIT).until(EC.presence_of_element_located((By.NAME, "category")))
-        highlight(cat); type_slow(cat, "Furniture"); pause(0.2)
-    except TimeoutException:
-        print("⚠️ Field not found: category")
+        mat = WebDriverWait(driver, WAIT).until(EC.presence_of_element_located((By.NAME, "material")))
+        highlight(mat)
+        if mat.tag_name.lower() == "select":
+            try:
+                Select(mat).select_by_visible_text("Paper")
+            except Exception:
 
+                opts = mat.find_elements(By.TAG_NAME, "option")
+                for o in opts:
+                    if o.get_attribute("value"):
+                        o.click(); break
+        else:
+            type_slow(mat, "Paper")
+        pause(0.2)
+    except TimeoutException:
+        print("⚠️ Field not found: material")
 
     try:
-        qty = WebDriverWait(driver, WAIT).until(EC.presence_of_element_located((By.NAME, "quantity")))
-        highlight(qty); type_slow(qty, "2"); pause(0.2)
+        w = WebDriverWait(driver, WAIT).until(EC.presence_of_element_located((By.NAME, "weight_kg")))
+        highlight(w); type_slow(w, "2.5"); pause(0.2)
     except TimeoutException:
-        print("⚠️ Field not found: quantity")
-
-
-    try:
-        partner = WebDriverWait(driver, WAIT).until(EC.presence_of_element_located((By.NAME, "partner")))
-        highlight(partner); type_slow(partner, "Local Charity"); pause(0.2)
-    except TimeoutException:
-        print("ℹ️ No partner field (skipped)")
+        print("⚠️ Field not found: weight_kg")
 
 
     try:
         note = WebDriverWait(driver, WAIT).until(EC.presence_of_element_located((By.NAME, "note")))
-        highlight(note); type_slow(note, "Pickup after 5pm; ground floor."); pause(0.2)
+        highlight(note); type_slow(note, "Clean, dry materials. Please verify weight."); pause(0.2)
     except TimeoutException:
-        print("ℹ️ No note field (skipped)")
+        print("⚠️ Field not found: note")
 
 
     try:
@@ -205,11 +219,11 @@ try:
 
     if not click_any(
         [
-            (By.XPATH, "//button[@type='submit' and contains(.,'Save Donation')]"),
+            (By.XPATH, "//button[@type='submit' and contains(.,'Save')]"),
             (By.XPATH, "//button[@type='submit']"),
             (By.CSS_SELECTOR, "button[type='submit'],input[type='submit']"),
         ],
-        desc="Submit Donation",
+        desc="Submit",
         fallback_url=None,
     ):
         f = WebDriverWait(driver, WAIT).until(EC.presence_of_element_located((By.XPATH, "//form")))
@@ -221,12 +235,13 @@ try:
 
     if wait_toast_success(): print("✅ Success toast found")
     else: print("ℹ️ No explicit success toast detected (proceeding)")
-    pause(0.4, "📸 Taking screenshot of successful donation submit")
-    ss("reuse_submit_success")
+    pause(0.4, "📸 Taking screenshot of successful submit")
+    ss("recycling_submit_success")
 
 
     click_any(
         [
+            (By.XPATH, "//aside//a[contains(@href,'/users/dashboard/')]"),
             (By.XPATH, "//a[contains(@href,'/users/dashboard/')]"),
         ],
         desc="Dashboard",
@@ -245,6 +260,7 @@ try:
         fallback_url=None,
     )
     if not logged_out:
+
         try:
             lf = WebDriverWait(driver, 3).until(
                 EC.presence_of_element_located((By.XPATH, "//form[contains(@action,'/users/logout')]"))
@@ -253,8 +269,10 @@ try:
             logged_out = True
         except TimeoutException:
             logged_out = False
+
     if not logged_out:
         driver.get(LOGOUT_URL); pause()
+
 
     if not wait_logged_out():
         print("ℹ️ Could not confirm logged-out state; forcing login page")
@@ -262,7 +280,7 @@ try:
     pause(0.4, "📸 Taking screenshot after logout")
     ss("after_logout")
 
-    print("✅ Flow complete: login → reuse submit → dashboard → logout")
+    print("✅ Flow complete: login → recycling submit → dashboard → logout")
 
 finally:
     pause(0.3)

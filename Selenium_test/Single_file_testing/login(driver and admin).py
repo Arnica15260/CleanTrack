@@ -32,7 +32,7 @@ ADMIN_PASSWORD  = "12345"
 WAIT = 8
 TYPE_DELAY = 0.012
 
-SS_DIR = Path("Selenium_test/screens")
+SS_DIR = Path("../Selenium_test/screens")
 SS_DIR.mkdir(parents=True, exist_ok=True)
 
 def ss(driver, name):

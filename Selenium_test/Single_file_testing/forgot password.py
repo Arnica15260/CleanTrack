@@ -26,7 +26,7 @@ CONTACT_URL          = f"{BASE}/users/contact/"
 WAIT       = 6
 TYPE_DELAY = 0.012
 
-SS_DIR = Path("Selenium_test/screens")
+SS_DIR = Path("../Selenium_test/screens")
 SS_DIR.mkdir(parents=True, exist_ok=True)
 
 def ss(name: str):

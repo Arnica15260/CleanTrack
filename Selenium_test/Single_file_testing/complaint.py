@@ -32,7 +32,7 @@ TYPE_DELAY      = 0.035
 HILITE_MS       = 250
 RETRY_STALE_MAX = 2
 
-SS_DIR = Path("Selenium_test/screens"); SS_DIR.mkdir(parents=True, exist_ok=True)
+SS_DIR = Path("../Selenium_test/screens"); SS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def pause(*args, **kwargs):
